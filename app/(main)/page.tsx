@@ -4,8 +4,12 @@ import CollectionExamSection from "@/components/main/CollectionExamSection";
 import MintPromptSection from "@/components/main/MintPromptSection";
 import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
 // import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useAddress } from "@coinbase/onchainkit/identity";
+import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useEffect } from "react";
+import { base } from "viem/chains";
 import { minikitConfig } from "../../minikit.config";
+import { AiOutlineLoading } from "react-icons/ai";
 
 interface AuthResponse {
     success: boolean;
@@ -20,13 +24,18 @@ interface AuthResponse {
 
 export default function Home() {
     const { isFrameReady, setFrameReady, context } = useMiniKit();
+    const username = context?.user?.username;
+
+    const { data: address, isLoading: isAddressLoading } = useAddress({
+        name: username || '',
+        chain: base
+    });
 
     useEffect(() => {
         if (!isFrameReady) {
             setFrameReady();
         }
     }, [setFrameReady, isFrameReady]);
-
 
 
     // If you need to verify the user's identity, you can use the useQuickAuth hook.
@@ -54,9 +63,9 @@ export default function Home() {
 
 
                 <div>
-                    <h2>Welcome, {context?.user?.displayName || context?.user?.username}</h2>
+                    <h2>Welcome, {context?.user?.displayName || username}</h2>
                     <p>FID: {context?.user?.fid}</p>
-                    <p>Username: @{context?.user?.username}</p>
+                    <p>Username: @{username}</p>
                     {context?.user?.pfpUrl && (
                         <img
                             src={context?.user?.pfpUrl}
@@ -66,6 +75,7 @@ export default function Home() {
                             style={{ borderRadius: '50%' }}
                         />
                     )}
+                    <p>address: {isAddressLoading ? <AiOutlineLoading className="animate-spin" /> : address ? address : 'None'}</p>
                 </div>
 
                 {/* 2. authData JSON 출력 (디버그 섹션) */}
@@ -79,6 +89,8 @@ export default function Home() {
 
                     {authError && <div className="p-8 text-center text-red-600">인증 중 오류 발생: {authError.message}</div>}
                 </div>
+
+                <Wallet />
 
                 <div className="flex flex-col gap-y-10">
                     <MintPromptSection />
