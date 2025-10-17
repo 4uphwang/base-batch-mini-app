@@ -5,11 +5,10 @@ import MintPromptSection from "@/components/main/MintPromptSection";
 import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
 // import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useAddress } from "@coinbase/onchainkit/identity";
-import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useEffect } from "react";
+import { AiOutlineLoading } from "react-icons/ai";
 import { base } from "viem/chains";
 import { minikitConfig } from "../../minikit.config";
-import { AiOutlineLoading } from "react-icons/ai";
 
 interface AuthResponse {
     success: boolean;
@@ -54,7 +53,6 @@ export default function Home() {
 
     const authDataJson = authData ? JSON.stringify(authData, null, 2) : 'No authentication data loaded.';
 
-
     return (
         <div className="bg-white text-black px-5 py-10">
             <div >
@@ -89,8 +87,6 @@ export default function Home() {
 
                     {authError && <div className="p-8 text-center text-red-600">인증 중 오류 발생: {authError.message}</div>}
                 </div>
-
-                <Wallet />
 
                 <div className="flex flex-col gap-y-10">
                     <MintPromptSection />
