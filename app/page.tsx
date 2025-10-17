@@ -3,7 +3,6 @@ import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { minikitConfig } from "../minikit.config";
-import styles from "./page.module.css";
 
 interface AuthResponse {
     success: boolean;
@@ -85,17 +84,17 @@ export default function Home() {
 
 
     return (
-        <div className={styles.container}>
-            <button className={styles.closeButton} type="button">
+        <div>
+            <button className="text-white bg-black " type="button">
                 ✕
             </button>
 
-            <div className={styles.content}>
-                <div className={styles.waitlistForm}>
-                    <h1 className={styles.title}>Join {minikitConfig.miniapp.name.toUpperCase()}</h1>
+            <div >
+                <div >
+                    <h1 >Join {minikitConfig.miniapp.name.toUpperCase()}</h1>
 
-                    <p className={styles.subtitle}>
-                        Hey {context?.user?.displayName || "there"}, Get early access and be the first to experience the future of<br />
+                    <p >
+                        {context?.user?.displayName || "there"}, Get early access and be the first to experience the future of<br />
                         crypto marketing strategy.
                     </p>
 
@@ -114,18 +113,18 @@ export default function Home() {
                         )}
                     </div>
 
-                    <form onSubmit={handleSubmit} className={styles.form}>
+                    <form onSubmit={handleSubmit} >
                         <input
                             type="email"
                             placeholder="Your amazing email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className={styles.emailInput}
+                            
                         />
 
-                        {error && <p className={styles.error}>{error}</p>}
+                        {error && <p >{error}</p>}
 
-                        <button type="submit" className={styles.joinButton}>
+                        <button type="submit" >
                             JOIN WAITLIST
                         </button>
                     </form>
