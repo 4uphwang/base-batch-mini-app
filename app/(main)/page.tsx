@@ -2,33 +2,27 @@
 
 import CollectionExamSection from "@/components/main/CollectionExamSection";
 import MintPromptSection from "@/components/main/MintPromptSection";
-import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
-// import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useAddress } from "@coinbase/onchainkit/identity";
+// import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AiOutlineLoading } from "react-icons/ai";
-import { base } from "viem/chains";
-import { minikitConfig } from "../../minikit.config";
 
-interface AuthResponse {
-    success: boolean;
-    user?: {
-        fid: number; // FID is the unique identifier for the user
-        issuedAt?: number;
-        expiresAt?: number;
-    };
-    message?: string; // Error messages come as 'message' not 'error'
-}
+// interface AuthResponse {
+//     success: boolean;
+//     user?: {
+//         fid: number; // FID is the unique identifier for the user
+//         issuedAt?: number;
+//         expiresAt?: number;
+//     };
+//     message?: string; // Error messages come as 'message' not 'error'
+// }
 
 
-export default function Home() {
-    const { isFrameReady, setFrameReady, context } = useMiniKit();
-    const username = context?.user?.username;
+export default function Main() {
+    const { isFrameReady, setFrameReady } = useMiniKit();
+    const router = useRouter();
 
-    const { data: address, isLoading: isAddressLoading } = useAddress({
-        name: username || '',
-        chain: base
-    });
+    // const username = context?.user?.username;
 
     useEffect(() => {
         if (!isFrameReady) {
@@ -46,22 +40,21 @@ export default function Home() {
     //   userFid: string;
     // }>("/api/auth");
 
-    const { data: authData, isLoading: isAuthLoading, error: authError } = useQuickAuth<AuthResponse>(
-        "/api/auth",
-        { method: "GET" }
-    );
+    // const { data: authData, isLoading: isAuthLoading, error: authError } = useQuickAuth<AuthResponse>(
+    //     "/api/auth",
+    //     { method: "GET" }
+    // );
 
-    const authDataJson = authData ? JSON.stringify(authData, null, 2) : 'No authentication data loaded.';
+    // const authDataJson = authData ? JSON.stringify(authData, null, 2) : 'No authentication data loaded.';
+    const handleMintRedirect = () => {
+        router.push('/mint');
+    };
 
     return (
-        <div className="bg-white text-black px-5 py-10">
+        <div className="bg-white text-black py-10">
             <div >
-
-                <h1 >Join {minikitConfig.miniapp.name.toUpperCase()}</h1>
-
-
                 <div>
-                    <h2>Welcome, {context?.user?.displayName || username}</h2>
+                    {/* <h2>Welcome, {context?.user?.displayName || username}</h2>
                     <p>FID: {context?.user?.fid}</p>
                     <p>Username: @{username}</p>
                     {context?.user?.pfpUrl && (
@@ -73,11 +66,11 @@ export default function Home() {
                             style={{ borderRadius: '50%' }}
                         />
                     )}
-                    <p>address: {isAddressLoading ? <AiOutlineLoading className="animate-spin" /> : address ? address : 'None'}</p>
+                    <p>address: {isAddressLoading ? <AiOutlineLoading className="animate-spin" /> : address ? address : 'None'}</p> */}
                 </div>
 
                 {/* 2. authData JSON 출력 (디버그 섹션) */}
-                <div className="mt-6 p-4 border rounded-lg bg-gray-100 shadow-inner">
+                {/* <div className="mt-6 p-4 border rounded-lg bg-gray-100 shadow-inner">
                     <h2 className="text-lg font-semibold mb-2 text-blue-800">API Auth Data (Debug)</h2>
                     {isAuthLoading && <div className="p-8 text-center text-black">인증 데이터 로딩 중...</div>}
 
@@ -86,10 +79,10 @@ export default function Home() {
                     </pre>
 
                     {authError && <div className="p-8 text-center text-red-600">인증 중 오류 발생: {authError.message}</div>}
-                </div>
+                </div> */}
 
                 <div className="flex flex-col gap-y-10">
-                    <MintPromptSection />
+                    <MintPromptSection onMintClick={handleMintRedirect} />
                     <CollectionExamSection />
                 </div>
             </div>

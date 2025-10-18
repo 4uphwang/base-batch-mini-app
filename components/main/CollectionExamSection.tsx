@@ -6,7 +6,6 @@ import { CiSearch } from "react-icons/ci";
 export default function CollectionExamSection() {
     const [searchTerm, setSearchTerm] = useState('');
 
-    // 기능 정의서 1.3에 따른 태그 예시
     const tags = ['designer', 'dev', 'marketer'];
     const tagsString = tags.join(', ');
 
@@ -16,7 +15,7 @@ export default function CollectionExamSection() {
 
 
     return (
-        <div>
+        <div className="bg-white p-5 flex flex-col items-center justify-center">
             <h2 className="text-3xl font-semibold">Collect Cards</h2>
             <h3 className="text-lg font-medium text-gray-400">Find your collaborators</h3>
 
@@ -45,7 +44,7 @@ export default function CollectionExamSection() {
 
             {/** Card 영역 */}
 
-            <div className="my-5">
+            <div className="my-5 w-full">
                 <div className="w-full bg-gray-300 h-80 rounded-4xl">
 
                 </div>
