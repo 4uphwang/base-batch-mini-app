@@ -8,7 +8,7 @@ import { isDevelopment } from './../app/rootProvider';
 
 interface MiniAppLoaderResult {
     isInMiniApp: boolean;
-    isFinishedLoading: boolean; // 로딩 완료 여부
+    isFinishedLoading: boolean;
 }
 
 export function useMiniAppLoader(): MiniAppLoaderResult {
@@ -22,14 +22,13 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
 
             try {
                 const miniAppStatus = await sdk.isInMiniApp();
-                setIsInMiniApp(miniAppStatus);
-                // setIsInMiniApp(isDevelopment ? true : miniAppStatus);
+                // setIsInMiniApp(miniAppStatus);
+                setIsInMiniApp(isDevelopment ? true : miniAppStatus);
 
                 if (miniAppStatus) {
                     const context = await sdk.context;
                     const userData = context.user;
 
-                    // 💡 전역 상태(Jotai)에 사용자 정보만 저장
                     setProfile({
                         fid: userData.fid || null,
                         username: userData.username || null,
@@ -39,9 +38,9 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
                 }
             } catch (error) {
                 console.error("Error loading Mini App data:", error);
-                setIsInMiniApp(false); // 오류 시 미니앱 환경이 아니라고 가정
+                setIsInMiniApp(false);
             } finally {
-                setIsLoading(false); // 💡 로딩 완료
+                setIsLoading(false);
             }
         };
 

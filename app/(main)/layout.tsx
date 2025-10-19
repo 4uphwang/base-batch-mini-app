@@ -4,13 +4,17 @@ import FooterNav from "@/components/layouts/FooterNav";
 import Header from "@/components/layouts/Header";
 import { useMiniAppLoader } from "@/hooks/useMiniAppLoader";
 import { ROOT_URL } from "@/minikit.config";
+import BCLogo from "@/public/bc-icon.png";
+import Image from "next/image";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     const { isInMiniApp, isFinishedLoading } = useMiniAppLoader();
 
     if (!isFinishedLoading) {
         // 💡 로딩 중일 때는 메인 콘텐츠 렌더링을 막습니다.
-        return <div className="flex items-center justify-center h-screen">앱 환경 확인 중...</div>;
+        return <div className="flex items-center justify-center h-screen">
+            <Image src={BCLogo} alt="splash-logo" className="w-1/4 aspect-square object-contain" />
+        </div>;
     }
 
     if (!isInMiniApp) {

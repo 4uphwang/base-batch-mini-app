@@ -31,9 +31,8 @@ export function useCardTokenBalance() {
             enabled: !!userAddress && !!CARD_TOKEN_ADDRESS,
         }
     });
-    console.log(CARD_TOKEN_ADDRESS,userAddress)
+
     const formattedResult = useMemo(() => {
-        console.log('data', userAddress, data)
         if (data === undefined) {
             return { balance: '0.00', isLoading: isLoading, isError: isError };
         }
