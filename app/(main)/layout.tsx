@@ -12,9 +12,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
     if (!isFinishedLoading) {
         // 💡 로딩 중일 때는 메인 콘텐츠 렌더링을 막습니다.
-        return <div className="flex items-center justify-center h-screen">
-            <Image src={BCLogo} alt="splash-logo" className="w-1/4 aspect-square object-contain" />
-        </div>;
+        return <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
+            <Image src={BCLogo} alt="splash-logo" className="w-1/4 max-w-40 aspect-square object-contain" />
+        </div>
     }
 
     if (!isInMiniApp) {
