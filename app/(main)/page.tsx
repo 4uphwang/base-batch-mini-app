@@ -2,11 +2,13 @@
 
 import CollectionExamSection from "@/components/main/CollectionExamSection";
 import MintPromptSection from "@/components/main/MintPromptSection";
+import { remoteLog } from "@/lib/utils";
 // import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
+import { getTokens } from '@coinbase/onchainkit/api';
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { Token } from "@coinbase/onchainkit/token";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { getTokens } from '@coinbase/onchainkit/api';
 
 // interface AuthResponse {
 //     success: boolean;
@@ -31,14 +33,45 @@ export default function Main() {
         }
     }, [setFrameReady, isFrameReady]);
 
-    useEffect(()=>{
+    useEffect(() => {
         const getBaseCardTokens = async () => {
-            const tokens = await getTokens({ limit: '1', search: 'CARD' });
-            console.log(tokens);
+            // 💡 2. 비동기 함수 시작 로그: API 호출 시작 직전
+            console.log('getBaseCardTokens: Initiating token API call with limit=1, search=CARD.');
 
+            try {
+                const tokens = await getTokens({ search: 'BaseCard' });
+
+                // 💡 2. 데이터 로드 완료 로그: API 응답 수신 확인
+                console.log('getBaseCardTokens: API response received.');
+
+                // 💡 3. 데이터 내용 상세 로그: 실제 데이터 객체 출력 및 서버 로깅
+                if (tokens) {
+                    console.log('SUCCESS: BaseCard tokens found.', tokens);
+
+                    remoteLog({
+                        message: 'TOKEN_FETCH_SUCCESS',
+                        data: { tokenCount: (tokens as Token[]).length, tokens: tokens }
+                    });
+
+                } else {
+                    console.log('INFO: No tokens found matching the criteria.', tokens);
+                    remoteLog({ message: 'TOKEN_FETCH_INFO', data: 'No tokens found' });
+                }
+
+            } catch (error: any) {
+                // 💡 4. 오류 로그: API 호출 중 문제 발생 시
+                console.error('ERROR: Failed to fetch BaseCard tokens.', error);
+
+                // 💡 서버 로깅 추가: 오류 상세 내용 전송
+                remoteLog({
+                    message: 'TOKEN_FETCH_ERROR',
+                    data: { error: error.message || 'Unknown error' }
+                });
+            }
         }
+
         getBaseCardTokens();
-    },[])
+    }, [])
 
 
     // If you need to verify the user's identity, you can use the useQuickAuth hook.
