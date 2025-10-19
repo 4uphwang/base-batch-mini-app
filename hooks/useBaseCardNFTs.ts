@@ -1,7 +1,6 @@
 import { useSetAtom } from 'jotai';
 import { useEffect, useMemo } from "react";
 import { Abi, zeroAddress } from "viem";
-import { baseSepolia } from "viem/chains";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { chain } from './../app/rootProvider';
 
@@ -26,7 +25,7 @@ export function useBaseCardNFTs() {
         address: NFT_CONTRACT_ADDRESS,
         functionName: 'balanceOf',
         args: [userAddress || zeroAddress],
-        chainId: baseSepolia.id,
+        chainId: chain.id,
         query: {
             // 사용자 주소가 유효할 때만 쿼리 실행
             enabled: !!userAddress && !!NFT_CONTRACT_ADDRESS,

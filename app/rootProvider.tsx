@@ -3,10 +3,11 @@ import { Provider as JotaiProvider } from 'jotai';
 import { ReactNode } from "react";
 
 import { OnchainKitProvider } from "@coinbase/onchainkit";
-import { base, baseSepolia } from "wagmi/chains";
+import { baseSepolia } from "wagmi/chains";
 
 export const isDevelopment = process.env.NODE_ENV === 'development';
-export const chain = isDevelopment ? baseSepolia : base;
+// export const chain = isDevelopment ? baseSepolia : base;
+export const chain = baseSepolia;
 
 export function RootProvider({ children }: { children: ReactNode }) {
     return (
