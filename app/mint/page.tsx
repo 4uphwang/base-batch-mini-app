@@ -1,5 +1,5 @@
 "use client";
-import BackButton from "@/components/ui/back-button";
+import BackButton from "@/components/common/BackButton";
 import { FloatingInput, FloatingLabel } from "@/components/ui/floating-label-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

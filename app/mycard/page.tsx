@@ -1,4 +1,4 @@
-import BackButton from "@/components/ui/back-button";
+import BackButton from "@/components/common/BackButton";
 
 export default function MyCard() {
 
@@ -7,7 +7,7 @@ export default function MyCard() {
             <BackButton />
 
             Mint Page
-            
+
         </div>
     );
 }

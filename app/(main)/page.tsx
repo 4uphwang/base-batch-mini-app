@@ -2,11 +2,20 @@
 
 import CollectionExamSection from "@/components/main/CollectionExamSection";
 import MintPromptSection from "@/components/main/MintPromptSection";
-import { remoteLog } from "@/lib/utils";
+import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
+import { useCardTokenBalance } from "@/hooks/useCardTokenBalance";
+import { nftDataAtom } from "@/store/nftstate";
 // import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
-import { getTokens } from '@coinbase/onchainkit/api';
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { Token } from "@coinbase/onchainkit/token";
+import { useAtom } from "jotai";
+// import { NFTCard } from '@coinbase/onchainkit/nft';
+// import {
+//     NFTLastSoldPrice,
+//     NFTMedia,
+//     NFTNetwork,
+//     NFTOwner,
+//     NFTTitle,
+// } from '@coinbase/onchainkit/nft/view';
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -24,8 +33,11 @@ import { useEffect } from "react";
 export default function Main() {
     const { isFrameReady, setFrameReady } = useMiniKit();
     const router = useRouter();
-
-    // const username = context?.user?.username;
+    useBaseCardNFTs();
+    useCardTokenBalance();
+    const [nftData] = useAtom(nftDataAtom);
+    const { count } = nftData;
+    const hasNFT = count !== 0;
 
     useEffect(() => {
         if (!isFrameReady) {
@@ -33,54 +45,13 @@ export default function Main() {
         }
     }, [setFrameReady, isFrameReady]);
 
-    useEffect(() => {
-        const getBaseCardTokens = async () => {
-            // 💡 2. 비동기 함수 시작 로그: API 호출 시작 직전
-            console.log('getBaseCardTokens: Initiating token API call with limit=1, search=CARD.');
-
-            try {
-                const tokens = await getTokens({ search: 'BaseCard' });
-
-                // 💡 2. 데이터 로드 완료 로그: API 응답 수신 확인
-                console.log('getBaseCardTokens: API response received.');
-
-                // 💡 3. 데이터 내용 상세 로그: 실제 데이터 객체 출력 및 서버 로깅
-                if (tokens) {
-                    console.log('SUCCESS: BaseCard tokens found.', tokens);
-
-                    remoteLog({
-                        message: 'TOKEN_FETCH_SUCCESS',
-                        data: { tokenCount: (tokens as Token[]).length, tokens: tokens }
-                    });
-
-                } else {
-                    console.log('INFO: No tokens found matching the criteria.', tokens);
-                    remoteLog({ message: 'TOKEN_FETCH_INFO', data: 'No tokens found' });
-                }
-
-            } catch (error: any) {
-                // 💡 4. 오류 로그: API 호출 중 문제 발생 시
-                console.error('ERROR: Failed to fetch BaseCard tokens.', error);
-
-                // 💡 서버 로깅 추가: 오류 상세 내용 전송
-                remoteLog({
-                    message: 'TOKEN_FETCH_ERROR',
-                    data: { error: error.message || 'Unknown error' }
-                });
-            }
-        }
-
-        getBaseCardTokens();
-    }, [])
-
-
     // If you need to verify the user's identity, you can use the useQuickAuth hook.
     // This hook will verify the user's signature and return the user's FID. You can update
     // this to meet your needs. See the /app/api/auth/route.ts file for more details.
     // Note: If you don't need to verify the user's identity, you can get their FID and other user data
     // via `context.user.fid`.
     // const { data, isLoading, error } = useQuickAuth<{
-    //   userFid: string;
+    //     userFid: string;
     // }>("/api/auth");
 
     // const { data: authData, isLoading: isAuthLoading, error: authError } = useQuickAuth<AuthResponse>(
@@ -97,6 +68,16 @@ export default function Main() {
         <div className="bg-white text-black py-10">
             <div >
                 <div>
+                    {/* <NFTCard
+                        contractAddress='0x9c574048C5e9aB81C185BF1EDE2484F06D44dCeA'
+                        tokenId='1'
+                    >
+                        <NFTMedia />
+                        <NFTTitle />
+                        <NFTOwner />
+                        <NFTLastSoldPrice />
+                        <NFTNetwork />
+                    </NFTCard> */}
                     {/* <h2>Welcome, {context?.user?.displayName || username}</h2>
                     <p>FID: {context?.user?.fid}</p>
                     <p>Username: @{username}</p>
@@ -124,10 +105,12 @@ export default function Main() {
                     {authError && <div className="p-8 text-center text-red-600">인증 중 오류 발생: {authError.message}</div>}
                 </div> */}
 
-                <div className="flex flex-col gap-y-10">
+                {hasNFT ? <div className="flex flex-col gap-y-10">
+
+                </div> : <div className="flex flex-col gap-y-10">
                     <MintPromptSection onMintClick={handleMintRedirect} />
                     <CollectionExamSection />
-                </div>
+                </div>}
             </div>
         </div>
     );

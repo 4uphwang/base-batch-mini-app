@@ -1,6 +1,6 @@
 "use client";
 
-import BackButton from "@/components/ui/back-button";
+import BackButton from "@/components/common/BackButton";
 
 export default function Collection() {
     return (
