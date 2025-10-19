@@ -1,13 +1,11 @@
-"use client";
-
 import BackButton from "@/components/ui/back-button";
 
-export default function Collection() {
+export default function Earn() {
     return (
         <div>
             <BackButton />
-
-            collection page
+            Earn page
+            준비중
         </div>
-    )
+    );
 }

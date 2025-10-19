@@ -1,12 +1,11 @@
 "use client";
+import BackButton from "@/components/ui/back-button";
 import { FloatingInput, FloatingLabel } from "@/components/ui/floating-label-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CiCircleRemove } from "react-icons/ci";
-import { FaAngleLeft } from "react-icons/fa6";
 
 const MAX_SKILLS = 8;
 const MAX_WEBSITES = 3;
@@ -46,7 +45,6 @@ const SkillTag = ({ skill, isSelected, onClick }: SkillTagProps) => {
 
 
 export default function Mint() {
-    const route = useRouter();
     const { context } = useMiniKit();
     const username = context?.user?.username || undefined;
     const [name, setName] = useState("");
@@ -113,7 +111,7 @@ export default function Mint() {
 
     return (
         <div className="bg-white text-black">
-            <FaAngleLeft size={40} onClick={route.back} className="absolute left-2 top-2 p-2 rounded-full" />
+            <BackButton />
 
             <form onSubmit={handleSubmit} className="flex flex-col justify-center items-center px-5 py-4 gap-y-6 mt-10">
 

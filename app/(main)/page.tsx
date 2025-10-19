@@ -6,6 +6,7 @@ import MintPromptSection from "@/components/main/MintPromptSection";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { getTokens } from '@coinbase/onchainkit/api';
 
 // interface AuthResponse {
 //     success: boolean;
@@ -29,6 +30,15 @@ export default function Main() {
             setFrameReady();
         }
     }, [setFrameReady, isFrameReady]);
+
+    useEffect(()=>{
+        const getBaseCardTokens = async () => {
+            const tokens = await getTokens({ limit: '1', search: 'CARD' });
+            console.log(tokens);
+
+        }
+        getBaseCardTokens();
+    },[])
 
 
     // If you need to verify the user's identity, you can use the useQuickAuth hook.
