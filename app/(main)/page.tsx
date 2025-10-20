@@ -92,7 +92,7 @@ export default function Main() {
                     <p>address: {isAddressLoading ? <AiOutlineLoading className="animate-spin" /> : address ? address : 'None'}</p> */}
                 </div>
 
-                {!hasNFT ? <div className="flex flex-col gap-y-10">
+                {hasNFT ? <div className="flex flex-col gap-y-10">
                     <MyCardSection />
                 </div> : <div className="flex flex-col gap-y-10">
                     <MintPromptSection onMintClick={handleMintRedirect} />
