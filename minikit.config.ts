@@ -1,4 +1,4 @@
-const ROOT_URL =
+export const ROOT_URL =
     process.env.NEXT_PUBLIC_URL ||
     (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
 
@@ -22,8 +22,8 @@ export const minikitConfig = {
         subtitle: "Builder Identity on Base",
         description: "Stop repeating your pitch. Mint your verified, onchain builder profile card (SBT). Search for talent & connect directly.",
         screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
-        iconUrl: `${ROOT_URL}/blue-icon.png`,
-        splashImageUrl: `${ROOT_URL}/blue-hero.png`,
+        iconUrl: `${ROOT_URL}/bc-icon.png`,
+        splashImageUrl: `${ROOT_URL}/bc-icon.png`,
         splashBackgroundColor: "#000000",
         homeUrl: ROOT_URL,
         webhookUrl: `${ROOT_URL}/api/webhook`,

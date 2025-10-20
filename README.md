@@ -1,133 +1,111 @@
-# Waitlist Mini App Quickstart
+# 🚀 BaseCard Builder Mini App Quickstart (README)
 
-This is a demo Mini App application built using OnchainKit and the Farcaster SDK. Build a waitlist sign-up mini app for your company that can be published to the Base app and Farcaster.
+-----
+## 1\. 프로젝트 개요
 
-## Prerequisites
+| 구분 | 내용 |
+| :--- | :--- |
+| **목표** | Farcaster/Base 사용자가 자신의 프로필을 NFT(BaseCard)로 민팅 |
+| **프론트엔드** | Next.js (App Router), React, Tailwind CSS |
+| **상태 관리** | Jotai (전역 상태)|
+| **Web3 연동** | Coinbase OnchainKit (미니앱 환경 및 인증) |
 
-Before getting started, make sure you have:
+-----
 
-* Base app account
-* A [Farcaster](https://farcaster.xyz/) account
-* [Vercel](https://vercel.com/) account for hosting the application
-* [Coinbase Developer Platform](https://portal.cdp.coinbase.com/) Client API Key
+## 2\. 필수 준비 사항 (Prerequisites)
 
-## Getting Started
+팀원들이 공통 환경에서 개발을 시작하기 위한 준비물입니다.
 
-### 1. Clone this repository 
+| 도구/계정 | 설명 |
+| :--- | :--- |
+| **Node.js** | v18+ |
+| **NPM** | 패키지 관리자 |
+| **Git** | 버전 관리 시스템 |
+| **CDP API Key** | Coinbase Developer Platform에서 발급받은 **API 키** |
+| **ERC20 Token Contract Address** | 사용할 ERC20 컨트랙트주소 |
+| **ERC721 Token Contract Address** | 사용할 ERC721 컨트랙트주소 |
+| **Git 계정** | 코드 커밋 및 푸시를 위해 필요합니다. |
+
+-----
+
+## 3\. 개발 환경 설정 (Getting Started)
+
+### 3.1. 레포지토리 클론 및 설치
 
 ```bash
-git clone https://github.com/base/demos.git
+# 1. 레포지토리 클론
+git clone https://github.com/4uphwang/base-batch-mini-app.git
+cd base-batch-mini-app.git
 ```
-
-### 2. Install dependencies:
-
-```bash
-cd demos/minikit/waitlist-mini-app-qs
+# 2. 의존성 설치
+```
 npm install
 ```
-
-### 3. Configure environment variables
-
-Create a `.env.local` file and add your environment variables:
-
-```bash
-NEXT_PUBLIC_PROJECT_NAME="Your App Name"
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=<Replace-WITH-YOUR-CDP-API-KEY>
-NEXT_PUBLIC_URL=
+or
+```
+yarn install
 ```
 
-### 4. Run locally:
+### 3.2. 환경 변수 설정 (필수)
+
+팀원들은 `.env.local.example`을 참고하여 **`.env.local`** 파일을 생성하고, 팀 리더로부터 전달받은 **공통 키**와 **로컬 환경 설정**을 채워 넣어야 합니다.
+
+```bash
+# .env.local
+
+# 1. 공통 설정
+NEXT_PUBLIC_PROJECT_NAME=BaseCard
+NEXT_PUBLIC_ONCHAINKIT_API_KEY="[팀 공동 CDP API 키 입력]"
+NEXT_PUBLIC_URL="http://localhost:3000"
+
+# 2. 컨트랙트 주소 (토큰 민팅 및 조회용)
+NEXT_PUBLIC_BASECARD_NFT_CONTRACT_ADDRESS="[배포된 NFT 컨트랙트 주소]"
+NEXT_PUBLIC_CARD_TOKEN_ADDRESS="[배포된 ERC20 토큰 컨트랙트 주소]"
+```
+
+### 3.3. 로컬에서 실행
 
 ```bash
 npm run dev
 ```
-
-## Customization
-
-### Update Manifest Configuration
-
-The `minikit.config.ts` file configures your manifest located at `app/.well-known/farcaster.json`.
-
-**Skip the `accountAssociation` object for now.**
-
-To personalize your app, change the `name`, `subtitle`, and `description` fields and add images to your `/public` folder. Then update their URLs in the file.
-
-## Deployment
-
-### 1. Deploy to Vercel
-
-```bash
-vercel --prod
+or
+```
+yarn dev
 ```
 
-You should have a URL deployed to a domain similar to: `https://your-vercel-project-name.vercel.app/`
+-----
 
-### 2. Update environment variables
+## 4\. 협업 및 버전 관리 전략
 
-Add your production URL to your local `.env` file:
+4.1. 개발 시작 워크플로우
+아래의 세 단계만 반복하며 개발을 진행합니다.
 
-```bash
-NEXT_PUBLIC_PROJECT_NAME="Your App Name"
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=<Replace-WITH-YOUR-CDP-API-KEY>
-NEXT_PUBLIC_URL=https://your-vercel-project-name.vercel.app/
+새 브랜치 생성 및 작업 시작: 새로운 기능 개발이나 버그 수정 시 반드시 새 브랜치를 생성합니다.
+
+```Bash
+git checkout main
+git pull
+git checkout -b feature/mint-form-design
 ```
+자유로운 커밋 및 푸시 (테스트 요청): 개발 중 변경사항이 발생하면 자유롭게 커밋하고 원격 저장소에 푸시합니다. 이 푸시가 테스트용 프리뷰 URL을 생성해 달라는 요청이 됩니다.
 
-### 3. Upload environment variables to Vercel
+```Bash
 
-Add environment variables to your production environment:
-
-```bash
-vercel env add NEXT_PUBLIC_PROJECT_NAME production
-vercel env add NEXT_PUBLIC_ONCHAINKIT_API_KEY production
-vercel env add NEXT_PUBLIC_URL production
+git commit -m "feat: [기능 요약] 구현 완료"
+git push origin feature/mint-form-design
 ```
+이 푸시를 감지하여 Vercel에서 프리뷰 URL을 생성하고 테스트를 진행하며 URL을 공유합니다.
+새로 생성한 브랜치에 계속 작업하면서 푸시하면 자동 배포 되며 프리뷰 URL은 유지 됩니다.
 
-## Account Association
 
-### 1. Sign Your Manifest
+### 4.3. Manifest 및 배포 주소
 
-1. Navigate to [Farcaster Manifest tool](https://farcaster.xyz/~/developers/mini-apps/manifest)
-2. Paste your domain in the form field (ex: your-vercel-project-name.vercel.app)
-3. Click the `Generate account association` button and follow the on-screen instructions for signing with your Farcaster wallet
-4. Copy the `accountAssociation` object
+Farcaster Manifest 서명(`accountAssociation`)과 최종 배포 URL(`NEXT_PUBLIC_URL`) 관리는 **제 Vercel 계정**을 통해 일괄 관리됩니다. 팀원들은 이 과정에 관여할 필요가 없으며, `minikit.config.ts` 파일의 최신 버전을 유지하기만 하면 됩니다.
 
-### 2. Update Configuration
+-----
 
-Update your `minikit.config.ts` file to include the `accountAssociation` object:
+## 5\. Next.js 개발 팁
 
-```ts
-export const minikitConfig = {
-    accountAssociation: {
-        "header": "your-header-here",
-        "payload": "your-payload-here",
-        "signature": "your-signature-here"
-    },
-    frame: {
-        // ... rest of your frame configuration
-    },
-}
-```
-
-### 3. Deploy Updates
-
-```bash
-vercel --prod
-```
-
-## Testing and Publishing
-
-### 1. Preview Your App
-
-Go to [base.dev/preview](https://base.dev/preview) to validate your app:
-
-1. Add your app URL to view the embeds and click the launch button to verify the app launches as expected
-2. Use the "Account association" tab to verify the association credentials were created correctly
-3. Use the "Metadata" tab to see the metadata added from the manifest and identify any missing fields
-
-### 2. Publish to Base App
-
-To publish your app, create a post in the Base app with your app's URL.
-
-## Learn More
-
-For detailed step-by-step instructions, see the [Create a Mini App tutorial](https://docs.base.org/docs/mini-apps/quickstart/create-new-miniapp/) in the Base documentation.
+  * **API Route:** 백엔드 로직은 `app/api/` 폴더 내에 `route.ts` 파일로 구현됩니다.
+  * **ABI 파일:** 컨트랙트 ABI 파일은 `lib/abi/` 폴더에 저장되어 있으며, 이 파일을 통해 컨트랙트 함수를 호출합니다.
+  * **전역 상태:** NFT 소유 여부, 잔액 등 전역 데이터는 `store/` 폴더의 Jotai 아톰을 통해 관리됩니다.
