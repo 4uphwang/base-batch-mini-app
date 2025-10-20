@@ -70,7 +70,6 @@ export function useBaseCardNFTs() {
         // ----------------------------------------------------
         // 3단계: 최종 결과 포맷팅 및 반환
         // ----------------------------------------------------
-        console.log('tokenIdsData', tokenIdsData)
         const tokenIds = tokenIdsData ? tokenIdsData
             .filter(result => result.status === 'success')
             .map(result => result.result as bigint) : [];

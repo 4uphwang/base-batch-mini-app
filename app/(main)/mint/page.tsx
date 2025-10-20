@@ -1,11 +1,18 @@
 "use client";
+
+import { useAtom } from "jotai";
+import { useState } from "react";
+
+import { userProfileAtom } from "@/store/userProfileState";
+
 import BackButton from "@/components/common/BackButton";
 import { FloatingInput, FloatingLabel } from "@/components/ui/floating-label-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useState } from "react";
-import { CiCircleRemove } from "react-icons/ci";
+import { Switch } from "@/components/ui/switch";
+import Image from "next/image";
+import { FaPlus } from "react-icons/fa";
+
 
 const MAX_SKILLS = 8;
 const MAX_WEBSITES = 3;
@@ -19,7 +26,6 @@ const ALL_SKILLS = [
     "Legal", "Marketing"
 ];
 
-// 🎨 태그를 나타내는 컴포넌트
 interface SkillTagProps {
     skill: string;
     isSelected: boolean;
@@ -28,35 +34,35 @@ interface SkillTagProps {
 
 const SkillTag = ({ skill, isSelected, onClick }: SkillTagProps) => {
     const baseClasses = "py-1 px-3 text-sm rounded-full transition-colors duration-150 flex items-center";
-    const selectedClasses = "bg-purple-100 text-purple-700 border border-purple-700"; // 활성화된 태그 스타일 (사진의 핑크/퍼플)
-    const defaultClasses = "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-transparent"; // 비활성화된 태그 스타일
+    const selectedClasses = "bg-[#DFE9FF] text-primary-1 border border-primary-1";
+    const defaultClasses = "bg-background-light-2 text-gray-700 hover:bg-gray-200 border border-transparent";
 
     return (
         <button
-            type="button" // 폼 제출 방지
+            type="button"
             onClick={onClick}
             className={`${baseClasses} ${isSelected ? selectedClasses : defaultClasses}`}
         >
             <span>{skill}</span>
-            <span className="ml-1 text-xs font-bold">{isSelected ? '✕' : '+'}</span>
+            <span className="ml-1 text-xs  font-bold w-2">{isSelected ? '✕' : '+'}</span>
         </button>
     );
 };
 
 
 export default function Mint() {
-    const { context } = useMiniKit();
-    const username = context?.user?.username || undefined;
+    const [userProfile] = useAtom(userProfileAtom);
+    const username = userProfile.username;
+
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
-    const [bio, setBio] = useState(""); // 텍스트
-    const [github, setGithub] = useState(""); // 소셜
-    const [facaster, setFacaster] = useState(""); // 소셜
-    const [twitter, setTwitter] = useState(""); // 소셜
-    const [websites, setWebsites] = useState<string[]>([]); // 웹사이트 목록
+    const [bio, setBio] = useState("");
+    const [github, setGithub] = useState("");
+    const [facaster, setFacaster] = useState("");
+    const [twitter, setTwitter] = useState("");
+    const [websites, setWebsites] = useState<string[]>([]);
     const [newWebsite, setNewWebsite] = useState("");
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-
     const [isBaseNameIncluded, setIsBaseNameIncluded] = useState(false);
 
 
@@ -80,8 +86,11 @@ export default function Mint() {
 
 
     const handleAddWebsite = () => {
-        if (newWebsite.trim() && websites.length < MAX_WEBSITES) {
-            setWebsites(prev => [...prev, newWebsite.trim()]);
+        const urlToAdd = newWebsite.trim();
+        if (!urlToAdd) return;
+        if (websites.includes(urlToAdd)) return;
+        if (websites.length < MAX_WEBSITES) {
+            setWebsites(prev => [...prev, urlToAdd]);
             setNewWebsite("");
         }
     };
@@ -102,7 +111,6 @@ export default function Mint() {
             twitter,
             websites,
             skills: selectedSkills,
-            // 💡 Base Name 조건부 포함
             baseName: isBaseNameIncluded ? username : undefined
         };
         console.log("민팅 데이터:", finalData);
@@ -111,22 +119,27 @@ export default function Mint() {
 
     return (
         <div className="bg-white text-black">
-            <BackButton />
+            <div className="relative">
+                <BackButton />
+            </div>
+            <div className="flex flex-col pt-14 px-5 ">
+                <h1 className="text-3xl font-semibold">Mint Your BaseCard</h1>
+                <p className="text-lg font-medium text-gray-400">Everyone can be a builder</p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col justify-center items-center px-5 py-4 gap-y-6 mt-10">
+            <form onSubmit={handleSubmit} className="flex flex-col justify-center items-start px-5 py-4 gap-y-6">
 
-                <div className="flex flex-col justify-center items-center">
-                    <h1 className="text-3xl font-semibold">Mint Your BaseCard</h1>
-                    <p className="text-lg font-medium text-gray-400">Everyone can be a builder</p>
-                </div>
                 {/* 프로필 이미지 영역 */}
-                <div className="w-24 h-24 rounded-xl border border-black flex items-center justify-center text-sm ">
-                    img
+                <div className="w-24 h-24 rounded-xl border border-black overflow-hidden">
+                    {
+                        userProfile?.pfpUrl
+                            ? <Image src={userProfile.pfpUrl} alt="profile_mintpage" className="w-24 h-24 object-contain" />
+                            : <div className="w-full h-full bg-gray-200" />
+                    }
                 </div>
 
                 {/* 1. 이름 입력 */}
-
-                <div className="w-full space-y-2"> {/* 💡 Shadcn 스타일의 space-y-2로 간격 확보 */}
+                <div className="w-full space-y-2">
                     <Label htmlFor="name" className="text-lg font-medium">Your Name*</Label>
                     <Input
                         id="name"
@@ -134,7 +147,7 @@ export default function Mint() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        className="h-12 text-lg border border-gray-400" // 💡 Shadcn Input에 높이/경계선 스타일 적용
+                        className="h-12 text-lg border border-gray-300"
                     />
                 </div>
 
@@ -147,128 +160,15 @@ export default function Mint() {
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
                         required
-                        placeholder="e.g., Senior Developer" // 💡 이제 플레이스홀더를 다시 사용할 수 있습니다.
-                        className="h-12 text-lg border border-gray-400"
+                        placeholder="e.g., Senior Developer"
+                        className="h-12 text-lg border border-gray-300"
                     />
                 </div>
 
-                <div className="w-full space-y-2"> {/* 💡 전체 필드를 위한 간격 확보 */}
-
-                    {/* 1. 일반 라벨 */}
-                    <Label htmlFor="base_name_input" className="text-lg font-medium">Base Name</Label>
-
-                    {/* 2. Disabled Input 및 버튼 그룹 */}
-                    <div className="flex gap-x-2 items-center">
-
-                        {/* Disabled Input 필드 (Base Name 표시) */}
-                        <div className="relative flex-1">
-                            <input
-                                id="base_name_input"
-                                type="text"
-                                value={username || undefined}
-                                disabled
-                                className="w-full p-3 text-lg h-12 border border-gray-400 rounded-lg bg-gray-100 text-gray-700 cursor-default"
-                            />
-                        </div>
-
-                        {/* Add/Remove 버튼 */}
-                        <button
-                            type="button"
-                            onClick={() => username && setIsBaseNameIncluded(prev => !prev)}
-                            className={`py-3 px-4 text-sm font-bold rounded-lg transition-colors h-12 whitespace-nowrap
-                        ${isBaseNameIncluded ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                        >
-                            {isBaseNameIncluded ? 'Added ✕' : 'Add +'}
-                        </button>
-                    </div>
-                </div>
-
-
-                <div className="flex flex-col w-full gap-y-2"> {/* 💡 Socials 그룹을 위한 공간 */}
-                    <h3 className="text-lg font-medium">Socials</h3>
-
-                    {/* 3. 소셜 필드 (Twitter) - 플로팅 라벨 */}
-                    <div className="relative w-full">
-                        <FloatingInput
-                            id="twitter/x"
-                            type="text"
-                            value={twitter}
-                            onChange={(e) => setTwitter(e.target.value)}
-                            className="p-3 text-lg h-12 border border-gray-400"
-                        />
-                        <FloatingLabel htmlFor="twitter/x">Twitter / X</FloatingLabel>
-                    </div>
-
-                    {/* 4. 소셜 필드 (GitHub) - 플로팅 라벨 */}
-                    <div className="relative w-full">
-                        <FloatingInput
-                            id="github"
-                            type="text"
-                            value={github}
-                            onChange={(e) => setGithub(e.target.value)}
-                            className="p-3 text-lg h-12 border border-gray-400"
-                        />
-                        <FloatingLabel htmlFor="github">GitHub</FloatingLabel>
-                    </div>
-
-                    <div className="relative w-full">
-                        <FloatingInput
-                            id="github"
-                            type="text"
-                            value={facaster}
-                            onChange={(e) => setFacaster(e.target.value)}
-                            className="p-3 text-lg h-12 border border-gray-400"
-                        />
-                        <FloatingLabel htmlFor="github">Facaster</FloatingLabel>
-                    </div>
-                </div>
-
-
-
-                {/* 6. 웹사이트 목록 */}
+                {/* 3. 스킬 선택 영역 */}
+                {/**TODO: 드롭다운으로 변경예정 */}
                 <div className="w-full">
-                    <h3 className="text-lg font-medium mb-3">Websites ({websites.length}/{MAX_WEBSITES})</h3>
-
-                    {/* 웹사이트 추가 입력 필드 */}
-                    <div className="flex gap-2 mb-3">
-                        <FloatingInput
-                            id="new-website"
-                            type="url"
-                            value={newWebsite}
-                            onChange={(e) => setNewWebsite(e.target.value)}
-                            className="flex-1 p-3 text-base h-12 border border-gray-400"
-                            placeholder="https://your-site.com"
-                            disabled={websites.length >= MAX_WEBSITES}
-                        />
-                        <button
-                            type="button"
-                            onClick={handleAddWebsite}
-                            disabled={!newWebsite.trim() || websites.length >= MAX_WEBSITES}
-                            className={`py-2 px-4 rounded-lg font-medium text-white transition-colors 
-                                ${!newWebsite.trim() || websites.length >= MAX_WEBSITES ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-                        >
-                            Add
-                        </button>
-                    </div>
-
-                    {/* 현재 웹사이트 목록 */}
-                    {websites.length > 0 && <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[40px]">
-                        {websites.map(url => (
-                            <div key={url} className="py-1 px-3 text-sm rounded-full bg-gray-200 text-gray-800 flex items-center">
-                                <span className="truncate max-w-[150px]">{url}</span>
-                                <CiCircleRemove
-                                    size={16}
-                                    className="ml-1 cursor-pointer text-red-500 hover:text-red-700"
-                                    onClick={() => handleRemoveWebsite(url)}
-                                />
-                            </div>
-                        ))}
-                    </div>}
-                </div>
-
-                {/* 7. 스킬 선택 영역 */}
-                <div className="w-full">
-                    <h3 className="text-lg font-medium mb-3">Skills</h3>
+                    <h3 className="text-lg font-medium mb-3">Skills*</h3>
                     <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg">
                         {ALL_SKILLS.map(skill => {
                             const isSelected = selectedSkills.includes(skill);
@@ -286,16 +186,127 @@ export default function Mint() {
                     </div>
                 </div>
 
-                {/* 5. 자기소개 텍스트 영역 (Shadcn 스타일 유지) */}
+
+
+                {/* 추가 선택 영역 4. Socials 그룹을 위한 공간 */}
+                <div className="flex flex-col w-full gap-y-2">
+                    <h3 className="text-lg font-medium">Socials</h3>
+
+                    <div className="relative w-full">
+                        <FloatingInput
+                            id="twitter/x"
+                            type="text"
+                            value={twitter}
+                            onChange={(e) => setTwitter(e.target.value)}
+                            className="p-3 text-lg h-12 border border-gray-300"
+                        />
+                        <FloatingLabel htmlFor="twitter/x">Twitter / X</FloatingLabel>
+                    </div>
+
+                    <div className="relative w-full">
+                        <FloatingInput
+                            id="github"
+                            type="text"
+                            value={github}
+                            onChange={(e) => setGithub(e.target.value)}
+                            className="p-3 text-lg h-12 border border-gray-300"
+                        />
+                        <FloatingLabel htmlFor="github">GitHub</FloatingLabel>
+                    </div>
+
+                    <div className="relative w-full">
+                        <FloatingInput
+                            id="github"
+                            type="text"
+                            value={facaster}
+                            onChange={(e) => setFacaster(e.target.value)}
+                            className="p-3 text-lg h-12 border border-gray-300"
+                        />
+                        <FloatingLabel htmlFor="github">Facaster</FloatingLabel>
+                    </div>
+                </div>
+
+
+                {/* 5. 웹사이트 목록 */}
+                <div className="w-full">
+                    <h3 className="text-lg font-medium mb-3">Websites ({websites.length}/{MAX_WEBSITES})</h3>
+
+                    {/* 웹사이트 추가 입력 필드 */}
+                    <div className="flex gap-2 mb-3">
+                        <FloatingInput
+                            id="new-website"
+                            type="url"
+                            value={newWebsite}
+                            onChange={(e) => setNewWebsite(e.target.value)}
+                            className="flex-1 p-3 text-base h-12 border border-gray-300"
+                            placeholder="https://your-site.com"
+                            disabled={websites.length >= MAX_WEBSITES}
+                        />
+                        <button
+                            type="button"
+                            onClick={handleAddWebsite}
+                            disabled={!newWebsite.trim() || websites.length >= MAX_WEBSITES}
+                            // 🚨 w-12 h-12로 크기를 Input과 동일하게 고정
+                            className={`w-12 h-12 flex items-center justify-center rounded-lg font-medium text-white transition-colors ${!newWebsite.trim() || websites.length >= MAX_WEBSITES
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-blue-600 hover:bg-blue-700'}`}
+                        >
+                            {/* 아이콘 크기를 조정하고, flex-center로 중앙 정렬 */}
+                            <FaPlus size={18} />
+                        </button>
+                    </div>
+
+                    {/* 현재 웹사이트 목록 */}
+                    {websites.length > 0 && <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[40px]">
+                        {websites.map(url => (
+                            <div key={url} className="py-1 px-3 text-sm rounded-full bg-background-light-2 text-gray-800 flex items-center">
+                                <span className="truncate max-w-[150px]">{url}</span>
+                                <button
+                                    type="button"
+                                    className="ml-1 text-red-400 hover:text-red-600 font-bold text-base transition-colors "
+                                    onClick={() => handleRemoveWebsite(url)}
+                                    aria-label={`${url} Delete`}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ))}
+                    </div>}
+                </div>
+
+                <div className="w-full space-y-2"> {/* 💡 전체 필드를 위한 간격 확보 */}
+
+                    <Label htmlFor="base_name_input" className="text-lg font-medium">Base Name</Label>
+                    <div className="flex gap-x-2 items-center">
+                        <div className="relative flex-1">
+                            <input
+                                id="base_name_input"
+                                type="text"
+                                value={username || undefined}
+                                disabled
+                                className="w-full p-3 text-lg h-12 border border-gray-400 rounded-lg bg-gray-100 text-gray-700 cursor-default"
+                            />
+                        </div>
+
+                        <Switch
+                            id="include-base-name"
+                            disabled={!username}
+                            checked={isBaseNameIncluded}
+                            onCheckedChange={setIsBaseNameIncluded}
+                        />
+                    </div>
+                </div>
+
+                {/* 7. 자기소개 텍스트 영역 */}
                 <div className="w-full space-y-2">
                     <Label htmlFor="bio" className="text-lg font-medium">About Yourself</Label>
                     <textarea
                         id="bio"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        className="w-full p-3 border border-gray-400 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base resize-none"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base resize-none"
                         rows={4}
-                        placeholder="당신의 경험과 목표를 요약해서 적어주세요."
+                        placeholder="Summarize your experience and goals."
                     />
                 </div>
 

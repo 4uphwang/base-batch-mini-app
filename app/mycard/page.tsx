@@ -6,7 +6,7 @@ export default function MyCard() {
         <div className="">
             <BackButton />
 
-            Mint Page
+            MyCard Page
 
         </div>
     );
