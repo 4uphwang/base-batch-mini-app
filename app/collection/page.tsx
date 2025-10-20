@@ -4,7 +4,7 @@ import BackButton from "@/components/common/BackButton";
 
 export default function Collection() {
     return (
-        <div>
+        <div className="relative">
             <BackButton />
 
             collection page

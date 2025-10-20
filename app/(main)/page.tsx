@@ -2,8 +2,8 @@
 
 import CollectionExamSection from "@/components/main/CollectionExamSection";
 import MintPromptSection from "@/components/main/MintPromptSection";
+import MyCardSection from "@/components/main/MyCardSection";
 import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
-import { useCardTokenBalance } from "@/hooks/useCardTokenBalance";
 import { nftDataAtom } from "@/store/nftstate";
 // import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
@@ -34,7 +34,6 @@ export default function Main() {
     const { isFrameReady, setFrameReady } = useMiniKit();
     const router = useRouter();
     useBaseCardNFTs();
-    useCardTokenBalance();
     const [nftData] = useAtom(nftDataAtom);
     const { count } = nftData;
     const hasNFT = count !== 0;
@@ -93,20 +92,8 @@ export default function Main() {
                     <p>address: {isAddressLoading ? <AiOutlineLoading className="animate-spin" /> : address ? address : 'None'}</p> */}
                 </div>
 
-                {/* 2. authData JSON 출력 (디버그 섹션) */}
-                {/* <div className="mt-6 p-4 border rounded-lg bg-gray-100 shadow-inner">
-                    <h2 className="text-lg font-semibold mb-2 text-blue-800">API Auth Data (Debug)</h2>
-                    {isAuthLoading && <div className="p-8 text-center text-black">인증 데이터 로딩 중...</div>}
-
-                    <pre className="whitespace-pre-wrap text-xs text-gray-700 font-mono">
-                        {authDataJson}
-                    </pre>
-
-                    {authError && <div className="p-8 text-center text-red-600">인증 중 오류 발생: {authError.message}</div>}
-                </div> */}
-
                 {hasNFT ? <div className="flex flex-col gap-y-10">
-
+                    <MyCardSection />
                 </div> : <div className="flex flex-col gap-y-10">
                     <MintPromptSection onMintClick={handleMintRedirect} />
                     <CollectionExamSection />
