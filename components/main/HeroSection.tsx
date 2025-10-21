@@ -1,37 +1,43 @@
 "use client";
 
-import Image from "next/image";
-
 interface HeroSectionProps {
     onMintClick: () => void;
 }
 
 export default function HeroSection({ onMintClick }: HeroSectionProps) {
     return (
-        <div className="relative min-h-screen overflow-hidden">
-            {/* Main Background Image */}
-            <div className="absolute inset-0">
-                <Image
-                    src="/assets/landing-page-background.png"
-                    alt="BaseCard Landing Background"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-            </div>
+        <div className="relative h-[55vh] overflow-hidden">
+            {/* Main Background SVG */}
+            <div
+                className="absolute inset-0 bg-no-repeat responsive-bg"
+                style={{
+                    backgroundImage: "url(/assets/landing-page-backgroud.svg)",
+                }}
+            />
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-20">
+            <div className="relative z-10 flex flex-col h-full px-4 sm:px-6 py-4">
                 {/* Title Section */}
-                <div className="text-center mb-16">
-                    <h1 className="text-5xl sm:text-6xl md:text-7xl font-k2d-bold text-white mb-6 leading-tight drop-shadow-lg">
+                <div className="text-left mb-16">
+                    <h1
+                        className="text-5xl sm:text-6xl md:text-7xl font-k2d-bold text-white mb-2 drop-shadow-lg"
+                        style={{
+                            letterSpacing: "-0.05em",
+                            lineHeight: "0.9",
+                        }}
+                    >
                         Onchain social
                         <br />
                         business card
                     </h1>
-                    <p className="text-xl sm:text-2xl font-k2d-medium text-white max-w-2xl mx-auto drop-shadow-md">
-                        Turn your onchain story into opportunity
+                    <p className="text-xl sm:text-2xl font-k2d-medium text-white max-w-2xl drop-shadow-md tracking-normal">
+                        Turn your onchain story into
+                        <br />
+                        opportunity
                     </p>
+
+                    {/* 공백 div */}
+                    <div className="w-full h-50"></div>
                 </div>
 
                 {/* Mint Button */}

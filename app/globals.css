@@ -335,3 +335,33 @@ textarea {
     font-family: var(--font-k2d);
     font-weight: 800;
 }
+
+/* Responsive SVG Background */
+.responsive-bg {
+    background-size: 150% auto;
+    background-position: 20% 0%;
+}
+
+/* Mobile (up to 640px) */
+@media (max-width: 640px) {
+    .responsive-bg {
+        background-size: 160% auto;
+        background-position: 25% 0%;
+    }
+}
+
+/* Tablet (641px to 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .responsive-bg {
+        background-size: 120% auto;
+        background-position: 10% 0%;
+    }
+}
+
+/* Desktop (1025px and up) */
+@media (min-width: 1025px) {
+    .responsive-bg {
+        background-size: 100% auto;
+        background-position: center bottom;
+    }
+}
