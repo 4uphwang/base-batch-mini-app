@@ -6,24 +6,46 @@ import { useState } from "react";
 import { userProfileAtom } from "@/store/userProfileState";
 
 import BackButton from "@/components/common/BackButton";
-import { FloatingInput, FloatingLabel } from "@/components/ui/floating-label-input";
+import {
+    FloatingInput,
+    FloatingLabel,
+} from "@/components/ui/floating-label-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { FaPlus } from "react-icons/fa";
 
-
 const MAX_SKILLS = 8;
 const MAX_WEBSITES = 3;
 const ALL_SKILLS = [
-    "Solidity", "Rust", "Security", "Javascript", "Typescript",
-    "Go", "Game development", "Data", "UI/UX", "Prototyping",
-    "Research", "Music", "Illustration", "Writing", "Video",
-    "Graphic design", "Animation", "Visual design", "Design",
-    "Digital art", "Photography", "Community",
-    "Product management", "Strategy", "Business development",
-    "Legal", "Marketing"
+    "Solidity",
+    "Rust",
+    "Security",
+    "Javascript",
+    "Typescript",
+    "Go",
+    "Game development",
+    "Data",
+    "UI/UX",
+    "Prototyping",
+    "Research",
+    "Music",
+    "Illustration",
+    "Writing",
+    "Video",
+    "Graphic design",
+    "Animation",
+    "Visual design",
+    "Design",
+    "Digital art",
+    "Photography",
+    "Community",
+    "Product management",
+    "Strategy",
+    "Business development",
+    "Legal",
+    "Marketing",
 ];
 
 interface SkillTagProps {
@@ -33,22 +55,28 @@ interface SkillTagProps {
 }
 
 const SkillTag = ({ skill, isSelected, onClick }: SkillTagProps) => {
-    const baseClasses = "py-1 px-3 text-sm rounded-full transition-colors duration-150 flex items-center";
-    const selectedClasses = "bg-[#DFE9FF] text-primary-1 border border-primary-1";
-    const defaultClasses = "bg-background-light-2 text-gray-700 hover:bg-gray-200 border border-transparent";
+    const baseClasses =
+        "py-1 px-3 text-sm rounded-full transition-colors duration-150 flex items-center";
+    const selectedClasses =
+        "bg-[#DFE9FF] text-primary-1 border border-primary-1";
+    const defaultClasses =
+        "bg-background-light-2 text-gray-700 hover:bg-gray-200 border border-transparent";
 
     return (
         <button
             type="button"
             onClick={onClick}
-            className={`${baseClasses} ${isSelected ? selectedClasses : defaultClasses}`}
+            className={`${baseClasses} ${
+                isSelected ? selectedClasses : defaultClasses
+            }`}
         >
             <span>{skill}</span>
-            <span className="ml-1 text-xs  font-bold w-2">{isSelected ? '✕' : '+'}</span>
+            <span className="ml-1 text-xs  font-bold w-2">
+                {isSelected ? "✕" : "+"}
+            </span>
         </button>
     );
 };
-
 
 export default function Mint() {
     const [userProfile] = useAtom(userProfileAtom);
@@ -65,13 +93,11 @@ export default function Mint() {
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [isBaseNameIncluded, setIsBaseNameIncluded] = useState(false);
 
-
-
     const toggleSkill = (skill: string) => {
-        setSelectedSkills(prev => {
+        setSelectedSkills((prev) => {
             if (prev.includes(skill)) {
                 // 이미 선택된 경우 제거
-                return prev.filter(s => s !== skill);
+                return prev.filter((s) => s !== skill);
             } else {
                 // 선택되지 않은 경우 추가 (최대 개수 확인)
                 if (prev.length >= MAX_SKILLS) {
@@ -84,21 +110,19 @@ export default function Mint() {
         });
     };
 
-
     const handleAddWebsite = () => {
         const urlToAdd = newWebsite.trim();
         if (!urlToAdd) return;
         if (websites.includes(urlToAdd)) return;
         if (websites.length < MAX_WEBSITES) {
-            setWebsites(prev => [...prev, urlToAdd]);
+            setWebsites((prev) => [...prev, urlToAdd]);
             setNewWebsite("");
         }
     };
 
     const handleRemoveWebsite = (urlToRemove: string) => {
-        setWebsites(prev => prev.filter(url => url !== urlToRemove));
+        setWebsites((prev) => prev.filter((url) => url !== urlToRemove));
     };
-
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -111,7 +135,7 @@ export default function Mint() {
             twitter,
             websites,
             skills: selectedSkills,
-            baseName: isBaseNameIncluded ? username : undefined
+            baseName: isBaseNameIncluded ? username : undefined,
         };
         console.log("민팅 데이터:", finalData);
         // TODO: 민팅 API 호출 로직 구현
@@ -124,23 +148,41 @@ export default function Mint() {
             </div>
             <div className="flex flex-col pt-14 px-5 ">
                 <h1 className="text-3xl font-semibold">Mint Your BaseCard</h1>
-                <p className="text-lg font-medium text-gray-400">Everyone can be a builder</p>
+                <p className="text-lg font-medium text-gray-400">
+                    Everyone can be a builder
+                </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col justify-center items-start px-5 py-4 gap-y-6">
-
+            <form
+                onSubmit={handleSubmit}
+                className="flex flex-col justify-center items-start px-5 py-4 gap-y-6"
+            >
                 {/* 프로필 이미지 영역 */}
-                <div className="w-24 h-24 rounded-xl border border-black overflow-hidden">
-                    {
-                        userProfile?.pfpUrl
-                            ? <Image src={userProfile.pfpUrl} alt="profile_mintpage" className="w-24 h-24 object-contain" />
-                            : <div className="w-full h-full bg-gray-200" />
-                    }
+                <div className="w-24 h-24 rounded-xl border overflow-hidden">
+                    {userProfile?.pfpUrl ? (
+                        <Image
+                            src={userProfile.pfpUrl}
+                            alt="profile_mintpage"
+                            width={96}
+                            height={96}
+                            className="w-24 h-24 object-contain"
+                        />
+                    ) : (
+                        <Image
+                            src="/assets/default-profile.png"
+                            alt="default profile"
+                            width={96}
+                            height={96}
+                            className="w-24 h-24 object-cover"
+                        />
+                    )}
                 </div>
 
                 {/* 1. 이름 입력 */}
                 <div className="w-full space-y-2">
-                    <Label htmlFor="name" className="text-lg font-medium">Your Name*</Label>
+                    <Label htmlFor="name" className="text-lg font-medium">
+                        Your Name*
+                    </Label>
                     <Input
                         id="name"
                         type="text"
@@ -151,18 +193,50 @@ export default function Mint() {
                     />
                 </div>
 
-                {/* 2. 역할 입력 (라벨/인풋 분리) */}
+                {/* 2. 역할 선택 (카드 스타일) */}
                 <div className="w-full space-y-2">
-                    <Label htmlFor="role" className="text-lg font-medium">Your Role*</Label>
-                    <Input
-                        id="role"
-                        type="text"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        required
-                        placeholder="e.g., Senior Developer"
-                        className="h-12 text-lg border border-gray-300"
-                    />
+                    <Label htmlFor="role" className="text-lg font-medium">
+                        Your Role*
+                    </Label>
+                    <div className="grid grid-cols-1 gap-3">
+                        {["Developer", "Designer", "Marketer"].map(
+                            (roleOption) => (
+                                <button
+                                    key={roleOption}
+                                    type="button"
+                                    onClick={() => setRole(roleOption)}
+                                    className={`p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
+                                        role === roleOption
+                                            ? "bg-gradient-to-r from-[#0050FF] to-[#4A90E2] text-white border-transparent shadow-lg"
+                                            : "bg-white text-black border-gray-200 hover:border-[#0050FF] hover:shadow-md"
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-lg font-k2d-bold mb-1">
+                                                {roleOption}
+                                            </h3>
+                                            <p className="text-sm opacity-80 font-k2d-regular">
+                                                {roleOption === "Developer" &&
+                                                    "Build amazing applications and smart contracts"}
+                                                {roleOption === "Designer" &&
+                                                    "Create beautiful and user-friendly interfaces"}
+                                                {roleOption === "Marketer" &&
+                                                    "Promote and grow communities and products"}
+                                            </p>
+                                        </div>
+                                        {role === roleOption && (
+                                            <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm">
+                                                    ✓
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </button>
+                            )
+                        )}
+                    </div>
                 </div>
 
                 {/* 3. 스킬 선택 영역 */}
@@ -170,7 +244,7 @@ export default function Mint() {
                 <div className="w-full">
                     <h3 className="text-lg font-medium mb-3">Skills*</h3>
                     <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg">
-                        {ALL_SKILLS.map(skill => {
+                        {ALL_SKILLS.map((skill) => {
                             const isSelected = selectedSkills.includes(skill);
                             // const isDisabled = !isSelected && selectedSkills.length >= MAX_SKILLS;
 
@@ -186,8 +260,6 @@ export default function Mint() {
                     </div>
                 </div>
 
-
-
                 {/* 추가 선택 영역 4. Socials 그룹을 위한 공간 */}
                 <div className="flex flex-col w-full gap-y-2">
                     <h3 className="text-lg font-medium">Socials</h3>
@@ -200,7 +272,9 @@ export default function Mint() {
                             onChange={(e) => setTwitter(e.target.value)}
                             className="p-3 text-lg h-12 border border-gray-300"
                         />
-                        <FloatingLabel htmlFor="twitter/x">Twitter / X</FloatingLabel>
+                        <FloatingLabel htmlFor="twitter/x">
+                            Twitter / X
+                        </FloatingLabel>
                     </div>
 
                     <div className="relative w-full">
@@ -226,10 +300,11 @@ export default function Mint() {
                     </div>
                 </div>
 
-
                 {/* 5. 웹사이트 목록 */}
                 <div className="w-full">
-                    <h3 className="text-lg font-medium mb-3">Websites ({websites.length}/{MAX_WEBSITES})</h3>
+                    <h3 className="text-lg font-medium mb-3">
+                        Websites ({websites.length}/{MAX_WEBSITES})
+                    </h3>
 
                     {/* 웹사이트 추가 입력 필드 */}
                     <div className="flex gap-2 mb-3">
@@ -245,11 +320,17 @@ export default function Mint() {
                         <button
                             type="button"
                             onClick={handleAddWebsite}
-                            disabled={!newWebsite.trim() || websites.length >= MAX_WEBSITES}
+                            disabled={
+                                !newWebsite.trim() ||
+                                websites.length >= MAX_WEBSITES
+                            }
                             // 🚨 w-12 h-12로 크기를 Input과 동일하게 고정
-                            className={`w-12 h-12 flex items-center justify-center rounded-lg font-medium text-white transition-colors ${!newWebsite.trim() || websites.length >= MAX_WEBSITES
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-blue-600 hover:bg-blue-700'}`}
+                            className={`w-12 h-12 flex items-center justify-center rounded-lg font-medium text-white transition-colors ${
+                                !newWebsite.trim() ||
+                                websites.length >= MAX_WEBSITES
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-600 hover:bg-blue-700"
+                            }`}
                         >
                             {/* 아이콘 크기를 조정하고, flex-center로 중앙 정렬 */}
                             <FaPlus size={18} />
@@ -257,26 +338,39 @@ export default function Mint() {
                     </div>
 
                     {/* 현재 웹사이트 목록 */}
-                    {websites.length > 0 && <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[40px]">
-                        {websites.map(url => (
-                            <div key={url} className="py-1 px-3 text-sm rounded-full bg-background-light-2 text-gray-800 flex items-center">
-                                <span className="truncate max-w-[150px]">{url}</span>
-                                <button
-                                    type="button"
-                                    className="ml-1 text-red-400 hover:text-red-600 font-bold text-base transition-colors "
-                                    onClick={() => handleRemoveWebsite(url)}
-                                    aria-label={`${url} Delete`}
+                    {websites.length > 0 && (
+                        <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[40px]">
+                            {websites.map((url) => (
+                                <div
+                                    key={url}
+                                    className="py-1 px-3 text-sm rounded-full bg-background-light-2 text-gray-800 flex items-center"
                                 >
-                                    ✕
-                                </button>
-                            </div>
-                        ))}
-                    </div>}
+                                    <span className="truncate max-w-[150px]">
+                                        {url}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="ml-1 text-red-400 hover:text-red-600 font-bold text-base transition-colors "
+                                        onClick={() => handleRemoveWebsite(url)}
+                                        aria-label={`${url} Delete`}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <div className="w-full space-y-2"> {/* 💡 전체 필드를 위한 간격 확보 */}
-
-                    <Label htmlFor="base_name_input" className="text-lg font-medium">Base Name</Label>
+                <div className="w-full space-y-2">
+                    {" "}
+                    {/* 💡 전체 필드를 위한 간격 확보 */}
+                    <Label
+                        htmlFor="base_name_input"
+                        className="text-lg font-medium"
+                    >
+                        Base Name
+                    </Label>
                     <div className="flex gap-x-2 items-center">
                         <div className="relative flex-1">
                             <input
@@ -299,7 +393,9 @@ export default function Mint() {
 
                 {/* 7. 자기소개 텍스트 영역 */}
                 <div className="w-full space-y-2">
-                    <Label htmlFor="bio" className="text-lg font-medium">About Yourself</Label>
+                    <Label htmlFor="bio" className="text-lg font-medium">
+                        About Yourself
+                    </Label>
                     <textarea
                         id="bio"
                         value={bio}

@@ -1,11 +1,11 @@
 "use client";
-import { Provider as JotaiProvider } from 'jotai';
+import { Provider as JotaiProvider } from "jotai";
 import { ReactNode } from "react";
 
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import { baseSepolia } from "wagmi/chains";
 
-export const isDevelopment = process.env.NODE_ENV === 'development';
+export const isDevelopment = process.env.NODE_ENV === "development";
 // export const chain = isDevelopment ? baseSepolia : base;
 export const chain = baseSepolia;
 
@@ -26,7 +26,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
                 }}
                 miniKit={{
                     enabled: true,
-                    autoConnect: true,
+                    autoConnect: false, // NOTE: for development, we don't want to auto connect to the wallet
                     notificationProxyUrl: undefined,
                 }}
             >
