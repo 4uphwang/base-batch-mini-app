@@ -5,7 +5,7 @@ import CollectCardsSection from "@/components/main/CollectCardsSection";
 import MyCardSection from "@/components/main/MyCardSection";
 import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
 import { nftDataAtom } from "@/store/nftstate";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
+// import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -21,18 +21,12 @@ import { useEffect } from "react";
 // }
 
 export default function Main() {
-    const { isFrameReady, setFrameReady } = useMiniKit();
+    // const { isFrameReady, setFrameReady } = useMiniKit();
     const router = useRouter();
     useBaseCardNFTs();
     const [nftData] = useAtom(nftDataAtom);
     const { count } = nftData;
     const hasNFT = count !== 0;
-
-    useEffect(() => {
-        if (!isFrameReady) {
-            setFrameReady();
-        }
-    }, [setFrameReady, isFrameReady]);
 
     // If you need to verify the user's identity, you can use the useQuickAuth hook.
     // This hook will verify the user's signature and return the user's FID. You can update

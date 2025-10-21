@@ -39,7 +39,8 @@ export default function RootLayout({
                 <body
                     className={`${inter.variable} ${sourceCodePro.variable} ${k2d.variable}`}
                 >
-                    <SafeArea>{children}</SafeArea>
+                    {/* <SafeArea>{children}</SafeArea> */}
+                    <>{children}</>
                 </body>
             </html>
         </RootProvider>
