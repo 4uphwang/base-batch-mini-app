@@ -1,21 +1,12 @@
 "use client";
 
-import CollectionExamSection from "@/components/main/CollectionExamSection";
-import MintPromptSection from "@/components/main/MintPromptSection";
+import HeroSection from "@/components/main/HeroSection";
+import CollectCardsSection from "@/components/main/CollectCardsSection";
 import MyCardSection from "@/components/main/MyCardSection";
 import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
 import { nftDataAtom } from "@/store/nftstate";
-// import { useMiniKit, useQuickAuth } from "@coinbase/onchainkit/minikit";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useAtom } from "jotai";
-// import { NFTCard } from '@coinbase/onchainkit/nft';
-// import {
-//     NFTLastSoldPrice,
-//     NFTMedia,
-//     NFTNetwork,
-//     NFTOwner,
-//     NFTTitle,
-// } from '@coinbase/onchainkit/nft/view';
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -28,7 +19,6 @@ import { useEffect } from "react";
 //     };
 //     message?: string; // Error messages come as 'message' not 'error'
 // }
-
 
 export default function Main() {
     const { isFrameReady, setFrameReady } = useMiniKit();
@@ -60,45 +50,19 @@ export default function Main() {
 
     // const authDataJson = authData ? JSON.stringify(authData, null, 2) : 'No authentication data loaded.';
     const handleMintRedirect = () => {
-        router.push('/mint');
+        router.push("/mint");
     };
 
     return (
-        <div className="bg-white text-black py-10">
-            <div >
-                <div>
-                    {/* <NFTCard
-                        contractAddress='0x9c574048C5e9aB81C185BF1EDE2484F06D44dCeA'
-                        tokenId='1'
-                    >
-                        <NFTMedia />
-                        <NFTTitle />
-                        <NFTOwner />
-                        <NFTLastSoldPrice />
-                        <NFTNetwork />
-                    </NFTCard> */}
-                    {/* <h2>Welcome, {context?.user?.displayName || username}</h2>
-                    <p>FID: {context?.user?.fid}</p>
-                    <p>Username: @{username}</p>
-                    {context?.user?.pfpUrl && (
-                        <img
-                            src={context?.user?.pfpUrl}
-                            alt="Profile"
-                            width={64}
-                            height={64}
-                            style={{ borderRadius: '50%' }}
-                        />
-                    )}
-                    <p>address: {isAddressLoading ? <AiOutlineLoading className="animate-spin" /> : address ? address : 'None'}</p> */}
+        <div className="min-h-screen bg-white">
+            {hasNFT ? (
+                <MyCardSection />
+            ) : (
+                <div className="flex flex-col">
+                    <HeroSection onMintClick={handleMintRedirect} />
+                    <CollectCardsSection />
                 </div>
-
-                {hasNFT ? <div className="flex flex-col gap-y-10">
-                    <MyCardSection />
-                </div> : <div className="flex flex-col gap-y-10">
-                    <MintPromptSection onMintClick={handleMintRedirect} />
-                    <CollectionExamSection />
-                </div>}
-            </div>
+            )}
         </div>
     );
 }

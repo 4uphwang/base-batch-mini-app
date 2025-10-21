@@ -1,6 +1,6 @@
 import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { Viewport } from "next";
-import { Inter, Source_Code_Pro } from "next/font/google";
+import { Inter, Source_Code_Pro, K2D } from "next/font/google";
 import "./globals.css";
 import { RootProvider } from "./rootProvider";
 
@@ -14,8 +14,14 @@ const sourceCodePro = Source_Code_Pro({
     subsets: ["latin"],
 });
 
+const k2d = K2D({
+    variable: "--font-k2d",
+    subsets: ["latin"],
+    weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
+});
+
 export const viewport: Viewport = {
-    width: 'device-width',
+    width: "device-width",
     initialScale: 1.0,
     maximumScale: 1.0,
     minimumScale: 1.0,
@@ -30,7 +36,9 @@ export default function RootLayout({
     return (
         <RootProvider>
             <html lang="en">
-                <body className={`${inter.variable} ${sourceCodePro.variable}`}>
+                <body
+                    className={`${inter.variable} ${sourceCodePro.variable} ${k2d.variable}`}
+                >
                     <SafeArea>{children}</SafeArea>
                 </body>
             </html>
