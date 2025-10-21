@@ -1,59 +1,87 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CiSearch } from "react-icons/ci";
-import Image from "next/image";
 
 interface CardData {
-    id: string;
-    name: string;
+    id: number;
+    nickname: string;
+    bio?: string;
+    imageURI?: string;
+    basename?: string;
+    role?: string;
+    skills?: string[];
     address: string;
-    role: string;
-    avatar: string;
 }
-
-const mockCards: CardData[] = [
-    {
-        id: "1",
-        name: "JellyJelly",
-        address: "Chorang.base.eth",
-        role: "Developer",
-        avatar: "/assets/mock-basecard.png",
-    },
-    {
-        id: "2",
-        name: "JellyJelly",
-        address: "Chorang.base.eth",
-        role: "Developer",
-        avatar: "/assets/mock-basecard.png",
-    },
-    {
-        id: "3",
-        name: "JellyJelly",
-        address: "Chorang.base.eth",
-        role: "Developer",
-        avatar: "/assets/mock-basecard.png",
-    },
-];
 
 export default function CollectCardsSection() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedTag, setSelectedTag] = useState("All");
+    const [cards, setCards] = useState<CardData[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const tags = ["All", "Designer", "Developer", "Marketer"];
+
+    // API에서 카드 데이터 가져오기
+    useEffect(() => {
+        const fetchCards = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch("/api/cards");
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch cards");
+                }
+
+                const data = await response.json();
+                setCards(data);
+                setError(null);
+            } catch (err) {
+                console.error("Error fetching cards:", err);
+                setError(
+                    err instanceof Error ? err.message : "Failed to fetch cards"
+                );
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCards();
+    }, []);
 
     const handleSearch = () => {
         console.log(`Searching for: ${searchTerm}`);
     };
 
+    // 필터링된 카드 목록
+    const filteredCards = cards.filter((card) => {
+        const matchesSearch =
+            searchTerm === "" ||
+            card.nickname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            card.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            card.skills?.some((skill) =>
+                skill.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+        const matchesTag = selectedTag === "All" || card.role === selectedTag;
+
+        return matchesSearch && matchesTag;
+    });
+
     return (
         <div className="bg-white px-4 sm:px-6 py-6 sm:py-8">
             {/* Header */}
-            <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-black mb-2">
+            <div className="text-left mb-6 sm:mb-8 pl-4 sm:pl-6 md:pl-8 lg:pl-12">
+                <h2
+                    className="text-3xl sm:text-4xl font-k2d-bold text-black mb-2"
+                    style={{
+                        letterSpacing: "-0.05em",
+                    }}
+                >
                     Collect cards
                 </h2>
-                <p className="text-base sm:text-lg text-gray-500 font-medium">
+                <p className="text-base sm:text-lg text-gray-500 font-k2d-medium">
                     Find your collaborators
                 </p>
             </div>
@@ -66,7 +94,7 @@ export default function CollectCardsSection() {
                         placeholder="designer, dev, marketer, ..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-12 px-4 pr-12 bg-white border-2 border-gray-200 rounded-xl text-black placeholder-gray-400 focus:border-[#0050FF] focus:outline-none transition-colors text-base"
+                        className="w-full h-12 px-4 pr-12 bg-white border-2 border-gray-200 rounded-xl text-black placeholder-gray-400 focus:border-[#0050FF] focus:outline-none transition-colors text-base font-k2d-regular"
                     />
                     <button
                         onClick={handleSearch}
@@ -78,12 +106,12 @@ export default function CollectCardsSection() {
             </div>
 
             {/* Filter Tags */}
-            <div className="flex gap-3 mb-8 overflow-x-auto pb-2">
+            <div className="flex gap-2 mb-8 pb-2 justify-start flex-wrap">
                 {tags.map((tag) => (
                     <button
                         key={tag}
                         onClick={() => setSelectedTag(tag)}
-                        className={`px-6 py-2 rounded-full font-medium whitespace-nowrap transition-colors text-base ${
+                        className={`px-3 py-1.5 rounded-full font-k2d-medium transition-colors text-xs flex-1 min-w-0 ${
                             selectedTag === tag
                                 ? "bg-[#0050FF] text-white"
                                 : "bg-white text-black border border-gray-200 hover:border-[#0050FF]"
@@ -96,46 +124,73 @@ export default function CollectCardsSection() {
 
             {/* Cards List */}
             <div className="space-y-4">
-                {mockCards.map((card) => (
-                    <div
-                        key={card.id}
-                        className="bg-gradient-to-r from-[#0050FF] to-[#4A90E2] rounded-2xl p-6 shadow-lg"
-                    >
-                        <div className="flex items-center">
-                            {/* Avatar */}
-                            <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gray-200 overflow-hidden mr-4">
-                                <Image
-                                    src={card.avatar}
-                                    alt={`${card.name} avatar`}
-                                    width={64}
-                                    height={64}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-
-                            {/* Card Info */}
-                            <div className="flex-1 text-white">
-                                <h3 className="text-xl font-bold mb-1">
-                                    {card.name}
-                                </h3>
-                                <p className="text-sm text-white/80 mb-1">
-                                    {card.address}
-                                </p>
-                                <p className="text-base font-semibold">
-                                    {card.role}
-                                </p>
-                            </div>
-
-                            {/* Bottom Right Logo */}
+                {loading ? (
+                    <div className="text-center py-8">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0050FF]"></div>
+                        <p className="mt-2 text-gray-500 font-k2d-regular">
+                            Loading cards...
+                        </p>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-8">
+                        <p className="text-red-500 font-k2d-regular">
+                            Error: {error}
+                        </p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-2 px-4 py-2 bg-[#0050FF] text-white rounded-lg font-k2d-medium hover:bg-[#0040CC] transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                ) : filteredCards.length === 0 ? (
+                    <div className="text-center py-8">
+                        <p className="text-gray-500 font-k2d-regular">
+                            No cards found
+                        </p>
+                    </div>
+                ) : (
+                    filteredCards.map((card) => (
+                        <div
+                            key={card.id}
+                            className="bg-gradient-to-r from-[#0050FF] to-[#4A90E2] rounded-2xl p-6 shadow-lg"
+                        >
                             <div className="flex items-center">
-                                <div className="w-6 h-6 bg-white/20 rounded mr-2"></div>
-                                <span className="text-xs text-white/80 font-medium">
-                                    BaseCard
-                                </span>
+                                {/* Card Info */}
+                                <div className="flex-1 text-white">
+                                    <h3 className="text-xl font-k2d-bold mb-1">
+                                        {card.nickname}
+                                    </h3>
+                                    <p className="text-sm text-white/80 mb-1 font-k2d-regular">
+                                        {card.basename || card.address}
+                                    </p>
+                                    <p className="text-base font-k2d-semibold">
+                                        {card.role || "Builder"}
+                                    </p>
+                                    {card.skills && card.skills.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-2">
+                                            {card.skills
+                                                .slice(0, 3)
+                                                .map((skill, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="px-2 py-1 bg-white/20 rounded text-xs font-k2d-regular"
+                                                    >
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                            {card.skills.length > 3 && (
+                                                <span className="px-2 py-1 bg-white/20 rounded text-xs font-k2d-regular">
+                                                    +{card.skills.length - 3}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );

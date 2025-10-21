@@ -4,7 +4,7 @@ import { updateProfileAtom } from "@/store/userProfileState";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { isDevelopment } from './../app/rootProvider';
+import { isDevelopment } from "./../app/rootProvider";
 
 interface MiniAppLoaderResult {
     isInMiniApp: boolean;
@@ -49,6 +49,6 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
 
     return {
         isInMiniApp,
-        isFinishedLoading: !isLoading
+        isFinishedLoading: !isLoading,
     };
 }

@@ -340,13 +340,18 @@ textarea {
 .responsive-bg {
     background-size: 150% auto;
     background-position: 20% 0%;
+    /* CSS 변수로 동적 조절 가능 */
+    --bg-position-x: 20%;
+    --bg-position-y: 0%;
+    background-position: var(--bg-position-x) var(--bg-position-y);
 }
 
 /* Mobile (up to 640px) */
 @media (max-width: 640px) {
     .responsive-bg {
         background-size: 160% auto;
-        background-position: 25% 0%;
+        --bg-position-x: 25%;
+        --bg-position-y: 0%;
     }
 }
 
@@ -354,7 +359,8 @@ textarea {
 @media (min-width: 641px) and (max-width: 1024px) {
     .responsive-bg {
         background-size: 120% auto;
-        background-position: 10% 0%;
+        --bg-position-x: 10%;
+        --bg-position-y: 0%;
     }
 }
 
@@ -362,6 +368,7 @@ textarea {
 @media (min-width: 1025px) {
     .responsive-bg {
         background-size: 100% auto;
-        background-position: center bottom;
+        --bg-position-x: center;
+        --bg-position-y: bottom;
     }
 }

@@ -6,7 +6,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ onMintClick }: HeroSectionProps) {
     return (
-        <div className="relative h-[55vh] overflow-hidden">
+        <div className="relative h-[60vh] overflow-hidden">
             {/* Main Background SVG */}
             <div
                 className="absolute inset-0 bg-no-repeat responsive-bg"
@@ -20,7 +20,7 @@ export default function HeroSection({ onMintClick }: HeroSectionProps) {
                 {/* Title Section */}
                 <div className="text-left mb-16">
                     <h1
-                        className="text-5xl sm:text-6xl md:text-7xl font-k2d-bold text-white mb-2 drop-shadow-lg"
+                        className="text-4xl sm:text-6xl md:text-7xl font-k2d-bold text-white mb-2 drop-shadow-lg"
                         style={{
                             letterSpacing: "-0.05em",
                             lineHeight: "0.9",
@@ -30,15 +30,15 @@ export default function HeroSection({ onMintClick }: HeroSectionProps) {
                         <br />
                         business card
                     </h1>
-                    <p className="text-xl sm:text-2xl font-k2d-medium text-white max-w-2xl drop-shadow-md tracking-normal">
+                    <p className="text-l sm:text-2xl font-k2d-medium text-white max-w-2xl drop-shadow-md tracking-normal">
                         Turn your onchain story into
                         <br />
                         opportunity
                     </p>
-
-                    {/* 공백 div */}
-                    <div className="w-full h-50"></div>
                 </div>
+
+                {/* 공백 div */}
+                <div className="w-full h-40"></div>
 
                 {/* Mint Button */}
                 <button

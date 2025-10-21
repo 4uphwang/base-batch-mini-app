@@ -1,15 +1,14 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+    return twMerge(clsx(inputs));
 }
-
 
 // 🚨 Next.js API Route로 데이터를 전송하는 함수입니다.
 interface LogPayload {
     message: string;
-    data?: any; 
+    data?: unknown;
     path?: string; // 어떤 경로에서 로그를 보냈는지 기록
 }
 
@@ -18,24 +17,24 @@ interface LogPayload {
  */
 export async function remoteLog(payload: LogPayload) {
     // 로컬 개발 시에는 console.log도 함께 실행합니다.
-    if (process.env.NODE_ENV === 'development') {
-        console.log('REMOTE LOG (Local Only):', payload);
+    if (process.env.NODE_ENV === "development") {
+        console.log("REMOTE LOG (Local Only):", payload);
     }
-    
+
     try {
-        await fetch('/api/debug', {
-            method: 'POST',
+        await fetch("/api/debug", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 ...payload,
             }),
             // 🚨 백그라운드에서 실행되도록 fetch 옵션을 설정합니다.
-            cache: 'no-store',
+            cache: "no-store",
         });
     } catch (error) {
         // API 호출 자체에 실패했을 경우 (네트워크 오류 등)
-        console.error('Failed to send remote log:', error);
+        console.error("Failed to send remote log:", error);
     }
 }
