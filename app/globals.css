@@ -346,7 +346,7 @@ textarea {
 @media (max-width: 640px) {
     .responsive-bg {
         background-size: 160% auto;
-        background-position: 30% 0%;
+        background-position: 25% 0%;
     }
 }
 
