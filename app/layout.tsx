@@ -1,4 +1,4 @@
-import { SafeArea } from "@coinbase/onchainkit/minikit";
+// import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { Viewport } from "next";
 import { Inter, Source_Code_Pro, K2D } from "next/font/google";
 import "./globals.css";
@@ -39,7 +39,8 @@ export default function RootLayout({
                 <body
                     className={`${inter.variable} ${sourceCodePro.variable} ${k2d.variable}`}
                 >
-                    <SafeArea>{children}</SafeArea>
+                    {/* <SafeArea>{children}</SafeArea> */}
+                    <>{children}</>
                 </body>
             </html>
         </RootProvider>

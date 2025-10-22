@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
+import { uploadBaseCardToIPFS } from "@/lib/ipfs";
+import type { CardGenerationResponse } from "@/lib/types/api";
 
 // SVG에 삽입할 데이터를 정의하는 타입
 type SvgData = {
@@ -15,7 +17,7 @@ type SvgData = {
 /**
  * SVG 템플릿에 실제 데이터를 삽입하여 최종 SVG 문자열을 생성합니다.
  */
-const createFinalSvg = (baseTemplate: string, data: SvgData): string => {
+const createBaseCardSvg = (baseTemplate: string, data: SvgData): string => {
     const { nickname, role, basename, profileImage } = data;
     const profileImageDataUrl = `data:${profileImage.mimeType};base64,${profileImage.base64}`;
 
@@ -46,6 +48,7 @@ export async function POST(request: Request) {
         const role = formData.get("role") as string;
         const basename = formData.get("basename") as string;
         const uploadedFile = formData.get("profileImage") as File;
+        const uploadToIpfs = formData.get("uploadToIpfs") === "true";
 
         if (!uploadedFile) {
             return new Response(
@@ -79,19 +82,59 @@ export async function POST(request: Request) {
         };
 
         // 4. 최종 SVG 생성
-        const finalSvg = createFinalSvg(baseTemplate, svgData);
+        const baseCardSvg = createBaseCardSvg(baseTemplate, svgData);
 
-        // 5. 생성된 SVG를 클라이언트에 전송
-        return new Response(finalSvg, {
+        // 5. IPFS 업로드 (옵션)
+        if (uploadToIpfs) {
+            const ipfsResult = await uploadBaseCardToIPFS(baseCardSvg, {
+                name: nickname || "BaseCard",
+            });
+
+            if (!ipfsResult.success) {
+                console.error("❌ IPFS upload failed:", ipfsResult.error);
+                // IPFS 실패해도 SVG는 반환
+            }
+
+            // 타입 일관성: CardGenerationResponse 형태로 반환
+            const response: CardGenerationResponse = {
+                success: true,
+                svg: baseCardSvg,
+                ipfs: ipfsResult.success
+                    ? {
+                          id: ipfsResult.id,
+                          cid: ipfsResult.cid,
+                          url: ipfsResult.url,
+                      }
+                    : undefined,
+            };
+
+            return new Response(JSON.stringify(response), {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        }
+
+        // 5-1. IPFS 업로드 없이 SVG만 반환
+        const response: CardGenerationResponse = {
+            success: true,
+            svg: baseCardSvg,
+        };
+
+        return new Response(JSON.stringify(response), {
             status: 200,
             headers: {
-                "Content-Type": "image/svg+xml",
+                "Content-Type": "application/json",
             },
         });
     } catch (error) {
         console.error("Error generating SVG:", error);
         return new Response(
-            JSON.stringify({ message: "Internal Server Error" }),
+            JSON.stringify({
+                message: "Internal Server Error",
+                error: error instanceof Error ? error.message : "Unknown error",
+            }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
     }

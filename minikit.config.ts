@@ -1,11 +1,8 @@
 export const ROOT_URL =
     process.env.NEXT_PUBLIC_URL ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
-    
-const ACCOUNT_HEADER = process.env.FARCASTER_HEADER || "";
-const ACCOUNT_PAYLOAD = process.env.FARCASTER_PAYLOAD || "";
-const ACCOUNT_SIGNATURE = process.env.FARCASTER_SIGNATURE || "";
-const ALLOWED_ADDRESSES_STRING = process.env.ALLOWED_BUILDER_ADDRESSES || "";
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : "http://localhost:3000");
 
 /**
  * MiniApp configuration object. Must follow the Farcaster MiniApp specification.
@@ -14,18 +11,20 @@ const ALLOWED_ADDRESSES_STRING = process.env.ALLOWED_BUILDER_ADDRESSES || "";
  */
 export const minikitConfig = {
     accountAssociation: {
-        header: ACCOUNT_HEADER,
-        payload: ACCOUNT_PAYLOAD,
-        signature: ACCOUNT_SIGNATURE
+        header: "eyJmaWQiOjEzODEyODcsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhBMjYxNUUzOTg4NEYyREY2MTA1QjY4Rjk1Mjg5RjQyQzNCQTI1MjA1In0",
+        payload: "eyJkb21haW4iOiJiYXNlY2FyZC52ZXJjZWwuYXBwIn0",
+        signature:
+            "7pE6trAuE5Ldb9sJM9ybnBBUQ5aMTMgKHBJPrTy+mxEx9x8EqaUXzq4eaOWndvDKeqQ+fEKg30EQw9ISADrNGBs=",
     },
     baseBuilder: {
-        allowedAddresses: [ALLOWED_ADDRESSES_STRING]
+        allowedAddresses: ["0x50EA81351aE397bCC00D8E552698116677811B91"],
     },
     miniapp: {
         version: "1",
         name: "Base Card",
         subtitle: "Builder Identity on Base",
-        description: "Stop repeating your pitch. Mint your verified, onchain builder profile card (SBT). Search for talent & connect directly.",
+        description:
+            "Stop repeating your pitch. Mint your verified, onchain builder profile card (SBT). Search for talent & connect directly.",
         screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
         iconUrl: `${ROOT_URL}/bc-icon.png`,
         splashImageUrl: `${ROOT_URL}/bc-icon.png`,
@@ -41,4 +40,3 @@ export const minikitConfig = {
         ogImageUrl: `${ROOT_URL}/blue-hero.png`,
     },
 } as const;
-
