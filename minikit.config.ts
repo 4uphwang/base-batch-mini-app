@@ -1,7 +1,9 @@
 export const ROOT_URL =
     process.env.NEXT_PUBLIC_URL ||
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
-    
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : "http://localhost:3000");
+
 const ACCOUNT_HEADER = process.env.FARCASTER_HEADER || "";
 const ACCOUNT_PAYLOAD = process.env.FARCASTER_PAYLOAD || "";
 const ACCOUNT_SIGNATURE = process.env.FARCASTER_SIGNATURE || "";
@@ -16,16 +18,17 @@ export const minikitConfig = {
     accountAssociation: {
         header: ACCOUNT_HEADER,
         payload: ACCOUNT_PAYLOAD,
-        signature: ACCOUNT_SIGNATURE
+        signature: ACCOUNT_SIGNATURE,
     },
     baseBuilder: {
-        allowedAddresses: [ALLOWED_ADDRESSES_STRING]
+        allowedAddresses: [ALLOWED_ADDRESSES_STRING],
     },
     miniapp: {
         version: "1",
         name: "Base Card",
         subtitle: "Builder Identity on Base",
-        description: "Stop repeating your pitch. Mint your verified, onchain builder profile card (SBT). Search for talent & connect directly.",
+        description:
+            "Stop repeating your pitch. Mint your verified, onchain builder profile card (SBT). Search for talent & connect directly.",
         screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
         iconUrl: `${ROOT_URL}/bc-icon.png`,
         splashImageUrl: `${ROOT_URL}/bc-icon.png`,
@@ -41,4 +44,3 @@ export const minikitConfig = {
         ogImageUrl: `${ROOT_URL}/blue-hero.png`,
     },
 } as const;
-

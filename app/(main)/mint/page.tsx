@@ -1,11 +1,15 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { userProfileAtom } from "@/store/userProfileState";
+import { useCardGeneration } from "@/hooks/useCardGeneration";
+import { useMintBaseCard } from "@/hooks/useMintBaseCard";
 
 import BackButton from "@/components/common/BackButton";
+import SuccessModal from "@/components/common/SuccessModal";
+import LoadingModal from "@/components/common/LoadingModal";
 import {
     FloatingInput,
     FloatingLabel,
@@ -15,6 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { FaPlus } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
 
 const MAX_SKILLS = 8;
 const MAX_WEBSITES = 3;
@@ -79,8 +85,28 @@ const SkillTag = ({ skill, isSelected, onClick }: SkillTagProps) => {
 };
 
 export default function Mint() {
+    const router = useRouter();
     const [userProfile] = useAtom(userProfileAtom);
     const username = userProfile.username;
+
+    const { address } = useAccount();
+
+    // Card generation hook
+    const {
+        generateCard,
+        isGenerating,
+        error: generationError,
+    } = useCardGeneration();
+
+    // NFT minting hook
+    const {
+        mintCard,
+        isPending: isMintPending,
+        isConfirming: isMintConfirming,
+        isSuccess: isMintSuccess,
+        hash: mintHash,
+        error: mintError,
+    } = useMintBaseCard();
 
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
@@ -92,6 +118,20 @@ export default function Mint() {
     const [newWebsite, setNewWebsite] = useState("");
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [isBaseNameIncluded, setIsBaseNameIncluded] = useState(false);
+    const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+    // Show success modal when minting is successful
+    useEffect(() => {
+        if (isMintSuccess) {
+            setShowSuccessModal(true);
+        }
+    }, [isMintSuccess]);
+
+    const handleCloseModal = () => {
+        setShowSuccessModal(false);
+        router.push("/mycard");
+    };
 
     const toggleSkill = (skill: string) => {
         setSelectedSkills((prev) => {
@@ -124,21 +164,133 @@ export default function Mint() {
         setWebsites((prev) => prev.filter((url) => url !== urlToRemove));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const finalData = {
-            name,
-            role,
-            bio,
-            github,
-            twitter,
-            websites,
-            skills: selectedSkills,
-            baseName: isBaseNameIncluded ? username : undefined,
-        };
-        console.log("민팅 데이터:", finalData);
-        // TODO: 민팅 API 호출 로직 구현
+        if (!profileImageFile) {
+            alert("Please upload a profile image");
+            return;
+        }
+
+        if (!name || !role) {
+            alert("Please fill in required fields (Name and Role)");
+            return;
+        }
+
+        try {
+            // Generate card with IPFS upload enabled
+            const result = await generateCard(
+                {
+                    name,
+                    role,
+                    baseName:
+                        isBaseNameIncluded && username ? username : "@basename",
+                    profileImage: profileImageFile,
+                },
+                true // uploadToIpfs = true
+            );
+
+            if (result.success) {
+                console.log("✅ Card generated successfully:", result);
+
+                // IPFS 업로드 결과 확인 (새로운 타입 시스템)
+                if (result.ipfs && result.ipfs.cid && result.ipfs.url) {
+                    console.log("✅ IPFS Upload successful:");
+                    console.log("  - ID:", result.ipfs.id);
+                    console.log("  - CID:", result.ipfs.cid);
+                    console.log("  - URL:", result.ipfs.url);
+
+                    // 먼저 디비에 카드 정보를 저장한다.
+                    try {
+                        const saveResponse = await fetch("/api/cards", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                nickname: name,
+                                role: role,
+                                bio: bio || "",
+                                imageURI: result.ipfs.cid,
+                                basename:
+                                    isBaseNameIncluded && username
+                                        ? username
+                                        : "@basename",
+                                skills: selectedSkills,
+                                address: address,
+                            }),
+                        });
+
+                        if (!saveResponse.ok) {
+                            throw new Error("Failed to save card to database");
+                        }
+
+                        const savedCard = await saveResponse.json();
+                        console.log("✅ Card saved to database:", savedCard);
+                    } catch (dbError) {
+                        console.error("❌ Database save error:", dbError);
+                        // DB 저장 실패 시 IPFS 파일 삭제
+                        if (result.ipfs.id) {
+                            try {
+                                await fetch(
+                                    `/api/ipfs/delete?id=${result.ipfs.id}`,
+                                    { method: "DELETE" }
+                                );
+                                console.log("🗑️ IPFS file cleaned up");
+                            } catch (cleanupError) {
+                                console.error(
+                                    "⚠️ IPFS cleanup error:",
+                                    cleanupError
+                                );
+                            }
+                        }
+                        throw dbError;
+                    }
+
+                    // Smart contract mint function 호출
+                    const mintResult = await mintCard({
+                        imageURI: result.ipfs.url, // IPFS URL
+                        nickname: name,
+                        role: role,
+                        bio: bio || "",
+                        basename:
+                            isBaseNameIncluded && username
+                                ? username
+                                : "@basename",
+                        socials: {
+                            twitter: twitter || "",
+                            github: github || "",
+                            farcaster: facaster || "",
+                        },
+                        ipfsId: result.ipfs.id, // CID for cleanup on failure
+                    });
+
+                    if (mintResult.success) {
+                        console.log("🎉 NFT Minting initiated!");
+                        console.log("  - Transaction hash:", mintResult.hash);
+                        // UI will show confirmation status via isMintConfirming/isMintSuccess
+                    } else {
+                        throw new Error(
+                            mintResult.error || "Failed to mint NFT"
+                        );
+                    }
+                } else {
+                    console.log("⚠️ Card generated but IPFS upload failed");
+                    alert(
+                        "Card generated but IPFS upload failed. Cannot mint NFT without IPFS URL."
+                    );
+                }
+            } else {
+                throw new Error(result.error || "Failed to generate card");
+            }
+        } catch (error) {
+            console.error("❌ Card generation error:", error);
+            alert(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to generate card"
+            );
+        }
     };
 
     return (
@@ -158,24 +310,56 @@ export default function Mint() {
                 className="flex flex-col justify-center items-start px-5 py-4 gap-y-6"
             >
                 {/* 프로필 이미지 영역 */}
-                <div className="w-24 h-24 rounded-xl border overflow-hidden">
-                    {userProfile?.pfpUrl ? (
-                        <Image
-                            src={userProfile.pfpUrl}
-                            alt="profile_mintpage"
-                            width={96}
-                            height={96}
-                            className="w-24 h-24 object-contain"
-                        />
-                    ) : (
-                        <Image
-                            src="/assets/default-profile.png"
-                            alt="default profile"
-                            width={96}
-                            height={96}
-                            className="w-24 h-24 object-cover"
-                        />
-                    )}
+                <div className="w-full space-y-3">
+                    <Label className="text-lg font-medium">
+                        Profile Image*
+                    </Label>
+                    <div className="flex items-center gap-4">
+                        <div className="w-24 h-24 rounded-xl border overflow-hidden relative">
+                            {profileImageFile ? (
+                                <Image
+                                    src={URL.createObjectURL(profileImageFile)}
+                                    alt="profile preview"
+                                    fill
+                                    sizes="96px"
+                                    className="object-cover"
+                                />
+                            ) : userProfile?.pfpUrl ? (
+                                <Image
+                                    src={userProfile.pfpUrl}
+                                    alt="profile_mintpage"
+                                    fill
+                                    sizes="96px"
+                                    className="object-contain"
+                                />
+                            ) : (
+                                <Image
+                                    src="/assets/default-profile.png"
+                                    alt="default profile"
+                                    fill
+                                    sizes="96px"
+                                    className="object-cover"
+                                />
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <input
+                                type="file"
+                                accept="image/png, image/jpeg, image/jpg"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setProfileImageFile(file);
+                                    }
+                                }}
+                                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                required
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Supported: PNG, JPEG (max 5MB)
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* 1. 이름 입력 */}
@@ -406,14 +590,74 @@ export default function Mint() {
                     />
                 </div>
 
+                {/* Error Messages Only */}
+                {generationError && (
+                    <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-700 text-sm">
+                            ❌ {generationError}
+                        </p>
+                    </div>
+                )}
+
+                {mintError && (
+                    <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-700 text-sm">
+                            ❌ Mint Error: {mintError}
+                        </p>
+                    </div>
+                )}
+
                 {/* 민팅 버튼 */}
                 <button
                     type="submit"
-                    className="w-full py-3 mt-6 text-lg font-bold bg-blue-600 rounded-lg text-white hover:bg-blue-700 transition-colors"
+                    disabled={isGenerating || isMintPending || isMintConfirming}
+                    className={`w-full py-3 mt-6 text-lg font-bold rounded-lg text-white transition-colors ${
+                        isGenerating || isMintPending || isMintConfirming
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : isMintSuccess
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-blue-600 hover:bg-blue-700"
+                    }`}
                 >
-                    MINT YOUR BASECARD
+                    {isGenerating
+                        ? "GENERATING..."
+                        : isMintPending
+                        ? "PREPARING..."
+                        : isMintConfirming
+                        ? "CONFIRMING..."
+                        : isMintSuccess
+                        ? "✓ MINTED!"
+                        : "MINT YOUR BASECARD"}
                 </button>
             </form>
+
+            {/* Loading Modal - Card Generation */}
+            <LoadingModal
+                isOpen={isGenerating}
+                title="Generating Card..."
+                description="Creating your BaseCard design and uploading to IPFS"
+            />
+
+            {/* Loading Modal - Preparing Transaction */}
+            <LoadingModal
+                isOpen={isMintPending && !isGenerating}
+                title="Preparing Transaction..."
+                description="Please approve the transaction in your wallet"
+            />
+
+            {/* Loading Modal - Confirming Transaction */}
+            <LoadingModal
+                isOpen={isMintConfirming}
+                title="Confirming Transaction..."
+                description="Waiting for blockchain confirmation"
+            />
+
+            {/* Success Modal */}
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={handleCloseModal}
+                transactionHash={mintHash}
+            />
         </div>
     );
 }
