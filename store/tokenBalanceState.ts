@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from "jotai";
 
 interface TokenBalanceState {
     balance: string;
@@ -7,7 +7,7 @@ interface TokenBalanceState {
 }
 
 const initialBalanceState: TokenBalanceState = {
-    balance: '0.00',
+    balance: "0.00",
     isLoading: true,
     isError: false,
 };

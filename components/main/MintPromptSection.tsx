@@ -1,10 +1,6 @@
 "use client";
 
-import {
-    generateCardDataURL,
-    generateMockCard,
-    CardProfile,
-} from "@/lib/cardGenerator";
+import { generateCardDataURL, generateMockCard } from "@/lib/cardGenerator";
 import { useState, useEffect } from "react";
 
 interface MintPromptSectionProps {

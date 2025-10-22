@@ -7,19 +7,31 @@ import { ROOT_URL } from "@/minikit.config";
 import BCLogo from "@/public/bc-icon.png";
 import Image from "next/image";
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const { isInMiniApp, isFinishedLoading } = useMiniAppLoader();
 
     if (!isFinishedLoading) {
         // 💡 로딩 중일 때는 메인 콘텐츠 렌더링을 막습니다.
-        return <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
-            <Image src={BCLogo} alt="splash-logo" className="w-1/4 max-w-40 aspect-square object-contain" />
-        </div>
+        return (
+            <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
+                <Image
+                    src={BCLogo}
+                    alt="splash-logo"
+                    className="w-1/4 max-w-40 aspect-square object-contain"
+                />
+            </div>
+        );
     }
 
     if (!isInMiniApp) {
         // 💡 미니앱 환경이 아닐 때 딥링크 안내를 보여줍니다.
-        const deepLinkUrl = `cbwallet://miniapp?url=${encodeURIComponent(ROOT_URL)}`;
+        const deepLinkUrl = `cbwallet://miniapp?url=${encodeURIComponent(
+            ROOT_URL
+        )}`;
 
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
@@ -28,7 +40,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         ⚠️ Not a Base Mini App
                     </h2>
                     <p className="text-gray-700 mb-6">
-                        This feature requires execution within the <span className="font-semibold">Base Wallet app</span> for secure and seamless operation.
+                        This feature requires execution within the{" "}
+                        <span className="font-semibold">Base Wallet app</span>{" "}
+                        for secure and seamless operation.
                     </p>
 
                     {/* The Deep Link Button */}

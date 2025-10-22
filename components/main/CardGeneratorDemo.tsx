@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
+import { useCardGeneration } from "@/hooks/useCardGeneration";
+import Image from "next/image";
 
 export default function CardGeneratorDemo() {
     const [nickname, setNickname] = useState("My Nickname");
@@ -8,8 +10,14 @@ export default function CardGeneratorDemo() {
     const [basename, setBasename] = useState("@basename");
     const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
-    const [status, setStatus] = useState("");
-    const [generatedSvg, setGeneratedSvg] = useState<string | null>(null);
+    const {
+        generateCard,
+        isGenerating,
+        error: generationError,
+        result,
+    } = useCardGeneration();
+
+    const generatedSvg = result?.svg || null;
 
     // SVG 다운로드 함수
     const downloadSvg = () => {
@@ -34,7 +42,7 @@ export default function CardGeneratorDemo() {
 
         const blob = new Blob([generatedSvg], { type: "image/svg+xml" });
         const url = URL.createObjectURL(blob);
-        const img = new Image();
+        const img = document.createElement("img");
 
         img.onload = () => {
             const canvas = document.createElement("canvas");
@@ -65,44 +73,43 @@ export default function CardGeneratorDemo() {
         img.src = url;
     };
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
         if (!profileImageFile) {
-            setStatus("Please select a profile image.");
+            alert("Please select a profile image");
             return;
         }
 
-        setStatus("Generating SVG on the server...");
-        setGeneratedSvg(null);
-
-        // FormData를 사용해 파일과 텍스트를 함께 보냅니다.
-        const formData = new FormData();
-        formData.append("nickname", nickname);
-        formData.append("role", role);
-        formData.append("basename", basename);
-        formData.append("profileImage", profileImageFile);
+        if (!nickname || !role) {
+            alert("Please fill in all required fields");
+            return;
+        }
 
         try {
-            const response = await fetch("/api/generate", {
-                method: "POST",
-                body: formData, // JSON.stringify가 아님!
-            });
+            // Generate card without IPFS upload (demo mode)
+            const result = await generateCard(
+                {
+                    name: nickname,
+                    role,
+                    baseName: basename,
+                    profileImage: profileImageFile,
+                },
+                false // Disable IPFS for demo
+            );
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || "Failed to generate SVG.");
+            if (result.success) {
+                console.log("Card generated successfully:", result);
+            } else {
+                throw new Error(result.error || "Failed to generate card");
             }
-
-            // 서버로부터 완성된 SVG 문자열을 받습니다.
-            const svgString = await response.text();
-            setGeneratedSvg(svgString);
-            setStatus("SVG generated successfully!");
         } catch (error) {
-            const errorMessage =
+            console.error("Card generation error:", error);
+            alert(
                 error instanceof Error
                     ? error.message
-                    : "Unknown error occurred";
-            setStatus(`Error: ${errorMessage}`);
+                    : "Failed to generate card"
+            );
         }
     };
 
@@ -134,10 +141,48 @@ export default function CardGeneratorDemo() {
                         </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Profile Image with Preview */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Profile Image*
+                                </label>
+                                <div className="flex items-center gap-4">
+                                    {profileImageFile && (
+                                        <div className="w-20 h-20 rounded-lg border overflow-hidden">
+                                            <Image
+                                                src={URL.createObjectURL(
+                                                    profileImageFile
+                                                )}
+                                                alt="profile preview"
+                                                width={80}
+                                                height={80}
+                                                className="w-20 h-20 object-cover"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="flex-1">
+                                        <input
+                                            type="file"
+                                            accept="image/png, image/jpeg, image/jpg"
+                                            onChange={(e) =>
+                                                setProfileImageFile(
+                                                    e.target.files?.[0] || null
+                                                )
+                                            }
+                                            required
+                                            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            PNG, JPEG (max 5MB)
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Input fields for text data */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Nickname
+                                    Nickname*
                                 </label>
                                 <input
                                     type="text"
@@ -153,7 +198,7 @@ export default function CardGeneratorDemo() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Role
+                                    Role*
                                 </label>
                                 <input
                                     type="text"
@@ -167,7 +212,7 @@ export default function CardGeneratorDemo() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Base Name
+                                    Base Name*
                                 </label>
                                 <input
                                     type="text"
@@ -181,73 +226,92 @@ export default function CardGeneratorDemo() {
                                 />
                             </div>
 
-                            {/* File input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Profile Image
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/png, image/jpeg"
-                                    onChange={(e) =>
-                                        setProfileImageFile(
-                                            e.target.files?.[0] || null
-                                        )
-                                    }
-                                    required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Supported formats: PNG, JPEG
-                                </p>
-                            </div>
+                            {/* Status Messages */}
+                            {generationError && (
+                                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                                    <p className="text-red-700 text-sm">
+                                        {generationError}
+                                    </p>
+                                </div>
+                            )}
+
+                            {result?.success && !result.ipfs && (
+                                <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                                    <p className="text-green-700 text-sm">
+                                        ✓ Card generated successfully!
+                                    </p>
+                                </div>
+                            )}
 
                             <button
                                 type="submit"
-                                className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
-                            >
-                                Generate Card
-                            </button>
-                        </form>
-
-                        {/* Status */}
-                        {status && (
-                            <div
-                                className={`mt-4 p-3 rounded-lg ${
-                                    status.includes("Error")
-                                        ? "bg-red-100 text-red-700"
-                                        : status.includes("successfully")
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-blue-100 text-blue-700"
+                                disabled={isGenerating}
+                                className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                                    isGenerating
+                                        ? "bg-gray-400 text-white cursor-not-allowed"
+                                        : "bg-blue-500 text-white hover:bg-blue-600"
                                 }`}
                             >
-                                {status}
-                            </div>
-                        )}
+                                {isGenerating
+                                    ? "Generating..."
+                                    : "Generate Card"}
+                            </button>
+                        </form>
                     </div>
 
                     {/* Instructions */}
-                    <div className="bg-gray-50 rounded-lg p-6">
-                        <h3 className="font-semibold text-gray-800 mb-3">
+                    <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                        <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                            <svg
+                                className="w-5 h-5"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
                             How it works:
                         </h3>
-                        <ol className="space-y-2 text-sm text-gray-600">
-                            <li>1. Fill in your card information</li>
-                            <li>2. Upload a profile image</li>
-                            <li>
-                                3. Click &quot;Generate Card&quot; to create
-                                your BaseCard
+                        <ol className="space-y-2 text-sm text-gray-700">
+                            <li className="flex gap-2">
+                                <span className="font-semibold text-blue-600">
+                                    1.
+                                </span>
+                                <span>Upload your profile image</span>
                             </li>
-                            <li>
-                                4. The server will generate a custom SVG using
-                                the basecard-base.svg template
+                            <li className="flex gap-2">
+                                <span className="font-semibold text-blue-600">
+                                    2.
+                                </span>
+                                <span>Fill in your card information</span>
                             </li>
-                            <li>
-                                5. Your personalized card will appear in the
-                                preview
+                            <li className="flex gap-2">
+                                <span className="font-semibold text-blue-600">
+                                    3.
+                                </span>
+                                <span>
+                                    Click &quot;Generate Card&quot; to create
+                                    your BaseCard
+                                </span>
                             </li>
-                            <li>6. Download your card as SVG or PNG format</li>
+                            <li className="flex gap-2">
+                                <span className="font-semibold text-blue-600">
+                                    4.
+                                </span>
+                                <span>
+                                    Preview and download your card as SVG or PNG
+                                </span>
+                            </li>
                         </ol>
+                        <div className="mt-4 pt-4 border-t border-blue-200">
+                            <p className="text-xs text-blue-700">
+                                💡 This is a demo page. For production minting
+                                with IPFS, use the main mint page.
+                            </p>
+                        </div>
                     </div>
                 </div>
                 {/* Card Preview */}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCardTokenBalance } from '@/hooks/useCardTokenBalance';
-import { balanceDataAtom } from '@/store/tokenBalanceState';
-import { useAtom } from 'jotai';
+import { useCardTokenBalance } from "@/hooks/useCardTokenBalance";
+import { balanceDataAtom } from "@/store/tokenBalanceState";
+import { useAtom } from "jotai";
 import { AiOutlineLoading } from "react-icons/ai";
 
 interface BalanceDisplayProps {
@@ -18,15 +18,12 @@ export default function BalanceDisplay({ className }: BalanceDisplayProps) {
 
     return (
         <div className={className}>
-            {
-                isLoading ?
-                    <AiOutlineLoading
-                        size={20}
-                        className='animate-spin min-w-12'
-                    />
-                    : balance
-            }
-            <span className='font-bold'>BC</span>
+            {isLoading ? (
+                <AiOutlineLoading size={20} className="animate-spin min-w-12" />
+            ) : (
+                balance
+            )}
+            <span className="font-bold">BC</span>
         </div>
-    )
+    );
 }

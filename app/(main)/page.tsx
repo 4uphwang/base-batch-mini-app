@@ -8,7 +8,6 @@ import { nftDataAtom } from "@/store/nftstate";
 // import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 // interface AuthResponse {
 //     success: boolean;

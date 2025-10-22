@@ -1,4 +1,4 @@
-import { SafeArea } from "@coinbase/onchainkit/minikit";
+// import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { Viewport } from "next";
 import { Inter, Source_Code_Pro, K2D } from "next/font/google";
 import "./globals.css";
