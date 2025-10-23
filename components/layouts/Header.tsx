@@ -73,7 +73,7 @@ export default function Header() {
  * FID (숫자)를 시드로 사용하여 항상 같은 랜덤 값 (0~1)을 반환하는 결정론적 함수
  */
 function getDeterministicRandom(seed: number) {
-    let x = Math.sin(seed + 1) * 10000;
+    const x = Math.sin(seed + 1) * 10000;
     return x - Math.floor(x);
 }
 
