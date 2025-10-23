@@ -9,6 +9,8 @@ import { useMintBaseCard } from "@/hooks/useMintBaseCard";
 
 import BackButton from "@/components/common/BackButton";
 import SuccessModal from "@/components/common/SuccessModal";
+import ErrorModal from "@/components/common/ErrorModal";
+import WarningModal from "@/components/common/WarningModal";
 import LoadingModal from "@/components/common/LoadingModal";
 import {
     FloatingInput,
@@ -106,7 +108,8 @@ export default function Mint() {
         isSuccess: isMintSuccess,
         hash: mintHash,
         error: mintError,
-    } = useMintBaseCard();
+        hasMinted,
+    } = useMintBaseCard(address);
 
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
@@ -120,6 +123,16 @@ export default function Mint() {
     const [isBaseNameIncluded, setIsBaseNameIncluded] = useState(false);
     const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [showWarningModal, setShowWarningModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState({
+        title: "Error Occurred",
+        description: "Something went wrong. Please try again.",
+    });
+    const [warningMessage, setWarningMessage] = useState({
+        title: "Warning",
+        description: "Please check your input.",
+    });
 
     // Show success modal when minting is successful
     useEffect(() => {
@@ -128,9 +141,27 @@ export default function Mint() {
         }
     }, [isMintSuccess]);
 
-    const handleCloseModal = () => {
+    const handleCloseSuccessModal = () => {
         setShowSuccessModal(false);
         router.push("/mycard");
+    };
+
+    const handleCloseErrorModal = () => {
+        setShowErrorModal(false);
+    };
+
+    const handleCloseWarningModal = () => {
+        setShowWarningModal(false);
+    };
+
+    const showError = (title: string, description: string) => {
+        setErrorMessage({ title, description });
+        setShowErrorModal(true);
+    };
+
+    const showWarning = (title: string, description: string) => {
+        setWarningMessage({ title, description });
+        setShowWarningModal(true);
     };
 
     const toggleSkill = (skill: string) => {
@@ -142,7 +173,10 @@ export default function Mint() {
                 // 선택되지 않은 경우 추가 (최대 개수 확인)
                 if (prev.length >= MAX_SKILLS) {
                     // 사용자에게 명확히 알림
-                    // alert(`스킬은 최대 ${MAX_SKILLS}개까지만 선택할 수 있습니다`);
+                    showWarning(
+                        "Maximum Skills Reached",
+                        `You can select up to ${MAX_SKILLS} skills. Please deselect a skill to add a new one.`
+                    );
                     return prev; // 추가하지 않고 기존 배열 반환
                 }
                 return [...prev, skill];
@@ -168,12 +202,18 @@ export default function Mint() {
         e.preventDefault();
 
         if (!profileImageFile) {
-            alert("Please upload a profile image");
+            showError(
+                "Profile Image Required",
+                "Please upload a profile image to continue."
+            );
             return;
         }
 
         if (!name || !role) {
-            alert("Please fill in required fields (Name and Role)");
+            showError(
+                "Required Fields Missing",
+                "Please fill in your name and role to continue."
+            );
             return;
         }
 
@@ -191,7 +231,7 @@ export default function Mint() {
             );
 
             if (result.success) {
-                console.log("✅ Card generated successfully:", result);
+                console.log("✅ Card generated: ", result.success);
 
                 // IPFS 업로드 결과 확인 (새로운 타입 시스템)
                 if (result.ipfs && result.ipfs.cid && result.ipfs.url) {
@@ -247,22 +287,22 @@ export default function Mint() {
                         throw dbError;
                     }
 
+                    const uri = `ipfs://${result.ipfs.cid}`;
                     // Smart contract mint function 호출
                     const mintResult = await mintCard({
-                        imageURI: result.ipfs.url, // IPFS URL
+                        imageURI: uri,
                         nickname: name,
                         role: role,
                         bio: bio || "",
                         basename:
-                            isBaseNameIncluded && username
-                                ? username
-                                : "@basename",
+                            isBaseNameIncluded && username ? username : "",
                         socials: {
                             twitter: twitter || "",
                             github: github || "",
                             farcaster: facaster || "",
                         },
                         ipfsId: result.ipfs.id, // CID for cleanup on failure
+                        userAddress: address, // User wallet address for DB cleanup
                     });
 
                     if (mintResult.success) {
@@ -276,7 +316,8 @@ export default function Mint() {
                     }
                 } else {
                     console.log("⚠️ Card generated but IPFS upload failed");
-                    alert(
+                    showError(
+                        "IPFS Upload Failed",
                         "Card generated but IPFS upload failed. Cannot mint NFT without IPFS URL."
                     );
                 }
@@ -285,10 +326,11 @@ export default function Mint() {
             }
         } catch (error) {
             console.error("❌ Card generation error:", error);
-            alert(
+            showError(
+                "Card Generation Failed",
                 error instanceof Error
                     ? error.message
-                    : "Failed to generate card"
+                    : "Failed to generate card. Please try again."
             );
         }
     };
@@ -303,6 +345,14 @@ export default function Mint() {
                 <p className="text-lg font-medium text-gray-400">
                     Everyone can be a builder
                 </p>
+                {hasMinted === true && (
+                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-800">
+                            ⚠️ You have already minted a BaseCard. Each address
+                            can only mint once.
+                        </p>
+                    </div>
+                )}
             </div>
 
             <form
@@ -655,8 +705,24 @@ export default function Mint() {
             {/* Success Modal */}
             <SuccessModal
                 isOpen={showSuccessModal}
-                onClose={handleCloseModal}
+                onClose={handleCloseSuccessModal}
                 transactionHash={mintHash}
+            />
+
+            {/* Error Modal */}
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={handleCloseErrorModal}
+                title={errorMessage.title}
+                description={errorMessage.description}
+            />
+
+            {/* Warning Modal */}
+            <WarningModal
+                isOpen={showWarningModal}
+                onClose={handleCloseWarningModal}
+                title={warningMessage.title}
+                description={warningMessage.description}
             />
         </div>
     );

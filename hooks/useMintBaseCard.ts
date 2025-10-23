@@ -1,8 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+    useWriteContract,
+    useWaitForTransactionReceipt,
+    useReadContract,
+    useChainId,
+} from "wagmi";
 import { baseCardAbi } from "@/lib/abi/abi";
+import { activeChain } from "@/lib/wagmi";
 
 const BASECARD_CONTRACT_ADDRESS = process.env
     .NEXT_PUBLIC_BASECARD_NFT_CONTRACT_ADDRESS! as `0x${string}`;
@@ -20,6 +26,7 @@ export interface BaseCardMintData {
         [key: string]: string; // e.g., { twitter: "@username", github: "username" }
     };
     ipfsId?: string; // Optional: ID for cleanup on failure
+    userAddress?: string; // User wallet address for DB cleanup
 }
 
 /**
@@ -55,8 +62,23 @@ export interface MintResult {
  * };
  * ```
  */
-export function useMintBaseCard() {
+export function useMintBaseCard(userAddress?: `0x${string}`) {
     const [mintError, setMintError] = useState<string | null>(null);
+    const [lastMintData, setLastMintData] = useState<BaseCardMintData | null>(
+        null
+    );
+
+    // Get current chain ID
+    const chainId = useChainId();
+    const isCorrectChain = chainId === activeChain.id;
+
+    // Check if user has already minted
+    const { data: hasMinted } = useReadContract({
+        address: BASECARD_CONTRACT_ADDRESS,
+        abi: baseCardAbi,
+        functionName: "hasMinted",
+        args: userAddress ? [userAddress] : undefined,
+    });
 
     // writeContract hook for sending transaction
     const {
@@ -76,13 +98,80 @@ export function useMintBaseCard() {
     });
 
     /**
+     * Clean up IPFS and DB data on mint failure or cancellation
+     */
+    const cleanupMintData = useCallback(async (data: BaseCardMintData) => {
+        const cleanupTasks: Promise<void>[] = [];
+
+        // Clean up IPFS
+        if (data.ipfsId) {
+            console.log(`🗑️ Cleaning up IPFS file (ID: ${data.ipfsId})...`);
+            cleanupTasks.push(
+                fetch(`/api/ipfs/delete?id=${data.ipfsId}`, {
+                    method: "DELETE",
+                })
+                    .then((response) => {
+                        if (response.ok) {
+                            console.log("✅ IPFS file cleaned up successfully");
+                        } else {
+                            console.warn("⚠️ Failed to clean up IPFS file");
+                        }
+                    })
+                    .catch((error) => {
+                        console.warn("⚠️ IPFS cleanup error:", error);
+                    })
+            );
+        }
+
+        // Clean up DB
+        if (data.userAddress) {
+            console.log(
+                `🗑️ Cleaning up DB card (Address: ${data.userAddress})...`
+            );
+            cleanupTasks.push(
+                fetch(`/api/card/${data.userAddress}`, {
+                    method: "DELETE",
+                })
+                    .then((response) => {
+                        if (response.ok) {
+                            console.log("✅ DB card cleaned up successfully");
+                        } else {
+                            console.warn("⚠️ Failed to clean up DB card");
+                        }
+                    })
+                    .catch((error) => {
+                        console.warn("⚠️ DB cleanup error:", error);
+                    })
+            );
+        }
+
+        // Wait for all cleanup tasks
+        await Promise.all(cleanupTasks);
+    }, []);
+
+    /**
      * Mint BaseCard NFT
      */
     const mintCard = useCallback(
         async (data: BaseCardMintData): Promise<MintResult> => {
             setMintError(null);
+            setLastMintData(data);
 
             try {
+                // Check if on correct chain first
+                if (!isCorrectChain) {
+                    throw new Error(
+                        `Please switch to ${activeChain.name} network to mint your BaseCard`
+                    );
+                }
+
+                // Check if user has already minted
+                if (hasMinted) {
+                    throw new Error(
+                        "You have already minted a BaseCard. Each address can only mint once."
+                    );
+                }
+
                 // Validate inputs
                 if (!data.imageURI || !data.nickname || !data.role) {
                     throw new Error(
@@ -91,14 +180,18 @@ export function useMintBaseCard() {
                 }
 
                 // Prepare social links
+                // Note: Contract expects specific social keys (x, farcaster, github, etc.)
+                // "twitter" should be converted to "x" as per contract whitelist
                 const socialKeys: string[] = [];
                 const socialValues: string[] = [];
 
                 if (data.socials) {
                     Object.entries(data.socials).forEach(([key, value]) => {
-                        if (value) {
-                            socialKeys.push(key);
-                            socialValues.push(value);
+                        if (value && value.trim() !== "") {
+                            // Convert "twitter" to "x" for contract compatibility
+                            const contractKey = key === "twitter" ? "x" : key;
+                            socialKeys.push(contractKey);
+                            socialValues.push(value.trim());
                         }
                     });
                 }
@@ -113,10 +206,20 @@ export function useMintBaseCard() {
                 };
 
                 console.log("🎨 Minting BaseCard with data:", {
+                    contractAddress: BASECARD_CONTRACT_ADDRESS,
                     initialCardData,
                     socialKeys,
                     socialValues,
+                    userAddress: data.userAddress,
                 });
+
+                // Validate contract address
+                if (
+                    !BASECARD_CONTRACT_ADDRESS ||
+                    BASECARD_CONTRACT_ADDRESS === "0x"
+                ) {
+                    throw new Error("Contract address not configured");
+                }
 
                 // Call smart contract
                 writeContract({
@@ -142,29 +245,22 @@ export function useMintBaseCard() {
                         ? error.message
                         : "Failed to mint BaseCard";
 
-                // Clean up IPFS file on failure
-                if (data.ipfsId) {
+                // Check if user rejected the transaction
+                const isUserRejection =
+                    error instanceof Error &&
+                    (error.message.includes("User rejected") ||
+                        error.message.includes("User denied") ||
+                        error.message.includes("user rejected") ||
+                        error.message.includes("rejected"));
+
+                if (isUserRejection) {
                     console.log(
-                        `🗑️ Cleaning up IPFS file (ID: ${data.ipfsId}) due to mint failure...`
+                        "🚫 User cancelled transaction, cleaning up..."
                     );
-
-                    try {
-                        const cleanupResponse = await fetch(
-                            `/api/ipfs/delete?id=${data.ipfsId}`,
-                            { method: "DELETE" }
-                        );
-
-                        if (cleanupResponse.ok) {
-                            console.log("✅ IPFS file cleaned up successfully");
-                        } else {
-                            console.warn(
-                                "⚠️ Failed to clean up IPFS file (file may remain pinned)"
-                            );
-                        }
-                    } catch (cleanupError) {
-                        console.warn("⚠️ IPFS cleanup error:", cleanupError);
-                    }
                 }
+
+                // Clean up IPFS and DB data on failure or cancellation
+                await cleanupMintData(data);
 
                 setMintError(errorMessage);
 
@@ -174,7 +270,7 @@ export function useMintBaseCard() {
                 };
             }
         },
-        [writeContract, hash]
+        [writeContract, hash, cleanupMintData, hasMinted, isCorrectChain]
     );
 
     // Combine errors
@@ -185,10 +281,17 @@ export function useMintBaseCard() {
 
     return {
         mintCard,
+        cleanupMintData, // Manual cleanup function
         isPending, // Transaction is being prepared
         isConfirming, // Transaction is being confirmed
         isSuccess, // Transaction confirmed successfully
         hash, // Transaction hash
         error,
+        lastMintData, // Last mint data for cleanup
+        hasMinted, // Check if user has already minted
+        isCorrectChain, // Check if on correct chain
+        chainId, // Current chain ID
+        requiredChainId: activeChain.id, // Required chain ID
+        chainName: activeChain.name, // Chain name for display
     };
 }
