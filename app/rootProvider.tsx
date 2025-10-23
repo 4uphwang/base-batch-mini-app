@@ -4,19 +4,20 @@ import { ReactNode, useState } from "react";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { baseSepolia } from "viem/chains";
-import { getConfig } from "./wagmi";
-export const isDevelopment = process.env.NODE_ENV === "development";
+import { activeChain, getConfig, isDevelopment } from "@/lib/wagmi";
+import { NetworkChecker } from "@/components/common/NetworkChecker";
 
 export function RootProvider({ children }: { children: ReactNode }) {
+    const [config] = useState(() => getConfig());
     const [queryClient] = useState(() => new QueryClient());
+
     return (
         <JotaiProvider>
-            <WagmiProvider config={getConfig()}>
+            <WagmiProvider config={config}>
                 <QueryClientProvider client={queryClient}>
                     <OnchainKitProvider
                         apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-                        chain={baseSepolia}
+                        chain={activeChain}
                         config={{
                             appearance: {
                                 mode: "auto",
@@ -27,11 +28,12 @@ export function RootProvider({ children }: { children: ReactNode }) {
                             },
                         }}
                         miniKit={{
-                            enabled: false,
+                            enabled: true,
                             autoConnect: false, // NOTE: for development, we don't want to auto connect to the wallet
                             notificationProxyUrl: undefined,
                         }}
                     >
+                        <NetworkChecker />
                         {children}
                     </OnchainKitProvider>
                 </QueryClientProvider>
@@ -39,3 +41,5 @@ export function RootProvider({ children }: { children: ReactNode }) {
         </JotaiProvider>
     );
 }
+
+export { isDevelopment };

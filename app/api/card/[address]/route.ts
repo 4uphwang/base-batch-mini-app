@@ -79,3 +79,40 @@ export async function PUT(
         );
     }
 }
+
+// DELETE /api/card/[address] - Delete card by address
+export async function DELETE(
+    _: Request,
+    { params }: { params: Promise<{ address: string }> }
+) {
+    try {
+        const { address } = await params;
+
+        // Check if card exists
+        const existingCard = await db
+            .select()
+            .from(cards)
+            .where(eq(cards.address, address));
+
+        if (existingCard.length === 0) {
+            return NextResponse.json(
+                { success: false, message: "Card not found" },
+                { status: 404 }
+            );
+        }
+
+        // Delete card
+        await db.delete(cards).where(eq(cards.address, address));
+
+        return NextResponse.json({
+            success: true,
+            message: "Card deleted successfully",
+        });
+    } catch (error) {
+        console.error("Error deleting card:", error);
+        return NextResponse.json(
+            { success: false, message: "Something went wrong" },
+            { status: 500 }
+        );
+    }
+}

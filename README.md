@@ -66,19 +66,42 @@ NEXT_PUBLIC_URL="http://localhost:3000"
 # 2. 컨트랙트 주소 (토큰 민팅 및 조회용)
 NEXT_PUBLIC_BASECARD_NFT_CONTRACT_ADDRESS="[배포된 NFT 컨트랙트 주소]"
 NEXT_PUBLIC_CARD_TOKEN_ADDRESS="[배포된 ERC20 토큰 컨트랙트 주소]"
+
+# 3. 네트워크 설정
+# true = Base Sepolia (testnet), false = Base Mainnet (production)
+# 개발 중에는 true로 설정 (기본값: NODE_ENV가 development면 자동으로 testnet 사용)
+NEXT_PUBLIC_USE_TESTNET=true
 ```
 
 ### 3.3. 로컬에서 실행
 
 ```bash
+# Base Sepolia (testnet)로 개발 (기본값)
 npm run dev
+
+# Base Sepolia (testnet)로 명시적 실행
+npm run dev:testnet
+
+# Base Mainnet으로 테스트
+npm run dev:mainnet
 ```
 
 or
 
-```
+```bash
 yarn dev
+yarn dev:testnet
+yarn dev:mainnet
 ```
+
+#### 네트워크 자동 전환 기능
+
+앱에 접속하면 자동으로 올바른 네트워크를 확인하고, 잘못된 네트워크일 경우 전환을 요청하는 모달이 표시됩니다:
+
+-   **Development 모드**: Base Sepolia (chainId: 84532) 필수
+-   **Production 모드**: Base Mainnet (chainId: 8453) 필수
+
+`.env.local`에서 `NEXT_PUBLIC_USE_TESTNET` 값을 변경하여 네트워크를 전환할 수 있습니다
 
 ---
 

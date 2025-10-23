@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from "jotai";
 
 interface NFTState {
     tokenIds: bigint[];
@@ -6,7 +6,6 @@ interface NFTState {
     isLoading: boolean;
     isError: boolean;
 }
-
 
 const initialNFTState: NFTState = {
     tokenIds: [],
@@ -17,9 +16,6 @@ const initialNFTState: NFTState = {
 
 export const nftDataAtom = atom(initialNFTState);
 
-export const updateNftDataAtom = atom(
-    null,
-    (get, set, update: NFTState) => {
-        set(nftDataAtom, update);
-    }
-);
+export const updateNftDataAtom = atom(null, (get, set, update: NFTState) => {
+    set(nftDataAtom, update);
+});

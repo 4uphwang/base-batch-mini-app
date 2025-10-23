@@ -1,3 +1,4 @@
+import { activeChain } from "@/lib/wagmi";
 import React from "react";
 
 interface SuccessModalProps {
@@ -58,7 +59,7 @@ export default function SuccessModal({
                     {/* View link */}
                     {transactionHash && (
                         <a
-                            href={`https://basescan.org/tx/${transactionHash}`}
+                            href={`${activeChain.blockExplorers?.default.url}/tx/${transactionHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-[#0050FF] hover:underline text-sm font-medium"

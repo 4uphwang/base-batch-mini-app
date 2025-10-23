@@ -23,6 +23,13 @@ export const baseCardAbi = [
     },
     {
         type: "function",
+        name: "hasMinted",
+        inputs: [{ name: "", type: "address" }],
+        outputs: [{ name: "", type: "bool" }],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
         name: "tokenURI",
         inputs: [{ name: "_tokenId", type: "uint256" }],
         outputs: [{ name: "", type: "string" }],
