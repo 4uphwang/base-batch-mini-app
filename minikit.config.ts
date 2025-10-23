@@ -28,7 +28,7 @@ export const minikitConfig = {
         name: "Base Card",
         subtitle: "Builder Identity on Base",
         description:
-            "Stop repeating your pitch. Mint your verified, onchain builder profile card (SBT). Search for talent & connect directly.",
+            "Stop repeating your pitch. Mint your verified, onchain builder profile card (SBT). Search for talent and connect directly.",
         screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
         iconUrl: `${ROOT_URL}/bc-icon.png`,
         splashImageUrl: `${ROOT_URL}/bc-icon.png`,
