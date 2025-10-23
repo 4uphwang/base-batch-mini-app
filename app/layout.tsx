@@ -1,9 +1,10 @@
 // import { SafeArea } from "@coinbase/onchainkit/minikit";
-import { Viewport } from "next";
-import { Inter, Source_Code_Pro, K2D } from "next/font/google";
+import { minikitConfig } from "@/minikit.config";
+import { SafeArea } from "@coinbase/onchainkit/minikit";
+import { Metadata, Viewport } from "next";
+import { Inter, K2D, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 import { RootProvider } from "./rootProvider";
-import { SafeArea } from "@coinbase/onchainkit/minikit";
 
 const inter = Inter({
     variable: "--font-inter",
@@ -29,11 +30,25 @@ export const viewport: Viewport = {
     userScalable: false,
 };
 
+
+export const metadata: Metadata = {
+    title: minikitConfig.miniapp.name,
+    openGraph: {
+        title: minikitConfig.miniapp.name,
+        description: minikitConfig.miniapp.description,
+        images: [minikitConfig.miniapp.imageUrl],
+        url: minikitConfig.miniapp.homeUrl,
+        siteName: minikitConfig.miniapp.name
+    },
+};
+
+
 export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+
     return (
         <RootProvider>
             <html lang="en">

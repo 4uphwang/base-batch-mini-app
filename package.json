@@ -25,6 +25,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "drizzle-orm": "^0.44.6",
+        "eruda": "^3.4.3",
         "formidable": "^3.5.4",
         "jotai": "^2.15.0",
         "lucide-react": "^0.546.0",

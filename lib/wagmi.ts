@@ -2,8 +2,8 @@ import { base, baseSepolia } from "viem/chains";
 import { cookieStorage, createConfig, createStorage, http } from "wagmi";
 import { baseAccount, coinbaseWallet, metaMask } from "wagmi/connectors";
 
+import { minikitConfig } from "@/minikit.config";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
-import { METADATA } from "./utils";
 
 // Use custom env variable for network selection
 // NEXT_PUBLIC_USE_TESTNET=true -> Base Sepolia (testnet)
@@ -15,11 +15,11 @@ export function getConfig() {
         connectors: [
             farcasterMiniApp(),
             baseAccount({
-                appName: METADATA.name,
-                appLogoUrl: METADATA.iconImageUrl,
+                appName: minikitConfig.miniapp.name,
+                appLogoUrl: minikitConfig.miniapp.iconUrl,
             }),
             coinbaseWallet({
-                appName: METADATA.name,
+                appName: minikitConfig.miniapp.name,
                 preference: "smartWalletOnly",
                 version: "4",
             }),

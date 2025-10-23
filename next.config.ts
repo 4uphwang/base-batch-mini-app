@@ -55,9 +55,30 @@ const nextConfig: NextConfig = {
         ];
     },
     allowedDevOrigins: [
-        'https://*.ngrok-free.app',
+        '*.ngrok-free.app',
         'https://basecard-git-dev1-4uphwangs-projects.vercel.app/',
-    ]
+    ],
+    async headers() {
+        return [
+            {
+                source: "/:path*",
+                headers: [
+                    {
+                        key: "Content-Security-Policy",
+                        value: "frame-ancestors *"
+                    },
+                    {
+                        key: "X-Frame-Options",
+                        value: "SAMEORIGIN"
+                    },
+                    {
+                        key: "Access-Control-Allow-Origin",
+                        value: "*"
+                    }
+                ]
+            }
+        ];
+    }
 };
 
 export default nextConfig;

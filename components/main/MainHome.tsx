@@ -1,0 +1,66 @@
+"use client";
+
+import { useAtom } from "jotai";
+import { useRouter } from "next/navigation";
+
+import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
+import { nftDataAtom } from "@/store/nftstate";
+
+import CollectCardsSection from "./CollectCardsSection";
+import HeroSection from "./HeroSection";
+import MyCardSection from "./MyCardSection";
+
+
+// interface AuthResponse {
+//     success: boolean;
+//     user?: {
+//         fid: number; // FID is the unique identifier for the user
+//         issuedAt?: number;
+//         expiresAt?: number;
+//     };
+//     message?: string; // Error messages come as 'message' not 'error'
+// }
+
+
+export default function MainHome() {
+    const router = useRouter();
+    useBaseCardNFTs();
+    const [nftData] = useAtom(nftDataAtom);
+    const { count } = nftData;
+    const hasNFT = count !== 0;
+
+    // If you need to verify the user's identity, you can use the useQuickAuth hook.
+    // This hook will verify the user's signature and return the user's FID. You can update
+    // this to meet your needs. See the /app/api/auth/route.ts file for more details.
+    // Note: If you don't need to verify the user's identity, you can get their FID and other user data
+    // via `context.user.fid`.
+    // const { data, isLoading, error } = useQuickAuth<{
+    //     userFid: string;
+    // }>("/api/auth");
+
+    // const { data: authData, isLoading: isAuthLoading, error: authError } = useQuickAuth<AuthResponse>(
+    //     "/api/auth",
+    //     { method: "GET" }
+    // );
+
+    // const authDataJson = authData ? JSON.stringify(authData, null, 2) : 'No authentication data loaded.';
+    const handleMintRedirect = () => {
+        router.push("/mint");
+    };
+
+    return (
+        <div className="min-h-screen bg-white">
+            {hasNFT ? (
+                <div className="flex flex-col">
+                    <MyCardSection />
+                    <CollectCardsSection />
+                </div>
+            ) : (
+                <div className="flex flex-col">
+                    <HeroSection onMintClick={handleMintRedirect} />
+                    <CollectCardsSection />
+                </div>
+            )}
+        </div>
+    );
+}

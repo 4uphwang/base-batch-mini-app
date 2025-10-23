@@ -2,7 +2,7 @@ import { baseSepolia } from "viem/chains";
 import { cookieStorage, createConfig, createStorage, http } from "wagmi";
 import { baseAccount, coinbaseWallet, metaMask } from "wagmi/connectors";
 
-import { METADATA } from "@/lib/utils";
+import { minikitConfig } from "@/minikit.config";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 
 export function getConfig() {
@@ -11,11 +11,11 @@ export function getConfig() {
         connectors: [
             farcasterMiniApp(),
             baseAccount({
-                appName: METADATA.name,
-                appLogoUrl: METADATA.iconImageUrl,
+                appName: minikitConfig.miniapp.name,
+                appLogoUrl: minikitConfig.miniapp.iconUrl,
             }),
             coinbaseWallet({
-                appName: METADATA.name,
+                appName: minikitConfig.miniapp.name,
                 preference: "smartWalletOnly",
                 version: "4",
             }),

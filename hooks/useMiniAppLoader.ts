@@ -14,7 +14,7 @@ interface MiniAppLoaderResult {
 
 export function useMiniAppLoader(): MiniAppLoaderResult {
     const setProfile = useSetAtom(updateProfileAtom);
-    const [isInMiniApp, setIsInMiniApp] = useState<boolean>(false);
+    const [isInMiniApp, setIsInMiniApp] = useState<boolean>(true);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isEnvironmentChecked, setIsEnvironmentChecked] = useState<boolean>(false);
 
@@ -24,6 +24,7 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
     // 1. 환경 확인 및 Mini App Ready 호출 로직
     const checkEnvironmentAndSetReady = useCallback(async () => {
         try {
+            console.log('checkEnvironmentAndSetReady')
             // A. 환경 확인: 실제 Mini App 환경인지 확인 (개발 모드에서는 강제 true)
             const miniAppStatus = isDevelopment ? true : await sdk.isInMiniApp();
             setIsInMiniApp(miniAppStatus);
@@ -50,6 +51,7 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
     // 3. 사용자 데이터 로딩 로직
     const loadUserData = useCallback(async () => {
         try {
+            console.log('loadUserData')
             // Mini App 환경이고, isMiniAppReady(Frame Ready) 신호가 완료되었는지 확인
             if (isInMiniApp) {
                 const context = await sdk.context;
