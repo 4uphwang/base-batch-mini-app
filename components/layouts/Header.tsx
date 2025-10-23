@@ -14,11 +14,11 @@ export default function Header() {
     const [userProfile] = useAtom(userProfileAtom);
     const { actions } = sdk;
 
-    const fixedColor1 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 172, 0);
-    const fixedColor2 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 172, 1);
+    const fixedColor1 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 0, 0);
+    const fixedColor2 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 0, 1);
 
     const backgroundStyle = `linear-gradient(45deg, ${fixedColor1}, ${fixedColor2})`;
-    const initial = (userProfile.displayName || userProfile.fid)?.toString().charAt(0).toUpperCase() || 'H';
+    const initial = (userProfile.displayName || userProfile.fid)?.toString().charAt(0).toUpperCase() || '';
 
     const handleLogoClick = () => {
         router.push("/");
