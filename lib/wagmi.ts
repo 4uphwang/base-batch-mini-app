@@ -1,9 +1,9 @@
-import { http, cookieStorage, createConfig, createStorage } from "wagmi";
 import { base, baseSepolia } from "viem/chains";
+import { cookieStorage, createConfig, createStorage, http } from "wagmi";
 import { baseAccount, coinbaseWallet, metaMask } from "wagmi/connectors";
 
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
-import { METADATA } from "@/lib/metadata";
+import { METADATA } from "./utils";
 
 // Use custom env variable for network selection
 // NEXT_PUBLIC_USE_TESTNET=true -> Base Sepolia (testnet)

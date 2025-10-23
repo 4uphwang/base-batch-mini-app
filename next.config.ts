@@ -54,6 +54,10 @@ const nextConfig: NextConfig = {
             },
         ];
     },
+    allowedDevOrigins: [
+        'https://*.ngrok-free.app',
+        'https://basecard-git-dev1-4uphwangs-projects.vercel.app/',
+    ]
 };
 
 export default nextConfig;

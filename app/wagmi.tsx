@@ -1,9 +1,9 @@
-import { http, cookieStorage, createConfig, createStorage } from "wagmi";
 import { baseSepolia } from "viem/chains";
+import { cookieStorage, createConfig, createStorage, http } from "wagmi";
 import { baseAccount, coinbaseWallet, metaMask } from "wagmi/connectors";
 
+import { METADATA } from "@/lib/utils";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
-import { METADATA } from "@/lib/metadata";
 
 export function getConfig() {
     return createConfig({
