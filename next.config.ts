@@ -44,6 +44,16 @@ const nextConfig: NextConfig = {
         contentSecurityPolicy:
             "default-src 'self'; script-src 'none'; sandbox;",
     },
+    async redirects() {
+        return [
+            {
+                source: "/.well-known/farcaster.json",
+                destination:
+                    "https://api.farcaster.xyz/miniapps/hosted-manifest/019a1007-53eb-6507-711b-af02e312f587",
+                permanent: true,
+            },
+        ];
+    },
 };
 
 export default nextConfig;

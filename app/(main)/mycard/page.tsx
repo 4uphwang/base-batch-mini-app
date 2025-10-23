@@ -1,11 +1,13 @@
 import BackButton from "@/components/common/BackButton";
 
-export default function Earn() {
+export default function MyCard() {
+
     return (
-        <div>
+        <div className="relative">
             <BackButton />
-            Earn page
-            준비중
+
+            MyCard Page
+
         </div>
     );
 }
