@@ -1,7 +1,7 @@
 "use client";
 
 import CARD_TOKEN_ABI_FULL from "@/lib/abi/CardToken.json";
-import { getConfig } from "@/lib/wagmi.config";
+import { getConfig } from "@/lib/wagmi";
 import { updateBalanceAtom } from "@/store/tokenBalanceState";
 import { formatAmount } from "@coinbase/onchainkit/token";
 import { useSetAtom } from "jotai";

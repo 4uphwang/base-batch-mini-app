@@ -49,7 +49,10 @@ export default function Main() {
     return (
         <div className="min-h-screen bg-white">
             {hasNFT ? (
-                <MyCardSection />
+                <div className="flex flex-col">
+                    <MyCardSection />
+                    <CollectCardsSection />
+                </div>
             ) : (
                 <div className="flex flex-col">
                     <HeroSection onMintClick={handleMintRedirect} />

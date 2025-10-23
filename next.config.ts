@@ -13,6 +13,37 @@ const nextConfig: NextConfig = {
 
         return config;
     },
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "gateway.pinata.cloud",
+                pathname: "/ipfs/**",
+            },
+            {
+                protocol: "https",
+                hostname: "*.mypinata.cloud",
+            },
+            {
+                protocol: "https",
+                hostname: "ipfs.io",
+                pathname: "/ipfs/**",
+            },
+            {
+                protocol: "https",
+                hostname: "cloudflare-ipfs.com",
+                pathname: "/ipfs/**",
+            },
+            {
+                protocol: "https",
+                hostname: "*.ipfs.dweb.link",
+            },
+        ],
+        dangerouslyAllowSVG: true,
+        contentDispositionType: "attachment",
+        contentSecurityPolicy:
+            "default-src 'self'; script-src 'none'; sandbox;",
+    },
 };
 
 export default nextConfig;
