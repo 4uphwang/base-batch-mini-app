@@ -48,11 +48,10 @@ const nextConfig: NextConfig = {
         return [
             {
                 source: "/.well-known/farcaster.json",
-                destination:
-                    "https://api.farcaster.xyz/miniapps/hosted-manifest/019a1007-53eb-6507-711b-af02e312f587",
-                permanent: true,
-            },
-        ];
+                destination: process.env.FARCASTER_REDIRECT_URL || "",
+                permanent: true
+            }
+        ]
     },
     allowedDevOrigins: [
         '*.ngrok-free.app',
