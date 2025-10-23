@@ -14,11 +14,11 @@ export default function Header() {
     const [userProfile] = useAtom(userProfileAtom);
     const { actions } = sdk;
 
-    const fixedColor1 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 172, 0);
-    const fixedColor2 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 172, 1);
+    const fixedColor1 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 0, 0);
+    const fixedColor2 = getFixedColorForUser(userProfile.fid ? Number(userProfile.fid) : 0, 1);
 
     const backgroundStyle = `linear-gradient(45deg, ${fixedColor1}, ${fixedColor2})`;
-    const initial = (userProfile.displayName || userProfile.fid)?.toString().charAt(0).toUpperCase() || 'H';
+    const initial = (userProfile.displayName || userProfile.fid)?.toString().charAt(0).toUpperCase() || '';
 
     const handleLogoClick = () => {
         router.push("/");
@@ -73,7 +73,7 @@ export default function Header() {
  * FID (숫자)를 시드로 사용하여 항상 같은 랜덤 값 (0~1)을 반환하는 결정론적 함수
  */
 function getDeterministicRandom(seed: number) {
-    let x = Math.sin(seed + 1) * 10000;
+    const x = Math.sin(seed + 1) * 10000;
     return x - Math.floor(x);
 }
 
