@@ -2,9 +2,9 @@
 
 import BackButton from "@/components/common/BackButton";
 import { useMyCard } from "@/hooks/useMyCard";
-import { useAccount } from "wagmi";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
 
 export default function MyCard() {
     const router = useRouter();
@@ -35,7 +35,7 @@ export default function MyCard() {
             <div
                 className="min-h-screen relative flex flex-col"
                 style={{
-                    backgroundImage: "url('/assets/mybasecard-background.svg')",
+                    backgroundImage: "url('/assets/mybasecard-background.webp')",
                     backgroundSize: "cover",
                     backgroundPosition: "60% 50%", // X% Y% 형식으로 조절 가능
                 }}

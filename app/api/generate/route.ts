@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { uploadBaseCardToIPFS } from "@/lib/ipfs";
 import type { CardGenerationResponse } from "@/lib/types/api";
+import BaseCard from "@/public/assets/basecard-base.webp";
 
 // SVG에 삽입할 데이터를 정의하는 타입
 type SvgData = {
