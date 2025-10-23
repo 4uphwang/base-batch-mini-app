@@ -8,7 +8,22 @@ import { useRouter } from "next/navigation";
 // import { useAtom } from "jotai";
 // import { FaRegUserCircle } from "react-icons/fa";
 import BalanceDisplay from "../token/BalanceDisplay";
-import { Wallet } from "@coinbase/onchainkit/wallet";
+import {
+    ConnectWallet,
+    Wallet,
+    WalletDropdown,
+    WalletDropdownBasename,
+    WalletDropdownFundLink,
+    WalletDropdownLink,
+    WalletDropdownDisconnect,
+} from "@coinbase/onchainkit/wallet";
+import {
+    Address,
+    Avatar,
+    Name,
+    Identity,
+    EthBalance,
+} from "@coinbase/onchainkit/identity";
 
 export default function Header() {
     const router = useRouter();
@@ -19,7 +34,7 @@ export default function Header() {
     };
 
     return (
-        <div className="h-[60px] w-full flex px-5 justify-between items-center border-b border-b-gray-200 bg-background-light">
+        <div className="h-[50px] w-full flex px-4 items-center border-b border-b-gray-200 bg-background-light">
             <div
                 onClick={handleLogoClick}
                 className="cursor-pointer transition-transform hover:scale-105 active:scale-95"
@@ -27,27 +42,38 @@ export default function Header() {
                 <Image
                     src={BaseCardLogoTypo}
                     alt="logo typo"
-                    width={140}
-                    height={40}
+                    width={110}
+                    height={32}
                     className="object-contain"
                 />
             </div>
 
-            <div className="flex justify-center items-center rounded-full bg-white min-w-20 h-[30px]">
-                <BalanceDisplay className="px-2 font-bold flex gap-x-1" />
-                <Wallet />
-                {/* 
-                {userProfile?.pfpUrl ? (
-                    <Image
-                        src={userProfile.pfpUrl}
-                        alt="profile"
-                        className="w-[30px] h-[30px] object-contain rounded-full border-2 border-black"
-                    />
-                ) : (
-                    <div className="w-[30px] h-[30px] rounded-full flex justify-center items-center">
-                        <FaRegUserCircle size={28} className="text-gray-700" />
-                    </div>
-                )} */}
+            <div className="ml-auto flex justify-center items-center rounded-full bg-white min-w-16 h-[28px] gap-x-1">
+                <div className="scale-75 origin-right">
+                    <Wallet>
+                        {/* 커넥트 전 표시  */}
+                        <ConnectWallet>
+                            <Avatar className="h-6 w-6" />
+                            <Name />
+                        </ConnectWallet>
+                        <WalletDropdown>
+                            <Identity
+                                className="px-4 pt-3 pb-2 font-k2d-bold"
+                                hasCopyAddressOnClick
+                            >
+                                {/* TODO: 여기에 basename pfp */}
+                                <Avatar />
+                                <Name />
+                                <Address />
+                                <EthBalance className="text-xl font-k2d-bold" />
+                            </Identity>
+
+                            {/* BASECARD TOKEN BALANCE */}
+                            <BalanceDisplay className="text-xl font-k2d-bold" />
+                            <WalletDropdownDisconnect className="text-xl font-k2d-bold" />
+                        </WalletDropdown>
+                    </Wallet>
+                </div>
             </div>
         </div>
     );
