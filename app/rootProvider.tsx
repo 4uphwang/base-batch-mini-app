@@ -28,7 +28,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
                             },
                         }}
                         miniKit={{
-                            enabled: false,
+                            enabled: true,
                             autoConnect: false, // NOTE: for development, we don't want to auto connect to the wallet
                             notificationProxyUrl: undefined,
                         }}

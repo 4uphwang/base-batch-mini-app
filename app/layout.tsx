@@ -3,6 +3,7 @@ import { Viewport } from "next";
 import { Inter, Source_Code_Pro, K2D } from "next/font/google";
 import "./globals.css";
 import { RootProvider } from "./rootProvider";
+import { SafeArea } from "@coinbase/onchainkit/minikit";
 
 const inter = Inter({
     variable: "--font-inter",
@@ -39,8 +40,7 @@ export default function RootLayout({
                 <body
                     className={`${inter.variable} ${sourceCodePro.variable} ${k2d.variable}`}
                 >
-                    {/* <SafeArea>{children}</SafeArea> */}
-                    <>{children}</>
+                    <SafeArea>{children}</SafeArea>
                 </body>
             </html>
         </RootProvider>
