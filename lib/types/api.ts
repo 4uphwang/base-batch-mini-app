@@ -45,3 +45,61 @@ export interface IPFSUploadResponse {
     url?: string;
     error?: string;
 }
+
+/**
+ * Card Data from Database
+ * cards 테이블 스키마 타입
+ */
+export interface Card {
+    id: number;
+    nickname: string;
+    bio?: string;
+    imageURI?: string;
+    basename: string;
+    role?: string;
+    skills?: string[];
+    address: string;
+}
+
+/**
+ * Program from Database
+ * /api/programs 엔드포인트의 응답 타입
+ */
+export interface Program {
+    id: number;
+    title: string;
+    description: string;
+    type: "bounty" | "project";
+    ownerCardId: number;
+    owner: {
+        id: number;
+        nickname: string;
+        bio?: string;
+        imageURI?: string;
+        basename: string;
+        role?: string;
+        skills?: string[];
+        address: string;
+    };
+}
+
+/**
+ * Program with enriched data for UI display
+ */
+export interface ProgramWithDisplayData extends Program {
+    reward?: string;
+    currency?: string;
+    deadline?: string;
+    participants?: number;
+}
+
+/**
+ * Collection Response
+ * /api/collections 엔드포인트의 응답 타입
+ */
+export interface CollectionResponse {
+    id: number;
+    cardId: number;
+    collectedCardId: number;
+    collectedCard: Card;
+}

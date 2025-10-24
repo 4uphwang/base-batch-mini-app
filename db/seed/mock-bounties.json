@@ -1,0 +1,59 @@
+{
+    "bounties": [
+        {
+            "id": "1",
+            "title": "Create Meme Content About Jellyjerry",
+            "organization": "Jellyjerry",
+            "rewardAmount": 20000,
+            "rewardCurrency": "USDC",
+            "deadline": "2025-11-05T23:59:00Z",
+            "participants": 5,
+            "category": "Content",
+            "thumbnailUrl": "https://example.com/images/bounty/jelly.png"
+        },
+        {
+            "id": "2",
+            "title": "Build a Snapshot Voting Strategy Plugin",
+            "organization": "Snapshot Labs",
+            "rewardAmount": 15000,
+            "rewardCurrency": "DAI",
+            "deadline": "2025-11-20T23:59:00Z",
+            "participants": 8,
+            "category": "Dev",
+            "thumbnailUrl": "https://example.com/images/bounty/snapshot.png"
+        },
+        {
+            "id": "3",
+            "title": "Design New UI/UX for DeFi Dashboard",
+            "organization": "Aave Grants",
+            "rewardAmount": 25000,
+            "rewardCurrency": "USDC",
+            "deadline": "2025-11-12T23:59:00Z",
+            "participants": 12,
+            "category": "Design",
+            "thumbnailUrl": "https://example.com/images/bounty/aave.png"
+        },
+        {
+            "id": "4",
+            "title": "Write Technical Docs for L2 Bridge",
+            "organization": "Polygon",
+            "rewardAmount": 5000,
+            "rewardCurrency": "MATIC",
+            "deadline": "2025-11-30T23:59:00Z",
+            "participants": 3,
+            "category": "Other",
+            "thumbnailUrl": "https://example.com/images/bounty/polygon.png"
+        },
+        {
+            "id": "5",
+            "title": "Find Security Vulnerability in Smart Contract",
+            "organization": "Immunefi",
+            "rewardAmount": 100000,
+            "rewardCurrency": "ETH",
+            "deadline": "2025-12-15T23:59:00Z",
+            "participants": 21,
+            "category": "Dev",
+            "thumbnailUrl": "https://example.com/images/bounty/immunefi.png"
+        }
+    ]
+}
