@@ -6,6 +6,7 @@ import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
 
 import { useMiniappParams } from "@/hooks/useMiniappParams";
 import { useMyCard } from "@/hooks/useMyCard";
+import { useAccount } from "wagmi";
 import CardCollectionAdder from "./CardCollectionAdder";
 import CollectCardsSection from "./CollectCardsSection";
 import HeroSection from "./HeroSection";
@@ -16,7 +17,8 @@ const ACTION_ADD_CARD = "addCardCollection";
 export default function MainHome() {
     const router = useRouter();
     useBaseCardNFTs();
-    const { data: card } = useMyCard();
+    const { address } = useAccount();
+    const { data: card } = useMyCard(address);
 
     // 1. 딥링크 파라미터 추출
     const { action, cardId } = useMiniappParams();
