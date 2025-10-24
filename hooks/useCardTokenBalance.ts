@@ -36,7 +36,6 @@ export function useCardTokenBalance() {
         },
     });
 
-    console.log("CARD Token Balance", data);
 
     const formattedResult = useMemo(() => {
         if (!isConnected || !userAddress) {
