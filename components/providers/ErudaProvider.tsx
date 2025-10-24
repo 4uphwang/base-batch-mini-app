@@ -1,10 +1,11 @@
 "use client";
 
-import { isDevelopment } from "@/lib/wagmi";
 import { useEffect } from "react";
 
 export default function ErudaProvider() {
     useEffect(() => {
+        const isDevelopment = process.env.NODE_ENV === "development";
+
         import("eruda").then((eruda) => {
             if (!window.eruda && isDevelopment) {
                 window.eruda = eruda.default;
