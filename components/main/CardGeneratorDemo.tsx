@@ -18,6 +18,17 @@ export default function CardGeneratorDemo() {
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [savedCard, setSavedCard] = useState<{
+        id: number;
+        nickname: string;
+        role: string;
+        basename: string;
+        address: string;
+        bio?: string;
+        imageURI: string;
+        profileImage?: string;
+        skills?: string[];
+    } | null>(null);
 
     const {
         generateCard,
@@ -44,11 +55,9 @@ export default function CardGeneratorDemo() {
         setSkills(skills.filter((skill) => skill !== skillToRemove));
     };
 
-    // SVG를 base64로 변환하는 함수
-    const svgToBase64 = (svg: string): string => {
-        return `data:image/svg+xml;base64,${btoa(
-            unescape(encodeURIComponent(svg))
-        )}`;
+    // 이미지를 base64 data URL로 변환하는 함수
+    const imageToDataURL = (base64: string, mimeType: string): string => {
+        return `data:${mimeType};base64,${base64}`;
     };
 
     // DB에 카드 저장하는 함수
@@ -68,12 +77,16 @@ export default function CardGeneratorDemo() {
         setSaveSuccess(false);
 
         try {
-            // SVG를 base64로 변환
-            // 3. 업로드된 이미지를 읽어 Base64로 인코딩
+            // 업로드된 이미지를 읽어 Base64로 인코딩
             const arrayBuffer = await profileImageFile.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
             const imageBase64 = buffer.toString("base64");
-            const profileImageBase64 = svgToBase64(imageBase64);
+
+            // data URL 형식으로 변환 (data:image/png;base64,...)
+            const profileImageDataURL = imageToDataURL(
+                imageBase64,
+                profileImageFile.type
+            );
 
             const response = await fetch("/api/cards", {
                 method: "POST",
@@ -88,7 +101,7 @@ export default function CardGeneratorDemo() {
                     basename,
                     skills,
                     address,
-                    profileImage: profileImageBase64,
+                    profileImage: profileImageDataURL, // data:image/...;base64,... 형식
                 }),
             });
 
@@ -97,8 +110,9 @@ export default function CardGeneratorDemo() {
                 throw new Error(errorData.message || "Failed to save card");
             }
 
-            const savedCard = await response.json();
-            console.log("Card saved successfully:", savedCard);
+            const savedCardData = await response.json();
+            console.log("Card saved successfully:", savedCardData);
+            setSavedCard(savedCardData);
             setSaveSuccess(true);
         } catch (error) {
             console.error("Save card error:", error);
@@ -658,6 +672,156 @@ export default function CardGeneratorDemo() {
                         </div>
                     )}
                 </div>
+                {/* Saved Card from Database */}
+                {savedCard && (
+                    <div className="col-span-1 lg:col-span-2 space-y-4 mt-8">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-semibold text-gray-800">
+                                Saved Card from Database
+                            </h2>
+                            <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                                ✓ Saved
+                            </span>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg shadow-lg p-6 border-2 border-green-200">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Profile Image from DB */}
+                                <div className="space-y-3">
+                                    <h3 className="font-semibold text-gray-800 text-lg">
+                                        Profile Image (Base64)
+                                    </h3>
+                                    <div className="bg-white rounded-lg p-4 shadow-md">
+                                        {savedCard.profileImage ? (
+                                            <Image
+                                                src={savedCard.profileImage}
+                                                alt={`${savedCard.nickname}'s profile`}
+                                                width={400}
+                                                height={400}
+                                                className="w-full h-auto rounded-lg"
+                                                unoptimized
+                                            />
+                                        ) : (
+                                            <div className="text-gray-500 text-center py-8">
+                                                No profile image saved
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="bg-gray-100 rounded p-2">
+                                        <p className="text-xs text-gray-600 font-mono break-all">
+                                            {savedCard.profileImage
+                                                ? `${savedCard.profileImage.substring(
+                                                      0,
+                                                      100
+                                                  )}...`
+                                                : "N/A"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Card Data */}
+                                <div className="space-y-3">
+                                    <h3 className="font-semibold text-gray-800 text-lg">
+                                        Card Data
+                                    </h3>
+                                    <div className="bg-white rounded-lg p-4 shadow-md space-y-3">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                ID
+                                            </label>
+                                            <p className="text-gray-900 font-mono">
+                                                {savedCard.id}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Nickname
+                                            </label>
+                                            <p className="text-gray-900 font-semibold">
+                                                {savedCard.nickname}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Role
+                                            </label>
+                                            <p className="text-gray-900">
+                                                {savedCard.role}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Basename
+                                            </label>
+                                            <p className="text-gray-900">
+                                                {savedCard.basename}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Wallet Address
+                                            </label>
+                                            <p className="text-gray-900 font-mono text-sm break-all">
+                                                {savedCard.address}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Bio
+                                            </label>
+                                            <p className="text-gray-700 text-sm">
+                                                {savedCard.bio || "N/A"}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Image URI (IPFS)
+                                            </label>
+                                            <p className="text-gray-900 font-mono text-sm break-all">
+                                                {savedCard.imageURI}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Skills
+                                            </label>
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {savedCard.skills &&
+                                                savedCard.skills.length > 0 ? (
+                                                    savedCard.skills.map(
+                                                        (
+                                                            skill: string,
+                                                            index: number
+                                                        ) => (
+                                                            <span
+                                                                key={index}
+                                                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm"
+                                                            >
+                                                                {skill}
+                                                            </span>
+                                                        )
+                                                    )
+                                                ) : (
+                                                    <span className="text-gray-500 text-sm">
+                                                        No skills
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Success Message */}
+                            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                <p className="text-green-800 text-sm font-medium text-center">
+                                    🎉 Card successfully saved to database with
+                                    base64 encoded profile image!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
