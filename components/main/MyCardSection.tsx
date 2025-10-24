@@ -13,7 +13,7 @@ export default function MyCardSection() {
     // IPFS Gateway URL
     const getIPFSUrl = (cid: string) => {
         if (!cid) return "/assets/default-profile.png";
-        return `https://ipfs.io/ipfs/${cid}`;
+        return `https://ipfs.io/ipfs/${cid.replace("ipfs://", "")}`;
     };
 
     const handleMyCardClick = () => {

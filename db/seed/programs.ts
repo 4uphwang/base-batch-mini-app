@@ -1,7 +1,7 @@
 export const samplePrograms = [
-  {
-    title: "BaseCard NFT Marketplace",
-    description: `# BaseCard NFT Marketplace
+    {
+        title: "BaseCard NFT Marketplace",
+        description: `# BaseCard NFT Marketplace
 
 Build a decentralized marketplace for trading BaseCard NFTs on Base network.
 
@@ -16,11 +16,11 @@ Build a decentralized marketplace for trading BaseCard NFTs on Base network.
 - **Total Reward**: 2 ETH
 - **Duration**: 4 weeks
 - **Difficulty**: Intermediate`,
-    type: "bounty" as const,
-  },
-  {
-    title: "DeFi Yield Optimizer",
-    description: `# DeFi Yield Optimizer
+        type: "bounty" as const,
+    },
+    {
+        title: "DeFi Yield Optimizer",
+        description: `# DeFi Yield Optimizer
 
 Create an automated yield farming strategy optimizer for Base ecosystem.
 
@@ -35,11 +35,11 @@ Create an automated yield farming strategy optimizer for Base ecosystem.
 - Maximize yield while minimizing risk
 - Support major DeFi protocols on Base
 - User-friendly interface for non-technical users`,
-    type: "project" as const,
-  },
-  {
-    title: "Base Social Media Integration",
-    description: `# Base Social Media Integration
+        type: "project" as const,
+    },
+    {
+        title: "Base Social Media Integration",
+        description: `# Base Social Media Integration
 
 Develop a social media platform that integrates with Base blockchain for content monetization.
 
@@ -55,11 +55,11 @@ Develop a social media platform that integrates with Base blockchain for content
 - Solidity smart contracts
 - IPFS for content storage
 - Farcaster integration`,
-    type: "bounty" as const,
-  },
-  {
-    title: "Cross-Chain Bridge Interface",
-    description: `# Cross-Chain Bridge Interface
+        type: "bounty" as const,
+    },
+    {
+        title: "Cross-Chain Bridge Interface",
+        description: `# Cross-Chain Bridge Interface
 
 Build a user-friendly interface for bridging assets between Base and other networks.
 
@@ -74,11 +74,11 @@ Build a user-friendly interface for bridging assets between Base and other netwo
 - Transaction success rate > 99%
 - Average bridge time < 5 minutes
 - User satisfaction score > 4.5/5`,
-    type: "project" as const,
-  },
-  {
-    title: "Base Analytics Dashboard",
-    description: `# Base Analytics Dashboard
+        type: "project" as const,
+    },
+    {
+        title: "Base Analytics Dashboard",
+        description: `# Base Analytics Dashboard
 
 Create a comprehensive analytics dashboard for Base network activity and metrics.
 
@@ -94,6 +94,6 @@ Create a comprehensive analytics dashboard for Base network activity and metrics
 - The Graph protocol
 - Dune Analytics API
 - Custom indexing solutions`,
-    type: "bounty" as const,
-  },
+        type: "bounty" as const,
+    },
 ];
