@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { userProfileAtom } from "@/store/userProfileState";
 import { useCardGeneration } from "@/hooks/useCardGeneration";
 import { useMintBaseCard } from "@/hooks/useMintBaseCard";
+import { convertFileToBase64DataURL } from "@/lib/imageUtils";
 
 import BackButton from "@/components/common/BackButton";
 import SuccessModal from "@/components/common/SuccessModal";
@@ -247,8 +248,13 @@ export default function Mint() {
                     console.log("  - CID:", result.ipfs.cid);
                     console.log("  - URL:", result.ipfs.url);
 
-                    // 먼저 디비에 카드 정보를 저장한다.
+                    const ipfsImageURI = `ipfs://${result.ipfs.cid}`;
+                    // 먼저 디비에 카드 정보를 저장한다 (profile 이미지 포함)
                     try {
+                        // Profile 이미지를 base64 data URL로 변환
+                        const profileImageDataURL =
+                            await convertFileToBase64DataURL(imageToUse);
+
                         const saveResponse = await fetch("/api/cards", {
                             method: "POST",
                             headers: {
@@ -258,13 +264,14 @@ export default function Mint() {
                                 nickname: name,
                                 role: role,
                                 bio: bio || "",
-                                imageURI: result.ipfs.cid,
+                                imageURI: ipfsImageURI,
                                 basename:
                                     isBaseNameIncluded && username
                                         ? username
                                         : "@basename",
                                 skills: selectedSkills,
                                 address: address,
+                                profileImage: profileImageDataURL, // base64 data URL
                             }),
                         });
 
@@ -274,6 +281,9 @@ export default function Mint() {
 
                         const savedCard = await saveResponse.json();
                         console.log("✅ Card saved to database:", savedCard);
+                        console.log(
+                            "📸 Profile image saved as base64 data URL"
+                        );
                     } catch (dbError) {
                         console.error("❌ Database save error:", dbError);
                         // DB 저장 실패 시 IPFS 파일 삭제
@@ -283,7 +293,9 @@ export default function Mint() {
                                     `/api/ipfs/delete?id=${result.ipfs.id}`,
                                     { method: "DELETE" }
                                 );
-                                console.log("🗑️ IPFS file cleaned up");
+                                console.log(
+                                    "🗑️ IPFS file cleaned up due to DB error"
+                                );
                             } catch (cleanupError) {
                                 console.error(
                                     "⚠️ IPFS cleanup error:",

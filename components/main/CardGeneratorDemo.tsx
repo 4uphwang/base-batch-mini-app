@@ -2,13 +2,34 @@
 
 import { useState } from "react";
 import { useCardGeneration } from "@/hooks/useCardGeneration";
+import { convertFileToBase64DataURL } from "@/lib/imageUtils";
 import Image from "next/image";
 
 export default function CardGeneratorDemo() {
     const [nickname, setNickname] = useState("My Nickname");
     const [role, setRole] = useState("Base Developer");
     const [basename, setBasename] = useState("@basename");
+    const [bio, setBio] = useState("");
+    const [address, setAddress] = useState(
+        "0xabc4567890123456789012345678901234567890"
+    );
+    const [skills, setSkills] = useState<string[]>([]);
+    const [skillInput, setSkillInput] = useState("");
     const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [savedCard, setSavedCard] = useState<{
+        id: number;
+        nickname: string;
+        role: string;
+        basename: string;
+        address: string;
+        bio?: string;
+        imageURI: string;
+        profileImage?: string;
+        skills?: string[];
+    } | null>(null);
 
     const {
         generateCard,
@@ -18,6 +39,81 @@ export default function CardGeneratorDemo() {
     } = useCardGeneration();
 
     const generatedSvg = result?.svg || null;
+
+    // Skills 관리 함수
+    const addSkill = () => {
+        if (
+            skillInput.trim() &&
+            skills.length < 5 &&
+            !skills.includes(skillInput.trim())
+        ) {
+            setSkills([...skills, skillInput.trim()]);
+            setSkillInput("");
+        }
+    };
+
+    const removeSkill = (skillToRemove: string) => {
+        setSkills(skills.filter((skill) => skill !== skillToRemove));
+    };
+
+    // DB에 카드 저장하는 함수
+    const saveCardToDatabase = async () => {
+        if (!profileImageFile) {
+            alert("Please generate card with IPFS upload first");
+            return;
+        }
+
+        if (!address) {
+            alert("Please enter wallet address");
+            return;
+        }
+
+        setIsSaving(true);
+        setSaveError(null);
+        setSaveSuccess(false);
+
+        try {
+            // File을 base64 data URL로 변환
+            const profileImageDataURL = await convertFileToBase64DataURL(
+                profileImageFile
+            );
+
+            const response = await fetch("/api/cards", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    nickname,
+                    role,
+                    bio,
+                    imageURI: "ipfs://dummyhash",
+                    basename,
+                    skills,
+                    address,
+                    profileImage: profileImageDataURL, // data:image/...;base64,... 형식
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to save card");
+            }
+
+            const savedCardData = await response.json();
+            console.log("Card saved successfully:", savedCardData);
+            setSavedCard(savedCardData);
+            setSaveSuccess(true);
+        } catch (error) {
+            console.error("Save card error:", error);
+            const errorMessage =
+                error instanceof Error ? error.message : "Failed to save card";
+            setSaveError(errorMessage);
+            alert(errorMessage);
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     // SVG 다운로드 함수
     const downloadSvg = () => {
@@ -87,7 +183,7 @@ export default function CardGeneratorDemo() {
         }
 
         try {
-            // Generate card without IPFS upload (demo mode)
+            // Generate card WITH IPFS upload (enabled for DB saving)
             const result = await generateCard(
                 {
                     name: nickname,
@@ -95,11 +191,15 @@ export default function CardGeneratorDemo() {
                     baseName: basename,
                     profileImage: profileImageFile,
                 },
-                false // Disable IPFS for demo
+                false // Enable IPFS for DB saving
             );
 
             if (result.success) {
                 console.log("Card generated successfully:", result);
+                if (result.ipfs) {
+                    console.log("IPFS CID:", result.ipfs.cid);
+                    console.log("IPFS URL:", result.ipfs.url);
+                }
             } else {
                 throw new Error(result.error || "Failed to generate card");
             }
@@ -117,11 +217,15 @@ export default function CardGeneratorDemo() {
         <div className="max-w-7xl mx-auto p-6">
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    BaseCard Generator
+                    BaseCard Generator Demo
                 </h1>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-gray-600 mb-2">
                     Create your personalized onchain business card with
-                    server-side SVG generation
+                    server-side SVG generation + IPFS + Database
+                </p>
+                <p className="text-sm text-blue-600 font-medium">
+                    Test the complete flow: Generate → Upload to IPFS → Save to
+                    DB
                 </p>
             </div>
 
@@ -226,36 +330,166 @@ export default function CardGeneratorDemo() {
                                 />
                             </div>
 
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Bio
+                                </label>
+                                <textarea
+                                    value={bio}
+                                    onChange={(e) => setBio(e.target.value)}
+                                    placeholder="Tell us about yourself..."
+                                    rows={3}
+                                    maxLength={500}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {bio.length}/500 characters
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Wallet Address* (for DB save)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    placeholder="0x1234567890123456789012345678901234567890"
+                                    pattern="^0x[a-fA-F0-9]{40}$"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Required for saving to database
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Skills (max 5)
+                                </label>
+                                <div className="flex gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        value={skillInput}
+                                        onChange={(e) =>
+                                            setSkillInput(e.target.value)
+                                        }
+                                        onKeyPress={(e) => {
+                                            if (e.key === "Enter") {
+                                                e.preventDefault();
+                                                addSkill();
+                                            }
+                                        }}
+                                        placeholder="Add a skill"
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        disabled={skills.length >= 5}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={addSkill}
+                                        disabled={skills.length >= 5}
+                                        className={`px-4 py-2 rounded-lg font-medium ${
+                                            skills.length >= 5
+                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                : "bg-blue-500 text-white hover:bg-blue-600"
+                                        }`}
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                                {skills.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {skills.map((skill, index) => (
+                                            <span
+                                                key={index}
+                                                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm"
+                                            >
+                                                {skill}
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        removeSkill(skill)
+                                                    }
+                                                    className="text-blue-700 hover:text-blue-900"
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             {/* Status Messages */}
                             {generationError && (
                                 <div className="p-3 rounded-lg bg-red-50 border border-red-200">
                                     <p className="text-red-700 text-sm">
-                                        {generationError}
+                                        ❌ Generation Error: {generationError}
                                     </p>
                                 </div>
                             )}
 
-                            {result?.success && !result.ipfs && (
+                            {saveError && (
+                                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                                    <p className="text-red-700 text-sm">
+                                        ❌ Save Error: {saveError}
+                                    </p>
+                                </div>
+                            )}
+
+                            {result?.success && result.ipfs && (
                                 <div className="p-3 rounded-lg bg-green-50 border border-green-200">
-                                    <p className="text-green-700 text-sm">
-                                        ✓ Card generated successfully!
+                                    <p className="text-green-700 text-sm font-medium mb-2">
+                                        ✓ Card generated successfully with IPFS!
+                                    </p>
+                                    <p className="text-green-600 text-xs break-all">
+                                        CID: {result.ipfs.cid}
                                     </p>
                                 </div>
                             )}
 
-                            <button
-                                type="submit"
-                                disabled={isGenerating}
-                                className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                                    isGenerating
-                                        ? "bg-gray-400 text-white cursor-not-allowed"
-                                        : "bg-blue-500 text-white hover:bg-blue-600"
-                                }`}
-                            >
-                                {isGenerating
-                                    ? "Generating..."
-                                    : "Generate Card"}
-                            </button>
+                            {saveSuccess && (
+                                <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                                    <p className="text-green-700 text-sm font-medium">
+                                        ✓ Card saved to database successfully!
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="space-y-2">
+                                <button
+                                    type="submit"
+                                    disabled={isGenerating}
+                                    className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                                        isGenerating
+                                            ? "bg-gray-400 text-white cursor-not-allowed"
+                                            : "bg-blue-500 text-white hover:bg-blue-600"
+                                    }`}
+                                >
+                                    {isGenerating
+                                        ? "Generating & Uploading to IPFS..."
+                                        : "Generate Card (with IPFS)"}
+                                </button>
+
+                                {result?.success && (
+                                    <button
+                                        type="button"
+                                        onClick={saveCardToDatabase}
+                                        disabled={isSaving || !address}
+                                        className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                                            isSaving || !address
+                                                ? "bg-gray-400 text-white cursor-not-allowed"
+                                                : "bg-green-500 text-white hover:bg-green-600"
+                                        }`}
+                                    >
+                                        {isSaving
+                                            ? "Saving to Database..."
+                                            : "Save to Database"}
+                                    </button>
+                                )}
+                            </div>
                         </form>
                     </div>
 
@@ -280,13 +514,18 @@ export default function CardGeneratorDemo() {
                                 <span className="font-semibold text-blue-600">
                                     1.
                                 </span>
-                                <span>Upload your profile image</span>
+                                <span>
+                                    Upload your profile image (PNG/JPEG)
+                                </span>
                             </li>
                             <li className="flex gap-2">
                                 <span className="font-semibold text-blue-600">
                                     2.
                                 </span>
-                                <span>Fill in your card information</span>
+                                <span>
+                                    Fill in all card information (nickname,
+                                    role, bio, address, skills)
+                                </span>
                             </li>
                             <li className="flex gap-2">
                                 <span className="font-semibold text-blue-600">
@@ -294,7 +533,7 @@ export default function CardGeneratorDemo() {
                                 </span>
                                 <span>
                                     Click &quot;Generate Card&quot; to create
-                                    your BaseCard
+                                    BaseCard and upload to IPFS
                                 </span>
                             </li>
                             <li className="flex gap-2">
@@ -302,14 +541,27 @@ export default function CardGeneratorDemo() {
                                     4.
                                 </span>
                                 <span>
+                                    Click &quot;Save to Database&quot; to store
+                                    card data with SVG
+                                </span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-semibold text-blue-600">
+                                    5.
+                                </span>
+                                <span>
                                     Preview and download your card as SVG or PNG
                                 </span>
                             </li>
                         </ol>
                         <div className="mt-4 pt-4 border-t border-blue-200">
+                            <p className="text-xs text-blue-700 mb-2">
+                                💡 This demo page tests the full flow: SVG
+                                generation → IPFS upload → DB storage
+                            </p>
                             <p className="text-xs text-blue-700">
-                                💡 This is a demo page. For production minting
-                                with IPFS, use the main mint page.
+                                🔑 The profile image is converted to SVG and
+                                stored as base64 in the database
                             </p>
                         </div>
                     </div>
@@ -321,6 +573,38 @@ export default function CardGeneratorDemo() {
                     </h2>
                     {generatedSvg ? (
                         <>
+                            {/* IPFS Info */}
+                            {result?.ipfs && (
+                                <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                    <h3 className="font-semibold text-purple-900 mb-2 text-sm">
+                                        📦 IPFS Upload Info
+                                    </h3>
+                                    <div className="space-y-1 text-xs">
+                                        <div>
+                                            <span className="font-medium text-purple-700">
+                                                CID:{" "}
+                                            </span>
+                                            <span className="text-gray-700 font-mono break-all">
+                                                {result.ipfs.cid}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="font-medium text-purple-700">
+                                                URL:{" "}
+                                            </span>
+                                            <a
+                                                href={result.ipfs.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:underline break-all"
+                                            >
+                                                {result.ipfs.url}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl">
                                 <div
                                     dangerouslySetInnerHTML={{
@@ -378,6 +662,156 @@ export default function CardGeneratorDemo() {
                         </div>
                     )}
                 </div>
+                {/* Saved Card from Database */}
+                {savedCard && (
+                    <div className="col-span-1 lg:col-span-2 space-y-4 mt-8">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-semibold text-gray-800">
+                                Saved Card from Database
+                            </h2>
+                            <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                                ✓ Saved
+                            </span>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg shadow-lg p-6 border-2 border-green-200">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Profile Image from DB */}
+                                <div className="space-y-3">
+                                    <h3 className="font-semibold text-gray-800 text-lg">
+                                        Profile Image (Base64)
+                                    </h3>
+                                    <div className="bg-white rounded-lg p-4 shadow-md">
+                                        {savedCard.profileImage ? (
+                                            <Image
+                                                src={savedCard.profileImage}
+                                                alt={`${savedCard.nickname}'s profile`}
+                                                width={400}
+                                                height={400}
+                                                className="w-full h-auto rounded-lg"
+                                                unoptimized
+                                            />
+                                        ) : (
+                                            <div className="text-gray-500 text-center py-8">
+                                                No profile image saved
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="bg-gray-100 rounded p-2">
+                                        <p className="text-xs text-gray-600 font-mono break-all">
+                                            {savedCard.profileImage
+                                                ? `${savedCard.profileImage.substring(
+                                                      0,
+                                                      100
+                                                  )}...`
+                                                : "N/A"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Card Data */}
+                                <div className="space-y-3">
+                                    <h3 className="font-semibold text-gray-800 text-lg">
+                                        Card Data
+                                    </h3>
+                                    <div className="bg-white rounded-lg p-4 shadow-md space-y-3">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                ID
+                                            </label>
+                                            <p className="text-gray-900 font-mono">
+                                                {savedCard.id}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Nickname
+                                            </label>
+                                            <p className="text-gray-900 font-semibold">
+                                                {savedCard.nickname}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Role
+                                            </label>
+                                            <p className="text-gray-900">
+                                                {savedCard.role}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Basename
+                                            </label>
+                                            <p className="text-gray-900">
+                                                {savedCard.basename}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Wallet Address
+                                            </label>
+                                            <p className="text-gray-900 font-mono text-sm break-all">
+                                                {savedCard.address}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Bio
+                                            </label>
+                                            <p className="text-gray-700 text-sm">
+                                                {savedCard.bio || "N/A"}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Image URI (IPFS)
+                                            </label>
+                                            <p className="text-gray-900 font-mono text-sm break-all">
+                                                {savedCard.imageURI}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                                Skills
+                                            </label>
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {savedCard.skills &&
+                                                savedCard.skills.length > 0 ? (
+                                                    savedCard.skills.map(
+                                                        (
+                                                            skill: string,
+                                                            index: number
+                                                        ) => (
+                                                            <span
+                                                                key={index}
+                                                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm"
+                                                            >
+                                                                {skill}
+                                                            </span>
+                                                        )
+                                                    )
+                                                ) : (
+                                                    <span className="text-gray-500 text-sm">
+                                                        No skills
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Success Message */}
+                            <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                                <p className="text-green-800 text-sm font-medium text-center">
+                                    🎉 Card successfully saved to database with
+                                    base64 encoded profile image!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
