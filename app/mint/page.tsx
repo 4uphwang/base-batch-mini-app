@@ -667,7 +667,7 @@ export default function Mint() {
                             type="text"
                             value={username || undefined}
                             disabled
-                            className="w-full p-3 text-lg h-12 border border-gray-400 rounded-lg bg-gray-100 text-gray-700 cursor-default"
+                            className="w-full p-3 text-base h-12 border border-gray-400 rounded-lg bg-gray-100 text-gray-700 cursor-default"
                         />
 
                         <ModernToggle
