@@ -48,8 +48,10 @@ This indicates submodules are incorrectly tracked as regular files.
 
 ```bash
 cd contracts
-git rm -r lib/
+git rm -r --cached lib/
 ```
+
+**Note**: Use `--cached` flag to remove files from Git index without deleting them from filesystem.
 
 ### Step 2: Re-add as Proper Submodules
 
@@ -67,11 +69,26 @@ git submodule add https://github.com/OpenZeppelin/openzeppelin-contracts.git lib
 # Check submodule status
 git submodule status
 
+# Verify file modes (should show 160000 for submodules)
+git ls-files --stage | grep lib
+
 # Test Foundry build
 forge build
 
 # Check git status
 git status
+```
+
+**Expected Output**:
+
+```bash
+# git submodule status
+ a6d71da563bbb8d6eef8fbec3a16c61c603d2764 lib/forge-std (v1.11.0-6-ga6d71da)
+ 1cf13771092c83a060eaef0f8809493fb4c04eb1 lib/openzeppelin-contracts (v4.8.0-1029-g1cf13771)
+
+# git ls-files --stage | grep lib
+160000 a6d71da563bbb8d6eef8fbec3a16c61c603d2764 0	lib/forge-std
+160000 1cf13771092c83a060eaef0f8809493fb4c04eb1 0	lib/openzeppelin-contracts
 ```
 
 ### Step 4: Commit Changes
@@ -83,6 +100,15 @@ git commit -m "fix: convert lib dependencies to proper git submodules
 - Remove individual files that were incorrectly tracked as regular files
 - Add forge-std and openzeppelin-contracts as proper git submodules
 - This ensures proper dependency management and reduces repository size"
+```
+
+**Expected Commit Output**:
+
+```
+[feature/contract-integration 48f0535] fix: convert lib dependencies to proper git submodules
+ 773 files changed, 2 insertions(+), 136586 deletions(-)
+ create mode 160000 contracts/lib/forge-std
+ create mode 160000 contracts/lib/openzeppelin-contracts
 ```
 
 ## ✅ Expected Results
@@ -152,6 +178,32 @@ To prevent this issue in the future:
 2. **Verify submodule status** after cloning repositories
 3. **Use `git clone --recursive`** when cloning repositories with submodules
 4. **Check `.gitmodules` file** exists and contains correct submodule definitions
+
+## 🔍 Real-World Case Study
+
+### Problem Encountered
+
+In our BaseCard project, we experienced the exact issue described above where:
+
+-   `lib/forge-std` and `lib/openzeppelin-contracts` were tracked as individual files (mode `100644`)
+-   IDE showed them as regular folders instead of submodules
+-   Repository size was bloated with 136,586 lines of dependency code
+
+### Solution Applied
+
+1. **Diagnosis**: Used `git ls-files --stage | grep lib` to confirm incorrect tracking
+2. **Removal**: `git rm -r --cached lib/` to remove from index without deleting files
+3. **Re-addition**: Used `git submodule add` for both dependencies
+4. **Verification**: Confirmed `160000` mode and proper commit hashes
+5. **Commit**: Successfully reduced repository by 136,586 lines
+
+### Results Achieved
+
+-   ✅ Repository size reduced by 136,586 lines
+-   ✅ Proper submodule tracking with `160000` mode
+-   ✅ IDE now displays submodule indicators correctly
+-   ✅ Fixed commit hashes: `a6d71da` (forge-std), `1cf13771` (openzeppelin-contracts)
+-   ✅ `forge build` works correctly with submodule dependencies
 
 ## 📖 References
 
