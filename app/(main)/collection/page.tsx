@@ -98,22 +98,23 @@ export default function Collection() {
 
     return (
         <div className="relative">
-            <BackButton />
-
             <div className="bg-white px-4 sm:px-6 py-6 sm:py-8">
                 {/* Header */}
-                <div className="text-left mb-6 sm:mb-8 pl-4 sm:pl-6 md:pl-8 lg:pl-12">
-                    <h2
-                        className="text-3xl sm:text-4xl font-k2d-bold text-black mb-2"
-                        style={{
-                            letterSpacing: "-0.05em",
-                        }}
-                    >
-                        My Collection
-                    </h2>
-                    <p className="text-base sm:text-lg text-gray-500 font-k2d-medium">
-                        Cards I&apos;ve collected
-                    </p>
+                <div className="flex items-center gap-4 mb-6 sm:mb-8 pl-4 sm:pl-6 md:pl-8 lg:pl-12">
+                    <BackButton size={40} className="relative left-0 top-0" />
+                    <div className="text-left">
+                        <h2
+                            className="text-3xl sm:text-4xl font-k2d-bold text-black mb-2"
+                            style={{
+                                letterSpacing: "-0.05em",
+                            }}
+                        >
+                            My Collection
+                        </h2>
+                        <p className="text-base sm:text-lg text-gray-500 font-k2d-medium">
+                            Cards I&apos;ve collected
+                        </p>
+                    </div>
                 </div>
 
                 {/* Filter Tags */}

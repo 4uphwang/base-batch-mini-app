@@ -46,21 +46,20 @@ export default function MyCard() {
                     {/* Header */}
                     <div className="relative pt-4 pb-6 px-6">
                         {/* Back Button and Title in same row */}
-                        <div className="flex items-center gap-8">
-                            <div>
-                                <BackButton className="text-white hover:bg-white/10" />
-                            </div>
-                            <div>
-                                <h1
-                                    className="font-k2d-bold text-white text-3xl"
-                                    style={{
-                                        letterSpacing: "-0.05em",
-                                        lineHeight: "0.9",
-                                    }}
-                                >
-                                    My BaseCard
-                                </h1>
-                            </div>
+                        <div className="flex items-center gap-6">
+                            <BackButton
+                                size={40}
+                                className="text-white hover:bg-white/10 relative left-0 top-0"
+                            />
+                            <h1
+                                className="font-k2d-bold text-white text-3xl"
+                                style={{
+                                    letterSpacing: "-0.05em",
+                                    lineHeight: "0.9",
+                                }}
+                            >
+                                My BaseCard
+                            </h1>
                         </div>
                     </div>
                 </div>
