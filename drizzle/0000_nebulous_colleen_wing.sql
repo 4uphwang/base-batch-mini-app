@@ -7,13 +7,15 @@ CREATE TABLE "cards" (
 	"role" text,
 	"skills" text[],
 	"address" varchar(42),
+	"profile_image" text,
 	CONSTRAINT "cards_address_unique" UNIQUE("address")
 );
 --> statement-breakpoint
 CREATE TABLE "collections" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"card_id" integer NOT NULL,
-	"collect_card_id" integer NOT NULL
+	"collect_card_id" integer NOT NULL,
+	CONSTRAINT "unique_collection" UNIQUE("card_id","collect_card_id")
 );
 --> statement-breakpoint
 CREATE TABLE "programs" (

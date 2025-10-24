@@ -1,5 +1,5 @@
 {
-  "id": "7f131f0e-2f52-47e3-9d25-ea9600cb0245",
+  "id": "43eb5041-c6a7-4e6e-ad36-d3ad18728682",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -53,6 +53,12 @@
         "address": {
           "name": "address",
           "type": "varchar(42)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profile_image": {
+          "name": "profile_image",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -126,7 +132,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "unique_collection": {
+          "name": "unique_collection",
+          "nullsNotDistinct": false,
+          "columns": [
+            "card_id",
+            "collect_card_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
