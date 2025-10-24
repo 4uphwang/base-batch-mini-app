@@ -1,29 +1,23 @@
 // Collection relationships - who collects whose cards
-// Index mapping: 0=JellyJelly, 1=Jeongseup, 2=Sam, 3=Peter
+// Index mapping: 0=Jihwang, 1=Mozzigom, 2=Soyverse, 3=Tomatocat
 export const sampleCollections = [
-    // JellyJelly (Designer) collects other cards
-    { ownerIndex: 0, collectedIndex: 1 }, // JellyJelly collects Jeongseup
-    { ownerIndex: 0, collectedIndex: 2 }, // JellyJelly collects Sam
-    { ownerIndex: 0, collectedIndex: 3 }, // JellyJelly collects Peter
+    // Jihwang (Marketer) collects other cards
+    { ownerIndex: 0, collectedIndex: 1 }, // Jihwang collects Mozzigom
+    { ownerIndex: 0, collectedIndex: 2 }, // Jihwang collects Soyverse
+    { ownerIndex: 0, collectedIndex: 3 }, // Jihwang collects Tomatocat
 
-    // Jeongseup (Developer) collects other cards
-    { ownerIndex: 1, collectedIndex: 0 }, // Jeongseup collects JellyJelly
-    { ownerIndex: 1, collectedIndex: 2 }, // Jeongseup collects Sam
-    { ownerIndex: 1, collectedIndex: 3 }, // Jeongseup collects Peter
+    // Mozzigom (Developer) collects other cards
+    { ownerIndex: 1, collectedIndex: 0 }, // Mozzigom collects Jihwang
+    { ownerIndex: 1, collectedIndex: 2 }, // Mozzigom collects Soyverse
+    { ownerIndex: 1, collectedIndex: 3 }, // Mozzigom collects Tomatocat
 
-    // Sam (Designer) collects other cards
-    { ownerIndex: 2, collectedIndex: 0 }, // Sam collects JellyJelly
-    { ownerIndex: 2, collectedIndex: 1 }, // Sam collects Jeongseup
-    { ownerIndex: 2, collectedIndex: 3 }, // Sam collects Peter
+    // Soyverse (Designer) collects other cards
+    { ownerIndex: 2, collectedIndex: 0 }, // Soyverse collects Jihwang
+    { ownerIndex: 2, collectedIndex: 1 }, // Soyverse collects Mozzigom
+    { ownerIndex: 2, collectedIndex: 3 }, // Soyverse collects Tomatocat
 
-    // Peter (Marketer) collects other cards
-    { ownerIndex: 3, collectedIndex: 0 }, // Peter collects JellyJelly
-    { ownerIndex: 3, collectedIndex: 1 }, // Peter collects Jeongseup
-    { ownerIndex: 3, collectedIndex: 2 }, // Peter collects Sam
-
-    // Additional cross-collections for more variety
-    { ownerIndex: 0, collectedIndex: 1 }, // JellyJelly also collects Jeongseup (duplicate for more activity)
-    { ownerIndex: 1, collectedIndex: 0 }, // Jeongseup also collects JellyJelly (duplicate for more activity)
-    { ownerIndex: 2, collectedIndex: 1 }, // Sam also collects Jeongseup (duplicate for more activity)
-    { ownerIndex: 3, collectedIndex: 0 }, // Peter also collects JellyJelly (duplicate for more activity)
+    // Tomatocat (Designer) collects other cards
+    { ownerIndex: 3, collectedIndex: 0 }, // Tomatocat collects Jihwang
+    { ownerIndex: 3, collectedIndex: 1 }, // Tomatocat collects Mozzigom
+    { ownerIndex: 3, collectedIndex: 2 }, // Tomatocat collects Soyverse
 ];
