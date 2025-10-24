@@ -40,7 +40,7 @@ export default function HeroSection({ onMintClick }: HeroSectionProps) {
             <div className='flex justify-center items-center'>
                 <Image
                     src={LandingCard}
-                    height={180}
+                    height={220}
                     alt="landing-page-card"
                     priority
                     className='object-contain z-50'
@@ -50,7 +50,7 @@ export default function HeroSection({ onMintClick }: HeroSectionProps) {
             {/* Mint Button */}
             <button
                 onClick={onMintClick}
-                className="z-20 w-full mt-5 max-w-md py-4 bg-gray-900 hover:bg-gray-800 active:bg-black text-white font-k2d-semibold rounded-xl transition-all duration-300 shadow-xl text-lg transform hover:scale-105 active:scale-95"
+                className="z-20 w-full mt-3 max-w-md py-4 bg-gray-900 hover:bg-gray-800 active:bg-black text-white font-k2d-semibold rounded-xl transition-all duration-300 shadow-xl text-lg transform hover:scale-105 active:scale-95"
             >
                 Mint Your Card
             </button>
