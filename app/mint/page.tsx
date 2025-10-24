@@ -253,7 +253,7 @@ export default function Mint() {
             // ✨ 최적화 3: Base64 변환 전 이미지 리사이징 및 압축
             // 카드 이미지 (Base64) 크기를 512px 또는 1024px 등 적절한 크기로 제한
             const profileImageDataURL = await resizeAndCompressImage(imageToUse, 512, 512, 1);
-
+            console.log('profileImageDataURL', profileImageDataURL)
             const baseName = isBaseNameIncluded && username ? username : "";
 
             // Card generation with IPFS upload
