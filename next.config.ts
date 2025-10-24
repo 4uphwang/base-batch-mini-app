@@ -14,29 +14,37 @@ const nextConfig: NextConfig = {
         return config;
     },
     images: {
+        // remotePatterns: [
+        //     {
+        //         protocol: "https",
+        //         hostname: "gateway.pinata.cloud",
+        //         pathname: "/ipfs/**",
+        //     },
+        //     {
+        //         protocol: "https",
+        //         hostname: "*.mypinata.cloud",
+        //     },
+        //     {
+        //         protocol: "https",
+        //         hostname: "ipfs.io",
+        //         pathname: "/ipfs/**",
+        //     },
+        //     {
+        //         protocol: "https",
+        //         hostname: "cloudflare-ipfs.com",
+        //         pathname: "/ipfs/**",
+        //     },
+        //     {
+        //         protocol: "https",
+        //         hostname: "*.ipfs.dweb.link",
+        //     },
+        // ],
         remotePatterns: [
             {
-                protocol: "https",
-                hostname: "gateway.pinata.cloud",
-                pathname: "/ipfs/**",
-            },
-            {
-                protocol: "https",
-                hostname: "*.mypinata.cloud",
-            },
-            {
-                protocol: "https",
-                hostname: "ipfs.io",
-                pathname: "/ipfs/**",
-            },
-            {
-                protocol: "https",
-                hostname: "cloudflare-ipfs.com",
-                pathname: "/ipfs/**",
-            },
-            {
-                protocol: "https",
-                hostname: "*.ipfs.dweb.link",
+                protocol: 'https',
+                hostname: '**', // 모든 HTTPS 도메인 허용
+                port: '',
+                pathname: '/**',
             },
         ],
         dangerouslyAllowSVG: true,

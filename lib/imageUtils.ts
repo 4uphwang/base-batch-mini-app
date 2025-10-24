@@ -144,3 +144,64 @@ export function safeImageURI(
 export function isValidImageURI(imageURI: string | null | undefined): boolean {
     return safeImageURI(imageURI) !== null;
 }
+
+
+
+/**
+ * File 객체의 이미지를 Base64 data URL로 변환하기 전에,
+ * 지정된 최대 크기에 맞춰 압축 및 리사이징하는 함수
+ * @param file - 원본 File 객체 (이미지)
+ * @param maxWidth - 이미지의 최대 너비 (픽셀)
+ * @param maxHeight - 이미지의 최대 높이 (픽셀)
+ * @param quality - 이미지 압축 품질 (0.0 ~ 1.0)
+ * @returns Base64 Data URL 문자열
+ */
+export const resizeAndCompressImage = (
+    file: File,
+    maxWidth: number,
+    maxHeight: number,
+    quality: number = 0.8
+): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new (window as any).Image();
+            img.src = event.target?.result as string;
+
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+
+                let width = img.width;
+                let height = img.height;
+
+                // 비율에 맞게 리사이징 (최대 너비/높이 제한)
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                // 캔버스에 이미지 그리기
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                // 압축 및 Base64로 변환
+                const dataUrl = canvas.toDataURL("image/jpeg", quality);
+                resolve(dataUrl);
+            };
+
+            img.onerror = (error: any) => reject(error);
+        };
+        reader.onerror = (error) => reject(error);
+    });
+};
