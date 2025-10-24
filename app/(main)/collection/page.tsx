@@ -5,24 +5,11 @@ import Image from "next/image";
 import BackButton from "@/components/common/BackButton";
 import { useAccount } from "wagmi";
 import { useMyCard } from "@/hooks/useMyCard";
-
-interface CardData {
-    id: number;
-    role: string;
-    imageURI: string;
-    address: string;
-    basename: string;
-}
-
-interface CollectionResponse {
-    cardId: number;
-    collectedCardId: number;
-    collectedCard: CardData;
-}
+import type { Card, CollectionResponse } from "@/lib/types";
 
 export default function Collection() {
     const [selectedTag, setSelectedTag] = useState("All");
-    const [collectedCards, setCollectedCards] = useState<CardData[]>([]);
+    const [collectedCards, setCollectedCards] = useState<Card[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -61,15 +48,18 @@ export default function Collection() {
                 console.log("collected cards:", collections.length);
 
                 // collectedCard 정보를 추출하여 카드 데이터로 변환
-                const collectedCardsData = collections.map(
-                    (collection, idx) => ({
-                        id: idx,
+                const collectedCardsData: Card[] = collections.map(
+                    (collection) => ({
+                        id: collection.collectedCard.id,
+                        nickname: collection.collectedCard.nickname,
+                        bio: collection.collectedCard.bio,
                         role: collection.collectedCard.role,
                         imageURI: collection.collectedCard.imageURI,
                         address: collection.collectedCard.address,
                         basename:
                             collection.collectedCard.basename ||
                             "default.base.name",
+                        skills: collection.collectedCard.skills,
                     })
                 );
 
