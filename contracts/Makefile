@@ -55,9 +55,9 @@ is-allowed-social-key:
 ## @notice [조회] 특정 주소가 이미 민팅했는지 확인합니다.
 # Usage: make check-has-minted ADDRESS=<user_address>
 check-has-minted:
-	@echo "🔍 Checking mint status for $(ADDRESS)..."
-	@cast call $(BASE_CARD_ADDRESS) "hasMinted(address)(bool)" $(ADDRESS) \
-		--rpc-url "$(NETWORK)"
+	@ADDRESS=$(filter-out $@,$(MAKECMDGOALS)); \
+	echo "🔍 Checking mint status for $$ADDRESS..."; \
+	cast call $(BASE_CARD_ADDRESS) "hasMinted(address)(bool)" $$ADDRESS --rpc-url "$(NETWORK)"
 
 ## @notice [조회] CARD 토큰의 Decimals를 가져옵니다.
 # Usage: make get-token-decimals
