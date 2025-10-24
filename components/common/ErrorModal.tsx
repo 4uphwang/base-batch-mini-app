@@ -1,4 +1,4 @@
-import React from "react";
+import { IoClose } from "react-icons/io5";
 
 interface ErrorModalProps {
     isOpen: boolean;
@@ -28,19 +28,10 @@ export default function ErrorModal({
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
                     aria-label="Close modal"
+                    className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                    <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                    >
-                        <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
+                    <IoClose size={24} />
                 </button>
 
                 {/* Content */}

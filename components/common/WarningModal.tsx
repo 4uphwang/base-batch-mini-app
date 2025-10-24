@@ -1,4 +1,4 @@
-import React from "react";
+import { IoClose, IoWarningOutline } from "react-icons/io5";
 
 interface WarningModalProps {
     isOpen: boolean;
@@ -28,38 +28,17 @@ export default function WarningModal({
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
                     aria-label="Close modal"
+                    className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                    <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                    >
-                        <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
+                    <IoClose size={24} />
                 </button>
 
                 {/* Content */}
                 <div className="flex flex-col items-center justify-center flex-1 text-center space-y-4 pt-4">
                     {/* Warning Icon */}
                     <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <svg
-                            className="w-8 h-8 text-yellow-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                        </svg>
+                        <IoWarningOutline className=" text-yellow-400 mb-1" size={48} />
                     </div>
 
                     <h2 className="text-2xl font-bold text-yellow-600">
@@ -74,7 +53,7 @@ export default function WarningModal({
                 {/* OK button */}
                 <button
                     onClick={onClose}
-                    className="w-full bg-yellow-600 text-white py-3 rounded-xl font-semibold text-base hover:bg-yellow-700 transition-colors"
+                    className="w-full bg-yellow-600 text-white py-3 rounded-xl font-semibold text-base hover:bg-yellow-700 transition-colors mt-2"
                 >
                     {buttonText}
                 </button>

@@ -1,9 +1,10 @@
 // import { SafeArea } from "@coinbase/onchainkit/minikit";
+import "./globals.css";
+
 import { minikitConfig } from "@/minikit.config";
 import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { Metadata, Viewport } from "next";
 import { Inter, K2D, Source_Code_Pro } from "next/font/google";
-import "./globals.css";
 import { RootProvider } from "./rootProvider";
 
 const inter = Inter({
@@ -50,14 +51,14 @@ export default function RootLayout({
 }>) {
 
     return (
-        <RootProvider>
-            <html lang="en">
-                <body
-                    className={`${inter.variable} ${sourceCodePro.variable} ${k2d.variable}`}
-                >
+        <html lang="en">
+            <body
+                className={`${inter.variable} ${sourceCodePro.variable} ${k2d.variable}`}
+            >
+                <RootProvider>
                     <SafeArea>{children}</SafeArea>
-                </body>
-            </html>
-        </RootProvider>
+                </RootProvider>
+            </body>
+        </html>
     );
 }

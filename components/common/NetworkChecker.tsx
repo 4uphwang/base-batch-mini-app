@@ -1,8 +1,8 @@
 "use client";
 
+import { activeChain } from "@/lib/wagmi";
 import { useEffect, useState } from "react";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
-import { activeChain, isDevelopment } from "@/lib/wagmi";
 
 /**
  * NetworkChecker Component
@@ -32,12 +32,13 @@ export function NetworkChecker() {
 
     // Check network when user connects or changes
     useEffect(() => {
-        if (isConnected && address && !isCorrectChain) {
-            setShowModal(true);
-        } else {
-            setShowModal(false);
+        const shouldShow = isConnected && address && !isCorrectChain;
+
+        // 현재 상태와 다를 때만 업데이트
+        if (shouldShow !== showModal) {
+            setShowModal(Boolean(shouldShow));
         }
-    }, [isConnected, address, isCorrectChain]);
+    }, [isConnected, address, isCorrectChain, showModal]);
 
     const handleSwitchNetwork = async () => {
         if (!switchChain) return;

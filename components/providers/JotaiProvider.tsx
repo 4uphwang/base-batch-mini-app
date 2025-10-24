@@ -3,6 +3,6 @@
 import { Provider as JotaiProvider } from "jotai";
 import { ReactNode } from "react";
 
-export function JotaiClientProvider({ children }: { children: ReactNode }) {
+export default function JotaiClientProvider({ children }: { children: ReactNode }) {
     return <JotaiProvider>{children}</JotaiProvider>;
 }

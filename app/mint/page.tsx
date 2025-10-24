@@ -1,28 +1,30 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { userProfileAtom } from "@/store/userProfileState";
 import { useCardGeneration } from "@/hooks/useCardGeneration";
 import { useMintBaseCard } from "@/hooks/useMintBaseCard";
-import { convertFileToBase64DataURL } from "@/lib/imageUtils";
+import { userProfileAtom } from "@/store/userProfileState";
 
 import BackButton from "@/components/common/BackButton";
-import SuccessModal from "@/components/common/SuccessModal";
 import ErrorModal from "@/components/common/ErrorModal";
-import WarningModal from "@/components/common/WarningModal";
 import LoadingModal from "@/components/common/LoadingModal";
+import { ModernToggle } from "@/components/common/ModernToggle";
+import SuccessModal from "@/components/common/SuccessModal";
+import WarningModal from "@/components/common/WarningModal";
 import {
     FloatingInput,
     FloatingLabel,
 } from "@/components/ui/floating-label-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { convertFileToBase64DataURL } from "@/lib/imageUtils";
+import FALLBACK_PROFILE_IMAGE from "@/public/assets/empty_pfp.png";
 import Image from "next/image";
-import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { CiCircleCheck, CiEdit } from "react-icons/ci";
+import { FaPlus } from "react-icons/fa";
 import { useAccount } from "wagmi";
 
 const MAX_SKILLS = 8;
@@ -65,25 +67,25 @@ interface SkillTagProps {
 
 const SkillTag = ({ skill, isSelected, onClick }: SkillTagProps) => {
     const baseClasses =
-        "py-1 px-3 text-sm rounded-full transition-colors duration-150 flex items-center";
+        " px-3 text-sm rounded-full transition-colors duration-150 flex items-center h-8";
     const selectedClasses =
-        "bg-[#DFE9FF] text-primary-1 border border-primary-1";
+        "bg-[#DFE9FF] text-primary-1 outline outline-primary-1";
     const defaultClasses =
-        "bg-background-light-2 text-gray-700 hover:bg-gray-200 border border-transparent";
+        "bg-background-light-2 text-gray-700 hover:bg-gray-200 outline outline-transparent";
 
+    const rotationClass = isSelected ? 'rotate-0' : '-rotate-45';
     return (
-        <button
-            type="button"
+        <div
+            // type="button"
             onClick={onClick}
-            className={`${baseClasses} ${
-                isSelected ? selectedClasses : defaultClasses
-            }`}
+            className={`${baseClasses} ${isSelected ? selectedClasses : defaultClasses}`}
         >
-            <span>{skill}</span>
-            <span className="ml-1 text-xs  font-bold w-2">
-                {isSelected ? "✕" : "+"}
-            </span>
-        </button>
+            {skill}
+            <div className={`ml-1 text-[10px] font-semibold w-2 transform transition-transform duration-300 ${rotationClass}`} >
+                ✕
+            </div>
+
+        </div>
     );
 };
 
@@ -91,7 +93,7 @@ export default function Mint() {
     const router = useRouter();
     const [userProfile] = useAtom(userProfileAtom);
     const username = userProfile.username;
-
+    const defaultProfileUrl = userProfile.pfpUrl;
     const { address } = useAccount();
 
     // Card generation hook
@@ -111,6 +113,7 @@ export default function Mint() {
         error: mintError,
         hasMinted,
     } = useMintBaseCard(address);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
@@ -142,64 +145,86 @@ export default function Mint() {
         }
     }, [isMintSuccess]);
 
-    const handleCloseSuccessModal = () => {
+
+    const handleImageClick = useCallback(() => {
+        // 이미지를 클릭하면 숨겨진 파일 인풋을 클릭합니다.
+        fileInputRef.current?.click();
+    }, []); // 의존성 없음
+
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setProfileImageFile(file);
+        }
+    }, [setProfileImageFile]); // setProfileImageFile는 React 보장으로 안정적이지만 명시
+
+    const handleResetImage = useCallback(() => {
+        setProfileImageFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }, [setProfileImageFile]);
+
+    const handleCloseSuccessModal = useCallback(() => {
         setShowSuccessModal(false);
         router.push("/mycard");
-    };
+    }, [router.push]);
 
-    const handleCloseErrorModal = () => {
+    const handleCloseErrorModal = useCallback(() => {
         setShowErrorModal(false);
-    };
+    }, [setShowErrorModal]);
 
-    const handleCloseWarningModal = () => {
+    const handleCloseWarningModal = useCallback(() => {
         setShowWarningModal(false);
-    };
+    }, [setShowWarningModal]);
 
-    const showError = (title: string, description: string) => {
+    const showError = useCallback((title: string, description: string) => {
         setErrorMessage({ title, description });
         setShowErrorModal(true);
-    };
+    }, [setErrorMessage, setShowErrorModal]);
 
-    const showWarning = (title: string, description: string) => {
+    const showWarning = useCallback((title: string, description: string) => {
         setWarningMessage({ title, description });
         setShowWarningModal(true);
-    };
+    }, [setWarningMessage, setShowWarningModal]);
 
-    const toggleSkill = (skill: string) => {
+    const toggleSkill = useCallback((skill: string) => {
         setSelectedSkills((prev) => {
             if (prev.includes(skill)) {
-                // 이미 선택된 경우 제거
                 return prev.filter((s) => s !== skill);
             } else {
-                // 선택되지 않은 경우 추가 (최대 개수 확인)
                 if (prev.length >= MAX_SKILLS) {
-                    // 사용자에게 명확히 알림
                     showWarning(
                         "Maximum Skills Reached",
                         `You can select up to ${MAX_SKILLS} skills. Please deselect a skill to add a new one.`
                     );
-                    return prev; // 추가하지 않고 기존 배열 반환
+                    return prev;
                 }
                 return [...prev, skill];
             }
         });
-    };
+    }, [setSelectedSkills, showWarning]);
 
-    const handleAddWebsite = () => {
+    const handleAddWebsite = useCallback(() => {
         const urlToAdd = newWebsite.trim();
         if (!urlToAdd) return;
-        if (websites.includes(urlToAdd)) return;
-        if (websites.length < MAX_WEBSITES) {
-            setWebsites((prev) => [...prev, urlToAdd]);
-            setNewWebsite("");
-        }
-    };
 
-    const handleRemoveWebsite = (urlToRemove: string) => {
+        // newWebsite 상태와 websites 상태를 사용하므로 의존성 배열에 포함
+        setWebsites((prev) => {
+            if (prev.includes(urlToAdd)) return prev;
+            if (prev.length < MAX_WEBSITES) {
+                setNewWebsite("");
+                return [...prev, urlToAdd];
+            }
+            return prev;
+        });
+    }, [newWebsite, setWebsites, setNewWebsite]);
+
+    const handleRemoveWebsite = useCallback((urlToRemove: string) => {
         setWebsites((prev) => prev.filter((url) => url !== urlToRemove));
-    };
+    }, [setWebsites]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name || !role) {
@@ -214,14 +239,27 @@ export default function Mint() {
             // Use default profile image if no file is uploaded
             let imageToUse: File;
 
+            // 이미지 URL 결정 (StaticImageData 처리 로직 추가)
+            const imageUrlToFetch = defaultProfileUrl || FALLBACK_PROFILE_IMAGE;
+
+            // URL을 순수 문자열로 변환합니다. StaticImageData 타입(객체)일 경우 src 속성을 사용합니다.
+            const urlString = (typeof imageUrlToFetch === 'object' && 'src' in imageUrlToFetch)
+                ? imageUrlToFetch.src
+                : String(imageUrlToFetch);
+
+
             if (profileImageFile) {
                 imageToUse = profileImageFile;
             } else {
                 // Fetch default image and convert to File
-                const response = await fetch("/assets/default-profile.png");
+
+                // Note: If defaultProfileUrl is an external image, 
+                // fetching it might cause CORS issues in a real environment. 
+                // Assuming it's a proxy-able or non-CORS restricted URL for this demo.
+                const response = await fetch(urlString); // 여기서 urlString 사용
                 const blob = await response.blob();
-                imageToUse = new File([blob], "default-profile.png", {
-                    type: "image/png",
+                imageToUse = new File([blob], "profile-image.png", {
+                    type: blob.type || "image/png",
                 });
             }
 
@@ -356,7 +394,28 @@ export default function Mint() {
                     : "Failed to generate card. Please try again."
             );
         }
-    };
+    }, [
+        name,
+        role,
+        profileImageFile,
+        defaultProfileUrl,
+        generateCard,
+        showError,
+        isBaseNameIncluded,
+        username,
+        selectedSkills,
+        address,
+        mintCard,
+        twitter,
+        github,
+        facaster,
+        bio
+    ]);
+
+    const profileImageUrl = profileImageFile
+        ? URL.createObjectURL(profileImageFile) // 1. 파일이 업로드된 경우 (최우선)
+        : defaultProfileUrl || FALLBACK_PROFILE_IMAGE; // 2. userProfile.pfpUrl이 있으면 사용, 없으면 로컬 기본 이미지 사용 (최종 폴백)
+
 
     return (
         <div className="bg-white text-black">
@@ -385,38 +444,35 @@ export default function Mint() {
                 {/* 프로필 이미지 영역 */}
                 <div className="w-full space-y-3">
                     <Label className="text-lg font-medium">Profile Image</Label>
-                    <div className="flex items-center gap-4">
-                        <div className="w-24 h-24 rounded-xl border overflow-hidden relative">
+                    <div className="flex items-center gap-4 relative">
+                        {/* 이미지 미리보기 및 편집 버튼 영역 */}
+                        <div className="relative w-24 h-24 rounded-xl border overflow-hidden cursor-pointer" >
                             <Image
-                                src={
-                                    profileImageFile
-                                        ? URL.createObjectURL(profileImageFile)
-                                        : "/assets/default-profile.png"
-                                }
+                                src={profileImageUrl}
                                 alt="profile preview"
-                                fill
-                                sizes="96px"
-                                className="object-cover"
+                                className="object-fill select-none"
+                                fill={true}
+                                style={{ objectFit: "cover" }}
                             />
                         </div>
-                        <div className="flex-1 space-y-2">
-                            <input
-                                type="file"
-                                accept="image/png, image/jpeg, image/jpg"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        setProfileImageFile(file);
-                                    }
-                                }}
-                                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            />
-                            <p className="text-xs text-gray-500">
-                                {profileImageFile
-                                    ? "Custom image selected"
-                                    : "Using default profile image. Upload to customize."}
-                            </p>
+                        <div
+                            onClick={handleImageClick}
+                            className="absolute -bottom-4 left-[72px] w-11 h-11 flex items-center justify-center z-50"
+                        >
+                            <div className="p-1 bg-blue-500 rounded-full shadow-md">
+                                <CiEdit className="w-4 h-4 text-white" />
+                            </div>
                         </div>
+
+                        {/* 실제 파일 input (숨김) */}
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/jpg"
+                            onChange={handleFileChange}
+                            ref={fileInputRef}
+                            className="hidden" // 💡 파일 input을 숨깁니다.
+                        />
+
                     </div>
                 </div>
 
@@ -447,13 +503,12 @@ export default function Mint() {
                                     key={roleOption}
                                     type="button"
                                     onClick={() => setRole(roleOption)}
-                                    className={`p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
-                                        role === roleOption
-                                            ? "bg-gradient-to-r from-[#0050FF] to-[#4A90E2] text-white border-transparent shadow-lg"
-                                            : "bg-white text-black border-gray-200 hover:border-[#0050FF] hover:shadow-md"
-                                    }`}
+                                    className={`p-4 rounded-2xl outline-2 transition-all duration-200 text-left ${role === roleOption
+                                        ? "bg-gradient-to-r from-[#0050FF] to-[#4A90E2] text-white border-transparent shadow-lg"
+                                        : "bg-white text-black border-gray-200 hover:outline-[#0050FF] hover:shadow-md"
+                                        }`}
                                 >
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between relative">
                                         <div>
                                             <h3 className="text-lg font-k2d-bold mb-1">
                                                 {roleOption}
@@ -468,11 +523,7 @@ export default function Mint() {
                                             </p>
                                         </div>
                                         {role === roleOption && (
-                                            <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                                <span className="text-white text-sm">
-                                                    ✓
-                                                </span>
-                                            </div>
+                                            <CiCircleCheck className="w-6 h-6 rounded-full absolute right-0" />
                                         )}
                                     </div>
                                 </button>
@@ -555,7 +606,7 @@ export default function Mint() {
                             type="url"
                             value={newWebsite}
                             onChange={(e) => setNewWebsite(e.target.value)}
-                            className="flex-1 p-3 text-base h-12 border border-gray-300"
+                            className="flex-1 p-3 text-base h-12 border border-gray-300 placeholder:text-sm"
                             placeholder="https://your-site.com"
                             disabled={websites.length >= MAX_WEBSITES}
                         />
@@ -567,12 +618,11 @@ export default function Mint() {
                                 websites.length >= MAX_WEBSITES
                             }
                             // 🚨 w-12 h-12로 크기를 Input과 동일하게 고정
-                            className={`w-12 h-12 flex items-center justify-center rounded-lg font-medium text-white transition-colors ${
-                                !newWebsite.trim() ||
+                            className={`w-12 h-12 flex items-center justify-center rounded-lg font-medium text-white transition-colors ${!newWebsite.trim() ||
                                 websites.length >= MAX_WEBSITES
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-blue-600 hover:bg-blue-700"
-                            }`}
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700"
+                                }`}
                         >
                             {/* 아이콘 크기를 조정하고, flex-center로 중앙 정렬 */}
                             <FaPlus size={18} />
@@ -581,18 +631,16 @@ export default function Mint() {
 
                     {/* 현재 웹사이트 목록 */}
                     {websites.length > 0 && (
-                        <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[40px]">
+                        <div className="flex flex-wrap gap-2">
                             {websites.map((url) => (
                                 <div
                                     key={url}
-                                    className="py-1 px-3 text-sm rounded-full bg-background-light-2 text-gray-800 flex items-center"
+                                    className="pl-3 text-sm rounded-full bg-background-light-2 text-gray-800 flex items-center"
                                 >
-                                    <span className="truncate max-w-[150px]">
-                                        {url}
-                                    </span>
+                                    {url}
                                     <button
                                         type="button"
-                                        className="ml-1 text-red-400 hover:text-red-600 font-bold text-base transition-colors "
+                                        className="w-8 h-8 text-red-400 hover:text-red-600 font-bold text-[10px] transition-colors "
                                         onClick={() => handleRemoveWebsite(url)}
                                         aria-label={`${url} Delete`}
                                     >
@@ -614,21 +662,19 @@ export default function Mint() {
                         Base Name
                     </Label>
                     <div className="flex gap-x-2 items-center">
-                        <div className="relative flex-1">
-                            <input
-                                id="base_name_input"
-                                type="text"
-                                value={username || undefined}
-                                disabled
-                                className="w-full p-3 text-lg h-12 border border-gray-400 rounded-lg bg-gray-100 text-gray-700 cursor-default"
-                            />
-                        </div>
+                        <input
+                            id="base_name_input"
+                            type="text"
+                            value={username || undefined}
+                            disabled
+                            className="w-full p-3 text-lg h-12 border border-gray-400 rounded-lg bg-gray-100 text-gray-700 cursor-default"
+                        />
 
-                        <Switch
-                            id="include-base-name"
-                            disabled={!username}
+                        <ModernToggle
                             checked={isBaseNameIncluded}
-                            onCheckedChange={setIsBaseNameIncluded}
+                            onChange={setIsBaseNameIncluded}
+                            disabled={!username}
+                        // color="green" // 색상 변경 가능
                         />
                     </div>
                 </div>
@@ -642,83 +688,87 @@ export default function Mint() {
                         id="bio"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base resize-none"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-base resize-none placeholder:text-sm"
                         rows={4}
                         placeholder="Summarize your experience and goals."
                     />
                 </div>
 
                 {/* Error Messages Only */}
-                {generationError && (
-                    <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-700 text-sm">
-                            ❌ {generationError}
-                        </p>
-                    </div>
-                )}
+                {
+                    generationError && (
+                        <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-700 text-sm">
+                                ❌ {generationError}
+                            </p>
+                        </div>
+                    )
+                }
 
-                {mintError && (
-                    <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-700 text-sm">
-                            ❌ Mint Error: {mintError}
-                        </p>
-                    </div>
-                )}
+                {
+                    mintError && (
+                        <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-red-700 text-sm">
+                                ❌ Mint Error: {mintError}
+                            </p>
+                        </div>
+                    )
+                }
 
                 {/* 민팅 버튼 */}
                 <button
                     type="submit"
                     disabled={isGenerating || isMintPending || isMintConfirming}
-                    className={`w-full py-3 mt-6 text-lg font-bold rounded-lg text-white transition-colors ${
-                        isGenerating || isMintPending || isMintConfirming
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : isMintSuccess
+                    className={`w-full py-3 mt-6 text-lg font-bold rounded-lg text-white transition-colors ${isGenerating || isMintPending || isMintConfirming
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : isMintSuccess
                             ? "bg-green-600 hover:bg-green-700"
                             : "bg-blue-600 hover:bg-blue-700"
-                    }`}
+                        }`}
                 >
                     {isGenerating
                         ? "GENERATING..."
                         : isMintPending
-                        ? "PREPARING..."
-                        : isMintConfirming
-                        ? "CONFIRMING..."
-                        : isMintSuccess
-                        ? "✓ MINTED!"
-                        : "MINT YOUR BASECARD"}
+                            ? "PREPARING..."
+                            : isMintConfirming
+                                ? "CONFIRMING..."
+                                : isMintSuccess
+                                    ? "✓ MINTED!"
+                                    : "MINT YOUR BASECARD"}
                 </button>
-            </form>
+            </form >
 
             {/* Loading Modal - Card Generation */}
-            <LoadingModal
+            < LoadingModal
                 isOpen={isGenerating}
                 title="Generating Card..."
                 description="Creating your BaseCard design and uploading to IPFS"
             />
 
             {/* Loading Modal - Preparing Transaction */}
-            <LoadingModal
-                isOpen={isMintPending && !isGenerating}
+            < LoadingModal
+                isOpen={isMintPending && !isGenerating
+                }
                 title="Preparing Transaction..."
                 description="Please approve the transaction in your wallet"
             />
 
             {/* Loading Modal - Confirming Transaction */}
-            <LoadingModal
+            < LoadingModal
                 isOpen={isMintConfirming}
                 title="Confirming Transaction..."
                 description="Waiting for blockchain confirmation"
             />
 
             {/* Success Modal */}
-            <SuccessModal
+            < SuccessModal
                 isOpen={showSuccessModal}
                 onClose={handleCloseSuccessModal}
                 transactionHash={mintHash}
             />
 
             {/* Error Modal */}
-            <ErrorModal
+            < ErrorModal
                 isOpen={showErrorModal}
                 onClose={handleCloseErrorModal}
                 title={errorMessage.title}
@@ -726,12 +776,12 @@ export default function Mint() {
             />
 
             {/* Warning Modal */}
-            <WarningModal
+            < WarningModal
                 isOpen={showWarningModal}
                 onClose={handleCloseWarningModal}
                 title={warningMessage.title}
                 description={warningMessage.description}
             />
-        </div>
+        </div >
     );
 }
