@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import type { Card } from "@/lib/types";
+import { safeImageURI } from "@/lib/imageUtils";
 import bountiesData from "@/db/seed/mock-bounties.json";
 import hackathonsData from "@/db/seed/mock-hackathon.json";
 
@@ -466,38 +467,43 @@ export default function Earn() {
                                         <div className="flex gap-4">
                                             {/* Builder Card Image */}
                                             <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 relative overflow-hidden">
-                                                {builder.imageURI ? (
-                                                    <Image
-                                                        src={
-                                                            builder.imageURI.startsWith(
-                                                                "ipfs://"
-                                                            )
-                                                                ? `https://ipfs.io/ipfs/${builder.imageURI.replace(
-                                                                      "ipfs://",
-                                                                      ""
-                                                                  )}`
-                                                                : builder.imageURI
-                                                        }
-                                                        alt={builder.nickname}
-                                                        fill
-                                                        className="object-contain"
-                                                        onError={(e) => {
-                                                            e.currentTarget.src =
-                                                                "/assets/default-profile.png";
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <svg
-                                                            width="40"
-                                                            height="40"
-                                                            viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                        >
-                                                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                                                        </svg>
-                                                    </div>
-                                                )}
+                                                {(() => {
+                                                    const imageUrl =
+                                                        safeImageURI(
+                                                            builder.imageURI,
+                                                            "/assets/default-profile.png"
+                                                        );
+
+                                                    return imageUrl ? (
+                                                        <Image
+                                                            src={imageUrl}
+                                                            alt={
+                                                                builder.nickname ||
+                                                                "Builder profile"
+                                                            }
+                                                            fill
+                                                            className="object-contain"
+                                                            unoptimized={imageUrl.startsWith(
+                                                                "data:"
+                                                            )}
+                                                            onError={(e) => {
+                                                                e.currentTarget.src =
+                                                                    "/assets/default-profile.png";
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                            <svg
+                                                                width="40"
+                                                                height="40"
+                                                                viewBox="0 0 24 24"
+                                                                fill="currentColor"
+                                                            >
+                                                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                                                            </svg>
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
 
                                             {/* Builder Info */}

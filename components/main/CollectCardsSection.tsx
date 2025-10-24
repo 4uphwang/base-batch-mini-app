@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { CiSearch } from "react-icons/ci";
+import Image from "next/image";
+import { safeImageURI } from "@/lib/imageUtils";
 
 interface CardData {
     id: number;
@@ -20,8 +22,10 @@ export default function CollectCardsSection() {
     const [cards, setCards] = useState<CardData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeCardId, setActiveCardId] = useState<number | null>(null);
 
     const tags = ["All", "Designer", "Developer", "Marketer"];
+    const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
     // API에서 카드 데이터 가져오기
     useEffect(() => {
@@ -68,6 +72,62 @@ export default function CollectCardsSection() {
 
         return matchesSearch && matchesTag;
     });
+
+    // Intersection Observer로 중앙 카드 감지
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    // 의미: 카드가 화면에 50% 이상 보일 때 활성화
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.9) {
+                        const cardId = parseInt(
+                            entry.target.getAttribute("data-card-id") || "0"
+                        );
+                        setActiveCardId(cardId);
+                    }
+                });
+            },
+            {
+                root: null,
+
+                // 더 넓은 영역 (상하 10%씩 제외 = 80% 감지)
+                // rootMargin: "-10% 0px -10% 0px"
+                // 더 좁은 영역 (상하 40%씩 제외 = 20% 감지 - 정확히 중앙만)
+                // rootMargin: "-40% 0px -40% 0px"
+                // 화면 전체 (감지 영역 제한 없음)
+                // rootMargin: "0px"
+                // 정확히 중앙 한 점 (거의 50% 지점)
+                // rootMargin: "-49% 0px -49% 0px"
+
+                rootMargin: "-25% 0px -25% 0px", // 중앙 50% 영역
+                threshold: [0, 0.25, 0.5, 0.75, 1],
+            }
+        );
+
+        // Copy refs to local variable for cleanup
+        const currentRefs = Array.from(cardRefs.current.values());
+
+        currentRefs.forEach((ref) => {
+            if (ref) observer.observe(ref);
+        });
+
+        return () => {
+            currentRefs.forEach((ref) => {
+                if (ref) observer.unobserve(ref);
+            });
+        };
+    }, [filteredCards]);
+
+    const setCardRef = useCallback(
+        (id: number, element: HTMLDivElement | null) => {
+            if (element) {
+                cardRefs.current.set(id, element);
+            } else {
+                cardRefs.current.delete(id);
+            }
+        },
+        []
+    );
 
     return (
         <div className="bg-white px-4 sm:px-6 py-6 sm:py-8">
@@ -150,46 +210,115 @@ export default function CollectCardsSection() {
                         </p>
                     </div>
                 ) : (
-                    filteredCards.map((card) => (
-                        <div
-                            key={card.id}
-                            className="bg-gradient-to-r from-[#0050FF] to-[#4A90E2] rounded-2xl p-6 shadow-lg"
-                        >
-                            <div className="flex items-center">
-                                {/* Card Info */}
-                                <div className="flex-1 text-white">
-                                    <h3 className="text-xl font-k2d-bold mb-1">
-                                        {card.nickname}
-                                    </h3>
-                                    <p className="text-sm text-white/80 mb-1 font-k2d-regular">
-                                        {card.basename || card.address}
-                                    </p>
-                                    <p className="text-base font-k2d-semibold">
-                                        {card.role || "Builder"}
-                                    </p>
-                                    {card.skills && card.skills.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 mt-2">
-                                            {card.skills
-                                                .slice(0, 3)
-                                                .map((skill, index) => (
-                                                    <span
-                                                        key={index}
-                                                        className="px-2 py-1 bg-white/20 rounded text-xs font-k2d-regular"
-                                                    >
-                                                        {skill}
-                                                    </span>
-                                                ))}
-                                            {card.skills.length > 3 && (
-                                                <span className="px-2 py-1 bg-white/20 rounded text-xs font-k2d-regular">
-                                                    +{card.skills.length - 3}
-                                                </span>
+                    <div className="flex flex-col -space-y-16 sm:-space-y-20 md:-space-y-24 mb-24">
+                        {filteredCards.map((card) => (
+                            <div
+                                key={card.id}
+                                ref={(el) => setCardRef(card.id, el)}
+                                data-card-id={card.id}
+                                className={`group cursor-pointer transition-all duration-700 ease-in-out ${
+                                    activeCardId === card.id
+                                        ? "scale-110 z-20"
+                                        : "scale-100 z-10"
+                                }`}
+                                style={{
+                                    opacity:
+                                        activeCardId === null
+                                            ? 1
+                                            : activeCardId === card.id
+                                            ? 1
+                                            : 0.7,
+                                }}
+                                onClick={() => {
+                                    window.open(
+                                        `https://base.app/profile/${card.address}`,
+                                        "_blank"
+                                    );
+                                }}
+                            >
+                                <div className="relative w-full h-56 sm:h-64 md:h-72 lg:h-80 shadow-xl rounded-2xl overflow-hidden bg-white border-4 border-white">
+                                    <Image
+                                        src={
+                                            safeImageURI(
+                                                card.imageURI,
+                                                "/assets/default-profile.png"
+                                            ) || "/assets/default-profile.png"
+                                        }
+                                        alt={
+                                            card.nickname ||
+                                            card.address ||
+                                            "Card image"
+                                        }
+                                        fill
+                                        className="object-contain"
+                                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 100vw, 100vw"
+                                        unoptimized={
+                                            card.imageURI?.startsWith(
+                                                "data:"
+                                            ) || false
+                                        }
+                                        onError={(e) => {
+                                            // 이미지 로드 실패 시 기본 이미지로 대체
+                                            e.currentTarget.src =
+                                                "/assets/default-profile.png";
+                                        }}
+                                    />
+
+                                    {/* Overlay Info - 중앙 카드에만 표시 */}
+                                    {activeCardId === card.id && (
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 animate-fade-in">
+                                            <h3 className="font-k2d-bold text-lg text-white truncate">
+                                                {card.nickname}
+                                            </h3>
+                                            <p className="text-sm text-white/90 font-k2d-regular truncate">
+                                                {card.basename || card.address}
+                                            </p>
+                                            {card.role && (
+                                                <p className="text-sm text-blue-300 font-k2d-medium mt-1">
+                                                    {card.role}
+                                                </p>
                                             )}
+                                            {card.skills &&
+                                                card.skills.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mt-2">
+                                                        {card.skills
+                                                            .slice(0, 3)
+                                                            .map(
+                                                                (
+                                                                    skill,
+                                                                    idx
+                                                                ) => (
+                                                                    <span
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular"
+                                                                    >
+                                                                        {skill}
+                                                                    </span>
+                                                                )
+                                                            )}
+                                                        {card.skills.length >
+                                                            3 && (
+                                                            <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular">
+                                                                +
+                                                                {card.skills
+                                                                    .length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
                                         </div>
+                                    )}
+
+                                    {/* Active Indicator */}
+                                    {activeCardId === card.id && (
+                                        <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50" />
                                     )}
                                 </div>
                             </div>
-                        </div>
-                    ))
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

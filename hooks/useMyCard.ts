@@ -28,8 +28,6 @@ async function fetchCardByAddress(address: string): Promise<Card> {
     }
 
     const data = await response.json();
-    console.log(`🔍 My Card:`, data);
-
     return data;
 }
 

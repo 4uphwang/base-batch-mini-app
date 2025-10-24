@@ -5,6 +5,7 @@ import Image from "next/image";
 import BackButton from "@/components/common/BackButton";
 import { useAccount } from "wagmi";
 import { useMyCard } from "@/hooks/useMyCard";
+import { safeImageURI } from "@/lib/imageUtils";
 import type { Card, CollectionResponse } from "@/lib/types";
 
 export default function Collection() {
@@ -169,16 +170,25 @@ export default function Collection() {
                                     <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 shadow-md transition-transform group-hover:scale-105">
                                         <Image
                                             src={
-                                                `https://ipfs.io/ipfs/${card.imageURI?.replace(
-                                                    "ipfs://",
-                                                    ""
-                                                )}` ||
+                                                safeImageURI(
+                                                    card.imageURI,
+                                                    "/assets/default-profile.png"
+                                                ) ||
                                                 "/assets/default-profile.png"
                                             }
-                                            alt={card.address}
+                                            alt={
+                                                card.nickname ||
+                                                card.address ||
+                                                "Card image"
+                                            }
                                             fill
                                             className="object-contain"
                                             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                                            unoptimized={
+                                                card.imageURI?.startsWith(
+                                                    "data:"
+                                                ) || false
+                                            }
                                             onError={(e) => {
                                                 // 이미지 로드 실패 시 기본 이미지로 대체
                                                 e.currentTarget.src =

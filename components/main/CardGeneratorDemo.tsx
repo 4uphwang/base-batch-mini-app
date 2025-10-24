@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCardGeneration } from "@/hooks/useCardGeneration";
+import { convertFileToBase64DataURL } from "@/lib/imageUtils";
 import Image from "next/image";
 
 export default function CardGeneratorDemo() {
@@ -55,11 +56,6 @@ export default function CardGeneratorDemo() {
         setSkills(skills.filter((skill) => skill !== skillToRemove));
     };
 
-    // 이미지를 base64 data URL로 변환하는 함수
-    const imageToDataURL = (base64: string, mimeType: string): string => {
-        return `data:${mimeType};base64,${base64}`;
-    };
-
     // DB에 카드 저장하는 함수
     const saveCardToDatabase = async () => {
         if (!profileImageFile) {
@@ -77,15 +73,9 @@ export default function CardGeneratorDemo() {
         setSaveSuccess(false);
 
         try {
-            // 업로드된 이미지를 읽어 Base64로 인코딩
-            const arrayBuffer = await profileImageFile.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            const imageBase64 = buffer.toString("base64");
-
-            // data URL 형식으로 변환 (data:image/png;base64,...)
-            const profileImageDataURL = imageToDataURL(
-                imageBase64,
-                profileImageFile.type
+            // File을 base64 data URL로 변환
+            const profileImageDataURL = await convertFileToBase64DataURL(
+                profileImageFile
             );
 
             const response = await fetch("/api/cards", {
