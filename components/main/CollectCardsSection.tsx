@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { CiSearch } from "react-icons/ci";
-import Image from "next/image";
 import { safeImageURI } from "@/lib/imageUtils";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CiSearch } from "react-icons/ci";
 
 interface CardData {
     id: number;
@@ -132,7 +132,7 @@ export default function CollectCardsSection() {
     return (
         <div className="bg-white px-4 sm:px-6 py-6 sm:py-8">
             {/* Header */}
-            <div className="text-left mb-6 sm:mb-8 pl-4 sm:pl-6 md:pl-8 lg:pl-12">
+            <div className="text-left mb-6">
                 <h2
                     className="text-3xl sm:text-4xl font-k2d-bold text-black mb-2"
                     style={{
@@ -171,11 +171,10 @@ export default function CollectCardsSection() {
                     <button
                         key={tag}
                         onClick={() => setSelectedTag(tag)}
-                        className={`px-3 py-1.5 rounded-full font-k2d-medium transition-colors text-xs flex-1 min-w-0 ${
-                            selectedTag === tag
+                        className={`px-3 py-1.5 rounded-full font-k2d-medium transition-colors text-xs flex-1 min-w-0 ${selectedTag === tag
                                 ? "bg-[#0050FF] text-white"
                                 : "bg-white text-black border border-gray-200 hover:border-[#0050FF]"
-                        }`}
+                            }`}
                     >
                         {tag}
                     </button>
@@ -216,18 +215,17 @@ export default function CollectCardsSection() {
                                 key={card.id}
                                 ref={(el) => setCardRef(card.id, el)}
                                 data-card-id={card.id}
-                                className={`group cursor-pointer transition-all duration-700 ease-in-out ${
-                                    activeCardId === card.id
+                                className={`group cursor-pointer transition-all duration-700 ease-in-out ${activeCardId === card.id
                                         ? "scale-110 z-20"
                                         : "scale-100 z-10"
-                                }`}
+                                    }`}
                                 style={{
                                     opacity:
                                         activeCardId === null
                                             ? 1
                                             : activeCardId === card.id
-                                            ? 1
-                                            : 0.7,
+                                                ? 1
+                                                : 0.7,
                                 }}
                                 onClick={() => {
                                     window.open(
@@ -300,12 +298,12 @@ export default function CollectCardsSection() {
                                                             )}
                                                         {card.skills.length >
                                                             3 && (
-                                                            <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular">
-                                                                +
-                                                                {card.skills
-                                                                    .length - 3}
-                                                            </span>
-                                                        )}
+                                                                <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular">
+                                                                    +
+                                                                    {card.skills
+                                                                        .length - 3}
+                                                                </span>
+                                                            )}
                                                     </div>
                                                 )}
                                         </div>
