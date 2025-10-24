@@ -54,7 +54,8 @@ export interface Card {
     id: number;
     nickname: string;
     bio?: string;
-    imageURI?: string;
+    imageURI?: string; // 생성된 BaseCard NFT 이미지 (IPFS URI)
+    profileImageURI?: string; // 카드 생성 시 사용한 원본 프로필 이미지 (IPFS URI or base64)
     basename: string;
     role?: string;
     skills?: string[];

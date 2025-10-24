@@ -41,7 +41,15 @@ export async function PUT(
     try {
         const { address } = await params;
         const body = await req.json();
-        const { nickname, bio, imageURI, basename, role, skills } = body;
+        const {
+            nickname,
+            bio,
+            imageURI,
+            profileImage,
+            basename,
+            role,
+            skills,
+        } = body;
 
         // Check if card exists
         const existingCard = await db
@@ -63,6 +71,7 @@ export async function PUT(
                 nickname,
                 bio,
                 imageURI,
+                profileImage, // 원본 프로필 이미지도 업데이트 가능
                 basename,
                 role,
                 skills,

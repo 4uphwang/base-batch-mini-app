@@ -20,8 +20,16 @@ export async function GET(_: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { nickname, bio, imageURI, basename, role, skills, address } =
-            body;
+        const {
+            nickname,
+            bio,
+            imageURI,
+            profileImage,
+            basename,
+            role,
+            skills,
+            address,
+        } = body;
 
         // Validate required fields
         if (!address) {
@@ -37,6 +45,7 @@ export async function POST(req: Request) {
                 nickname,
                 bio,
                 imageURI,
+                profileImage, // 원본 프로필 이미지 저장
                 basename,
                 role,
                 skills,

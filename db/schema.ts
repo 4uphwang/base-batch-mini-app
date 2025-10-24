@@ -13,11 +13,12 @@ export const cards = pgTable("cards", {
     id: serial("id").primaryKey(),
     nickname: varchar("nickname", { length: 256 }),
     bio: text("bio"),
-    imageURI: text("imageURI"),
+    imageURI: text("imageURI"), // 생성된 BaseCard NFT 이미지 (IPFS URI)
     basename: text("basename"),
     role: text("role"),
     skills: text("skills").array(), // 스킬은 텍스트 배열로 저장
     address: varchar("address", { length: 42 }).unique(), // EVM 주소는 42자
+    profileImage: text("profile_image"), // 카드 생성 시 사용한 원본 프로필 이미지 (SVG base64)
 });
 
 // collections 테이블 (Many-to-Many 관계)

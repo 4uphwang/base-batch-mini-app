@@ -22,9 +22,33 @@ export default function MyCard() {
 
     if (error || !card) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0050FF] to-[#0080FF]">
-                <div className="text-white font-k2d text-xl">
-                    Card not found
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#0050FF] to-[#0080FF] px-6 py-8">
+                <div className="flex flex-col items-center text-center gap-6">
+                    {/* Title */}
+                    <h1
+                        className="text-5xl sm:text-6xl font-k2d-bold text-white drop-shadow-lg"
+                        style={{
+                            letterSpacing: "-0.05em",
+                            lineHeight: "0.9",
+                        }}
+                    >
+                        No Card Found
+                    </h1>
+
+                    {/* Subtitle */}
+                    <p className="text-xl sm:text-2xl font-k2d-medium text-white max-w-md drop-shadow-md">
+                        Create your onchain identity
+                        <br />
+                        and start building your story
+                    </p>
+
+                    {/* Mint Button */}
+                    <button
+                        onClick={() => router.push("/mint")}
+                        className="w-full max-w-md py-4 bg-gray-900 hover:bg-gray-800 active:bg-black text-white font-k2d-semibold rounded-xl transition-all duration-300 shadow-xl text-lg transform hover:scale-105 active:scale-95 mt-4"
+                    >
+                        Mint Your Card
+                    </button>
                 </div>
             </div>
         );

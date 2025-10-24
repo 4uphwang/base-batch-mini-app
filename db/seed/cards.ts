@@ -1,60 +1,64 @@
 export const sampleCards = [
     {
-        nickname: "JellyJelly",
-        bio: "I'm JellyJelly, a designer who loves to create beautiful things.",
+        nickname: "Jihwang",
+        bio: "I'm Jihwang, a marketer who loves to promote products and build communities.",
         imageURI:
-            "ipfs://bafybeicxlkvj2mcpvobrkzwkpbxrpdqia5dudzjfgsxm2iorge4kqch4bu",
-        basename: "jellyjelly.base.eth",
+            "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-jihwang.png",
+        profileImage: "", // 추후 업데이트
+        basename: "jihwang.base.eth",
+        role: "Marketer",
+        skills: [
+            "Digital Marketing",
+            "Community Building",
+            "Social Media",
+            "Content Strategy",
+            "Brand Management",
+        ],
+        address: "0x1234567890123456789012345678901234567890",
+    },
+    {
+        nickname: "Mozzigom",
+        bio: "I'm Mozzigom, a developer who loves to build innovative blockchain solutions.",
+        imageURI:
+            "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-mozzigom.png",
+        profileImage: "", // 추후 업데이트
+        basename: "mozzigom.base.eth",
+        role: "Developer",
+        skills: ["TypeScript", "React", "Solidity", "Web3", "Smart Contracts"],
+        address: "0x1234567890123456789012345678901234567891",
+    },
+    {
+        nickname: "Soyverse",
+        bio: "I'm Soyverse, a designer who creates stunning visual experiences.",
+        imageURI:
+            "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-soyverse.png",
+        profileImage: "", // 추후 업데이트
+        basename: "soyverse.base.eth",
         role: "Designer",
         skills: [
             "Figma",
             "UI/UX Design",
-            "Adobe Creative Suite",
+            "Visual Design",
             "Prototyping",
             "Design Systems",
         ],
-        address: "0x542c187EeBeC727C07538571B37D3AeE49a9b7F9",
+        address: "0x1234567890123456789012345678901234567892",
     },
     {
-        nickname: "Jeongseup",
-        bio: "I'm Jeongseup, a developer who loves to code.",
+        nickname: "Tomatocat",
+        bio: "I'm Tomatocat, a designer who loves to create beautiful and intuitive interfaces.",
         imageURI:
-            "ipfs://bafybeihsyxzgalb6y4jsqvo4675htm6itxhkbypw6nipukw56biquiuiuu",
-        basename: "jeongseup.base.eth",
-        role: "Developer",
-        skills: ["TypeScript", "React", "Node.js", "Web3", "Smart Contracts"],
-        address: "0xE0Ab3848E1D00DD970085F10923C45646DbA181D",
-    },
-    {
-        nickname: "Sam",
-        bio: "I'm Sam, a designer who loves to create beautiful things.",
-        imageURI:
-            "ipfs://bafybeifr7cptxrxd3zg2dg52hmm2uce6cswyxke2ylqachxqb5lakxazfe",
-        basename: "",
+            "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-tomatocat.png",
+        profileImage: "", // 추후 업데이트
+        basename: "tomatocat.base.eth",
         role: "Designer",
         skills: [
-            "Sketch",
-            "Adobe XD",
+            "Figma",
+            "Adobe Creative Suite",
             "User Research",
+            "Interaction Design",
             "Wireframing",
-            "Visual Design",
         ],
-        address: "0xC3c55b00B7FF5Af1C1162101D3a524a12b853E69",
-    },
-    {
-        nickname: "Peter",
-        bio: "I'm Peter, a marketer who loves to promote products.",
-        imageURI:
-            "ipfs://bafybeihjxqxq4wj7c5mt2kpqohewjhis7323vfsmx3h3xxyiztjrwpxs7q",
-        basename: "marketing-peter.base.eth",
-        role: "Marketer",
-        skills: [
-            "Digital Marketing",
-            "SEO",
-            "Social Media",
-            "Content Strategy",
-            "Analytics",
-        ],
-        address: "0x62121e4Daa06a23128B568b76D0Bcae33743afA3",
+        address: "0x1234567890123456789012345678901234567893",
     },
 ];
