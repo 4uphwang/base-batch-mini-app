@@ -223,12 +223,12 @@ export function useMintBaseCard() {
             }
 
             // Call smart contract
-            // writeContract({
-            //     address: BASECARD_CONTRACT_ADDRESS,
-            //     abi: baseCardAbi,
-            //     functionName: "mintBaseCard",
-            //     args: [initialCardData, socialKeys, socialValues],
-            // });
+            writeContract({
+                address: BASECARD_CONTRACT_ADDRESS,
+                abi: baseCardAbi,
+                functionName: "mintBaseCard",
+                args: [initialCardData, socialKeys, socialValues],
+            });
 
             // Note: We can't wait here because writeContract is async but doesn't return the receipt
             // The transaction hash will be available in the `hash` state
