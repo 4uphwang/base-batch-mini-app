@@ -1,24 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCardGeneration } from "@/hooks/useCardGeneration";
+import { useMintBaseCard } from "@/hooks/useMintBaseCard";
+import { executeCardMintFlow } from "@/lib/cardMintingFlow";
 import { convertFileToBase64DataURL } from "@/lib/imageUtils";
 import Image from "next/image";
+import { useAccount } from "wagmi";
 
 export default function CardGeneratorDemo() {
+    const { address: connectedAddress } = useAccount();
+
     const [nickname, setNickname] = useState("My Nickname");
     const [role, setRole] = useState("Base Developer");
     const [basename, setBasename] = useState("@basename");
     const [bio, setBio] = useState("");
-    const [address, setAddress] = useState(
-        "0xabc4567890123456789012345678901234567890"
-    );
+    const [address, setAddress] = useState<string>(connectedAddress || "");
+
+    // 연결된 주소가 변경되면 자동으로 업데이트
+    useEffect(() => {
+        if (connectedAddress) {
+            setAddress(connectedAddress);
+        }
+    }, [connectedAddress]);
+    const [twitter, setTwitter] = useState("");
+    const [github, setGithub] = useState("");
+    const [farcaster, setFarcaster] = useState("");
     const [skills, setSkills] = useState<string[]>([]);
     const [skillInput, setSkillInput] = useState("");
     const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isMinting, setIsMinting] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [mintSuccess, setMintSuccess] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [mintError, setMintError] = useState<string | null>(null);
     const [savedCard, setSavedCard] = useState<{
         id: number;
         nickname: string;
@@ -30,6 +46,7 @@ export default function CardGeneratorDemo() {
         profileImage?: string;
         skills?: string[];
     } | null>(null);
+    const [mintHash, setMintHash] = useState<string | null>(null);
 
     const {
         generateCard,
@@ -37,6 +54,14 @@ export default function CardGeneratorDemo() {
         error: generationError,
         result,
     } = useCardGeneration();
+
+    const {
+        mintCard,
+        isPending: isMintPending,
+        isConfirming: isMintConfirming,
+        isSuccess: isMintSuccess,
+        error: useMintError,
+    } = useMintBaseCard(address as `0x${string}`);
 
     const generatedSvg = result?.svg || null;
 
@@ -112,6 +137,135 @@ export default function CardGeneratorDemo() {
             alert(errorMessage);
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    // NFT 민팅 함수 (전체 플로우)
+    const mintNFT = async () => {
+        if (!profileImageFile) {
+            alert("Please select a profile image");
+            return;
+        }
+
+        if (!address) {
+            alert("Please enter wallet address");
+            return;
+        }
+
+        if (!nickname || !role) {
+            alert("Please fill in nickname and role");
+            return;
+        }
+
+        setIsMinting(true);
+        setMintError(null);
+        setMintSuccess(false);
+        setMintHash(null);
+
+        try {
+            const result = await executeCardMintFlow(
+                {
+                    name: nickname,
+                    role,
+                    bio,
+                    baseName: basename,
+                    address,
+                    profileImageFile,
+                    skills,
+                    socials: {
+                        twitter,
+                        github,
+                        farcaster,
+                    },
+                },
+                generateCard,
+                mintCard
+            );
+
+            if (result.success) {
+                console.log("✅ NFT minted successfully!", result.data);
+                setMintSuccess(true);
+                setMintHash(result.data?.mintHash || null);
+                setSavedCard({
+                    id: result.data?.cardId || 0,
+                    nickname,
+                    role,
+                    basename,
+                    address,
+                    bio,
+                    imageURI: `ipfs://${result.data?.ipfsCid}`,
+                    skills,
+                });
+            } else {
+                throw new Error(result.error || "Minting failed");
+            }
+        } catch (error) {
+            console.error("Mint NFT error:", error);
+            const errorMessage =
+                error instanceof Error ? error.message : "Failed to mint NFT";
+            setMintError(errorMessage);
+            alert(errorMessage);
+        } finally {
+            setIsMinting(false);
+        }
+    };
+
+    // Contract call만 테스트하는 함수 (Mock 데이터 사용)
+    const testContractCall = async () => {
+        // 연결된 주소 우선 사용, 없으면 입력된 주소 사용
+        const addressToUse = connectedAddress || address;
+
+        if (!addressToUse) {
+            alert("Please connect your wallet or enter wallet address");
+            return;
+        }
+
+        setIsMinting(true);
+        setMintError(null);
+        setMintSuccess(false);
+        setMintHash(null);
+
+        try {
+            // Mock 데이터 생성 (컨트랙트 허용 키 사용)
+            const mockMintData = {
+                imageURI: "ipfs://QmTestMockHash123456789012345678901234567890",
+                nickname: "Test User",
+                role: "Developer",
+                bio: "This is a test mint using mock data",
+                basename: "@testuser",
+                socials: {
+                    x: "@testuser", // ✅ 허용됨
+                    github: "testuser", // ✅ 허용됨
+                    farcaster: "testuser", // ✅ 허용됨
+                },
+                ipfsId: "mock-ipfs-id-123",
+                userAddress: addressToUse,
+            };
+
+            console.log(
+                "🧪 Testing contract call with mock data:",
+                mockMintData
+            );
+
+            const result = await mintCard(mockMintData);
+
+            if (result.success) {
+                console.log("✅ Contract call successful!", result);
+                setMintSuccess(true);
+                setMintHash(result.hash || null);
+            } else {
+                throw new Error(result.error || "Contract call failed");
+            }
+        } catch (error) {
+            console.error("Contract call error:", error);
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to call contract";
+            setMintError(errorMessage);
+            alert(errorMessage);
+        } finally {
+            setIsMinting(false);
         }
     };
 
@@ -217,15 +371,18 @@ export default function CardGeneratorDemo() {
         <div className="max-w-7xl mx-auto p-6">
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    BaseCard Generator Demo
+                    BaseCard Generator & Minting Demo
                 </h1>
                 <p className="text-lg text-gray-600 mb-2">
                     Create your personalized onchain business card with
-                    server-side SVG generation + IPFS + Database
+                    server-side SVG generation + IPFS + Database + NFT Minting
                 </p>
-                <p className="text-sm text-blue-600 font-medium">
+                <p className="text-sm text-blue-600 font-medium mb-1">
                     Test the complete flow: Generate → Upload to IPFS → Save to
-                    DB
+                    DB → Mint NFT
+                </p>
+                <p className="text-sm text-purple-600 font-medium">
+                    🎨 NEW: Full minting flow testing available!
                 </p>
             </div>
 
@@ -349,7 +506,7 @@ export default function CardGeneratorDemo() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Wallet Address* (for DB save)
+                                    Wallet Address* (for DB save & Minting)
                                 </label>
                                 <input
                                     type="text"
@@ -360,8 +517,49 @@ export default function CardGeneratorDemo() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Required for saving to database
+                                    {connectedAddress
+                                        ? `✅ Connected: ${connectedAddress.slice(
+                                              0,
+                                              6
+                                          )}...${connectedAddress.slice(-4)}`
+                                        : "⚠️ Please connect your wallet for minting NFT"}
                                 </p>
+                                {connectedAddress && (
+                                    <p className="text-xs text-green-600 mt-1">
+                                        🎯 Will use connected wallet address for
+                                        contract calls
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Social Links */}
+                            <div className="space-y-3">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Social Links (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={twitter}
+                                    onChange={(e) => setTwitter(e.target.value)}
+                                    placeholder="Twitter / X handle"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                />
+                                <input
+                                    type="text"
+                                    value={github}
+                                    onChange={(e) => setGithub(e.target.value)}
+                                    placeholder="GitHub username"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                />
+                                <input
+                                    type="text"
+                                    value={farcaster}
+                                    onChange={(e) =>
+                                        setFarcaster(e.target.value)
+                                    }
+                                    placeholder="Farcaster username"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                />
                             </div>
 
                             <div>
@@ -438,6 +636,22 @@ export default function CardGeneratorDemo() {
                                 </div>
                             )}
 
+                            {mintError && (
+                                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                                    <p className="text-red-700 text-sm">
+                                        ❌ Mint Error: {mintError}
+                                    </p>
+                                </div>
+                            )}
+
+                            {useMintError && (
+                                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                                    <p className="text-red-700 text-sm">
+                                        ❌ Transaction Error: {useMintError}
+                                    </p>
+                                </div>
+                            )}
+
                             {result?.success && result.ipfs && (
                                 <div className="p-3 rounded-lg bg-green-50 border border-green-200">
                                     <p className="text-green-700 text-sm font-medium mb-2">
@@ -453,6 +667,33 @@ export default function CardGeneratorDemo() {
                                 <div className="p-3 rounded-lg bg-green-50 border border-green-200">
                                     <p className="text-green-700 text-sm font-medium">
                                         ✓ Card saved to database successfully!
+                                    </p>
+                                </div>
+                            )}
+
+                            {mintSuccess && mintHash && (
+                                <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                                    <p className="text-green-700 text-sm font-medium mb-2">
+                                        🎉 NFT minted successfully!
+                                    </p>
+                                    <p className="text-green-600 text-xs break-all">
+                                        Hash: {mintHash}
+                                    </p>
+                                </div>
+                            )}
+
+                            {isMintPending && (
+                                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                                    <p className="text-blue-700 text-sm">
+                                        ⏳ Preparing transaction...
+                                    </p>
+                                </div>
+                            )}
+
+                            {isMintConfirming && (
+                                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                                    <p className="text-blue-700 text-sm">
+                                        ⏳ Confirming transaction...
                                     </p>
                                 </div>
                             )}
@@ -474,20 +715,97 @@ export default function CardGeneratorDemo() {
                                 </button>
 
                                 {result?.success && (
-                                    <button
-                                        type="button"
-                                        onClick={saveCardToDatabase}
-                                        disabled={isSaving || !address}
-                                        className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                                            isSaving || !address
-                                                ? "bg-gray-400 text-white cursor-not-allowed"
-                                                : "bg-green-500 text-white hover:bg-green-600"
-                                        }`}
-                                    >
-                                        {isSaving
-                                            ? "Saving to Database..."
-                                            : "Save to Database"}
-                                    </button>
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={saveCardToDatabase}
+                                            disabled={isSaving || !address}
+                                            className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                                                isSaving || !address
+                                                    ? "bg-gray-400 text-white cursor-not-allowed"
+                                                    : "bg-green-500 text-white hover:bg-green-600"
+                                            }`}
+                                        >
+                                            {isSaving
+                                                ? "Saving to Database..."
+                                                : "Save to Database"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={mintNFT}
+                                            disabled={
+                                                isMinting ||
+                                                isMintPending ||
+                                                isMintConfirming ||
+                                                !address ||
+                                                !connectedAddress
+                                            }
+                                            className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                                                isMinting ||
+                                                isMintPending ||
+                                                isMintConfirming ||
+                                                !address ||
+                                                !connectedAddress
+                                                    ? "bg-gray-400 text-white cursor-not-allowed"
+                                                    : "bg-purple-500 text-white hover:bg-purple-600"
+                                            }`}
+                                        >
+                                            {isMinting
+                                                ? "Minting NFT (Complete Flow)..."
+                                                : isMintPending
+                                                ? "Preparing Transaction..."
+                                                : isMintConfirming
+                                                ? "Confirming..."
+                                                : isMintSuccess
+                                                ? "✓ Minted!"
+                                                : "🎨 Mint NFT (Full Flow)"}
+                                        </button>
+
+                                        {!connectedAddress && (
+                                            <p className="text-xs text-center text-amber-600">
+                                                ⚠️ Please connect your wallet to
+                                                mint NFT
+                                            </p>
+                                        )}
+                                    </>
+                                )}
+
+                                {/* Contract Call Test Button */}
+                                <button
+                                    type="button"
+                                    onClick={testContractCall}
+                                    disabled={
+                                        isMinting ||
+                                        isMintPending ||
+                                        isMintConfirming ||
+                                        (!connectedAddress && !address)
+                                    }
+                                    className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                                        isMinting ||
+                                        isMintPending ||
+                                        isMintConfirming ||
+                                        (!connectedAddress && !address)
+                                            ? "bg-gray-400 text-white cursor-not-allowed"
+                                            : "bg-orange-500 text-white hover:bg-orange-600"
+                                    }`}
+                                >
+                                    {isMinting
+                                        ? "Testing Contract Call..."
+                                        : isMintPending
+                                        ? "Preparing Transaction..."
+                                        : isMintConfirming
+                                        ? "Confirming..."
+                                        : connectedAddress
+                                        ? "🧪 Test Contract Call (Connected Wallet)"
+                                        : "🧪 Test Contract Call (Mock Data)"}
+                                </button>
+
+                                {!connectedAddress && !address && (
+                                    <p className="text-xs text-center text-amber-600">
+                                        ⚠️ Please connect your wallet or enter
+                                        address to test contract calls
+                                    </p>
                                 )}
                             </div>
                         </form>
@@ -524,7 +842,7 @@ export default function CardGeneratorDemo() {
                                 </span>
                                 <span>
                                     Fill in all card information (nickname,
-                                    role, bio, address, skills)
+                                    role, bio, address, skills, socials)
                                 </span>
                             </li>
                             <li className="flex gap-2">
@@ -538,11 +856,35 @@ export default function CardGeneratorDemo() {
                             </li>
                             <li className="flex gap-2">
                                 <span className="font-semibold text-blue-600">
-                                    4.
+                                    4a.
                                 </span>
                                 <span>
-                                    Click &quot;Save to Database&quot; to store
-                                    card data with SVG
+                                    (Optional) Click &quot;Save to
+                                    Database&quot; to test DB storage only
+                                </span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-semibold text-blue-600">
+                                    4b.
+                                </span>
+                                <span>
+                                    <strong>
+                                        Click &quot;Mint NFT (Full Flow)&quot;
+                                    </strong>{" "}
+                                    to execute complete flow: Generate → IPFS →
+                                    DB → Mint NFT
+                                </span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="font-semibold text-orange-600">
+                                    4c.
+                                </span>
+                                <span>
+                                    <strong>
+                                        Click &quot;Test Contract Call (Mock
+                                        Data)&quot;
+                                    </strong>{" "}
+                                    to test smart contract interaction only
                                 </span>
                             </li>
                             <li className="flex gap-2">
@@ -556,12 +898,21 @@ export default function CardGeneratorDemo() {
                         </ol>
                         <div className="mt-4 pt-4 border-t border-blue-200">
                             <p className="text-xs text-blue-700 mb-2">
-                                💡 This demo page tests the full flow: SVG
-                                generation → IPFS upload → DB storage
+                                💡 This demo page tests the COMPLETE flow: SVG
+                                generation → IPFS upload → DB storage → NFT
+                                Minting
                             </p>
-                            <p className="text-xs text-blue-700">
+                            <p className="text-xs text-blue-700 mb-2">
                                 🔑 The profile image is converted to SVG and
                                 stored as base64 in the database
+                            </p>
+                            <p className="text-xs text-purple-700 font-semibold mb-2">
+                                🎨 NEW: Test the full minting flow including NFT
+                                creation!
+                            </p>
+                            <p className="text-xs text-orange-700 font-semibold">
+                                🧪 NEW: Test smart contract calls with mock
+                                data!
                             </p>
                         </div>
                     </div>
