@@ -67,9 +67,14 @@ export async function generateQRCodeSVG(
 /**
  * Generate a shareable URL for a BaseCard
  */
-export function generateCardShareURL(cardId: string, nickname: string): string {
+export function generateCardShareURL(cardId: string): string {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-    return `${baseUrl}/card/${cardId}?name=${encodeURIComponent(nickname)}`;
+    console.log(
+        "generated share URL",
+        `${baseUrl}/action=addcardcollection&id=${cardId}`
+    );
+
+    return `${baseUrl}/card/${cardId}`;
 }
 
 /**
@@ -77,9 +82,8 @@ export function generateCardShareURL(cardId: string, nickname: string): string {
  */
 export async function generateCardShareQRCode(
     cardId: string,
-    nickname: string,
     options?: QRCodeOptions
 ): Promise<string> {
-    const shareURL = generateCardShareURL(cardId, nickname);
+    const shareURL = generateCardShareURL(cardId);
     return generateQRCodeDataURL(shareURL, options);
 }

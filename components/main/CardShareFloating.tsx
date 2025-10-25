@@ -33,18 +33,14 @@ export default function CardShareFloating({
 
         setIsLoading(true);
         try {
-            const qrCode = await generateCardShareQRCode(
-                card.id.toString(),
-                card.nickname,
-                {
-                    width: 200,
-                    margin: 2,
-                    color: {
-                        dark: "#FFFFFF",
-                        light: "#0050FF",
-                    },
-                }
-            );
+            const qrCode = await generateCardShareQRCode(card.id.toString(), {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: "#FFFFFF",
+                    light: "#0050FF",
+                },
+            });
             setQrCodeDataURL(qrCode);
             // console.log("qrCodeDataURL", qrCodeDataURL);
         } catch (error) {
