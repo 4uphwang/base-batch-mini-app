@@ -4,6 +4,7 @@ import { safeImageURI } from "@/lib/imageUtils";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CiSearch } from "react-icons/ci";
+import { useOpenUrl } from "@coinbase/onchainkit/minikit";
 
 interface CardData {
     id: number;
@@ -23,6 +24,7 @@ export default function CollectCardsSection() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeCardId, setActiveCardId] = useState<number | null>(null);
+    const openUrl = useOpenUrl();
 
     const tags = ["All", "Designer", "Developer", "Marketer"];
     const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -171,10 +173,11 @@ export default function CollectCardsSection() {
                     <button
                         key={tag}
                         onClick={() => setSelectedTag(tag)}
-                        className={`px-3 py-1.5 rounded-full font-k2d-medium transition-colors text-xs flex-1 min-w-0 ${selectedTag === tag
+                        className={`px-3 py-1.5 rounded-full font-k2d-medium transition-colors text-xs flex-1 min-w-0 ${
+                            selectedTag === tag
                                 ? "bg-[#0050FF] text-white"
                                 : "bg-white text-black border border-gray-200 hover:border-[#0050FF]"
-                            }`}
+                        }`}
                     >
                         {tag}
                     </button>
@@ -215,24 +218,24 @@ export default function CollectCardsSection() {
                                 key={card.id}
                                 ref={(el) => setCardRef(card.id, el)}
                                 data-card-id={card.id}
-                                className={`group cursor-pointer transition-all duration-700 ease-in-out ${activeCardId === card.id
+                                className={`group cursor-pointer transition-all duration-700 ease-in-out ${
+                                    activeCardId === card.id
                                         ? "scale-110 z-20"
                                         : "scale-100 z-10"
-                                    }`}
+                                }`}
                                 style={{
                                     opacity:
                                         activeCardId === null
                                             ? 1
                                             : activeCardId === card.id
-                                                ? 1
-                                                : 0.7,
+                                            ? 1
+                                            : 0.7,
                                 }}
-                                onClick={() => {
-                                    window.open(
-                                        `https://base.app/profile/${card.address}`,
-                                        "_blank"
-                                    );
-                                }}
+                                onClick={() =>
+                                    openUrl(
+                                        `https://base.app/profile/${card.address}`
+                                    )
+                                }
                             >
                                 <div className="relative w-full h-56 sm:h-64 md:h-72 lg:h-80 shadow-xl rounded-2xl overflow-hidden bg-white border-4 border-white">
                                     <Image
@@ -298,12 +301,12 @@ export default function CollectCardsSection() {
                                                             )}
                                                         {card.skills.length >
                                                             3 && (
-                                                                <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular">
-                                                                    +
-                                                                    {card.skills
-                                                                        .length - 3}
-                                                                </span>
-                                                            )}
+                                                            <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular">
+                                                                +
+                                                                {card.skills
+                                                                    .length - 3}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 )}
                                         </div>

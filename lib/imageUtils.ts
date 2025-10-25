@@ -145,8 +145,6 @@ export function isValidImageURI(imageURI: string | null | undefined): boolean {
     return safeImageURI(imageURI) !== null;
 }
 
-
-
 /**
  * File 객체의 이미지를 Base64 data URL로 변환하기 전에,
  * 지정된 최대 크기에 맞춰 압축 및 리사이징하는 함수
