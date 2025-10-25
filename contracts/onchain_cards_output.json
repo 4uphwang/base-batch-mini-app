@@ -30,13 +30,5 @@
         "role": "Designer",
         "bio": "I'm Tomatocat, a designer who loves to create beautiful and intuitive interfaces.",
         "basename": "tomatocat.base.eth"
-    },
-    {
-        "name": "BaseCard: #5",
-        "image": "ipfs://bafybeia2yp2z75rihwnnj7eyjsrggxtvrfkqcy3kxmkhrm3z4bhbngtueu",
-        "nickname": "Tester 1",
-        "role": "Marketer",
-        "bio": "Let's go into Base",
-        "basename": ""
     }
 ]
