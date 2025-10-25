@@ -18,6 +18,11 @@
     :root {
         --background: #ffffff;
         --foreground: #171717;
+
+        --bottom-nav-h: 64px;
+        --header-h: 60px;
+        /* iOS Safe Area 대응 변수 */
+        --safe-bottom: env(safe-area-inset-bottom);
     }
 
     @media (prefers-color-scheme: dark) {

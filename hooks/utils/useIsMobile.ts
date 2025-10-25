@@ -16,7 +16,6 @@ export const useIsMobile = (): MobileOS => {
 
     useEffect(() => {
         const userAgent = typeof window.navigator === "undefined" ? "" : navigator.userAgent;
-
         // 1. OS 구분
         const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
         const isAndroid = /Android/i.test(userAgent);
