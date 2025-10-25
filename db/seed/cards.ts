@@ -1,10 +1,13 @@
+import { profileImages } from "./profileImages/profileImages";
+
 export const sampleCards = [
     {
         nickname: "Jihwang",
         bio: "I'm Jihwang, a marketer who loves to promote products and build communities.",
         imageURI:
             "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-jihwang.png",
-        profileImage: "", // 추후 업데이트
+        profileImage:
+            profileImages["0x1234567890123456789012345678901234567890"],
         basename: "jihwang.base.eth",
         role: "Marketer",
         skills: [
@@ -21,7 +24,8 @@ export const sampleCards = [
         bio: "I'm Mozzigom, a developer who loves to build innovative blockchain solutions.",
         imageURI:
             "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-mozzigom.png",
-        profileImage: "", // 추후 업데이트
+        profileImage:
+            profileImages["0x1234567890123456789012345678901234567891"],
         basename: "mozzigom.base.eth",
         role: "Developer",
         skills: ["TypeScript", "React", "Solidity", "Web3", "Smart Contracts"],
@@ -32,7 +36,8 @@ export const sampleCards = [
         bio: "I'm Soyverse, a designer who creates stunning visual experiences.",
         imageURI:
             "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-soyverse.png",
-        profileImage: "", // 추후 업데이트
+        profileImage:
+            profileImages["0x1234567890123456789012345678901234567892"],
         basename: "soyverse.base.eth",
         role: "Designer",
         skills: [
@@ -49,7 +54,8 @@ export const sampleCards = [
         bio: "I'm Tomatocat, a designer who loves to create beautiful and intuitive interfaces.",
         imageURI:
             "ipfs://bafybeigawnpuomc5pxfaikcx2nf4qlgqc3bjt7wltojck7gajc7ybq4oli/basecard-tomatocat.png",
-        profileImage: "", // 추후 업데이트
+        profileImage:
+            profileImages["0x1234567890123456789012345678901234567893"],
         basename: "tomatocat.base.eth",
         role: "Designer",
         skills: [

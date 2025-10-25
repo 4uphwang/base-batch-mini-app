@@ -11,7 +11,9 @@
         "db:migrate": "drizzle-kit migrate",
         "db:push": "drizzle-kit push",
         "db:studio": "drizzle-kit studio",
-        "db:seed": "tsx ./db/seed.ts"
+        "db:seed": "tsx ./db/seed.ts",
+        "db:insert-images": "tsx ./scripts/insertProfileImages.ts",
+        "generate-images": "tsx ./scripts/generateProfileImages.ts"
     },
     "dependencies": {
         "@coinbase/onchainkit": "^1.1.1",
