@@ -115,7 +115,7 @@ export default function Mint() {
         hash: mintHash,
         error: mintError,
         hasMinted,
-    } = useMintBaseCard(address);
+    } = useMintBaseCard();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [name, setName] = useState("");

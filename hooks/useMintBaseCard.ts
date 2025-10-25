@@ -4,6 +4,7 @@ import { baseCardAbi } from "@/lib/abi/abi";
 import { activeChain } from "@/lib/wagmi";
 import { useCallback, useState } from "react";
 import {
+    useAccount,
     useChainId,
     useReadContract,
     useWaitForTransactionReceipt,
@@ -62,7 +63,8 @@ export interface MintResult {
  * };
  * ```
  */
-export function useMintBaseCard(userAddress?: `0x${string}`) {
+export function useMintBaseCard() {
+    const { address: userAddress } = useAccount();
     const [mintError, setMintError] = useState<string | null>(null);
     const [lastMintData, setLastMintData] = useState<BaseCardMintData | null>(
         null
@@ -156,7 +158,7 @@ export function useMintBaseCard(userAddress?: `0x${string}`) {
         async (data: BaseCardMintData): Promise<MintResult> => {
             setMintError(null);
             setLastMintData(data);
-
+            console.log('userAddress', userAddress)
             try {
                 // Check if on correct chain first
                 if (!isCorrectChain) {
@@ -222,12 +224,12 @@ export function useMintBaseCard(userAddress?: `0x${string}`) {
                 }
 
                 // Call smart contract
-                writeContract({
-                    address: BASECARD_CONTRACT_ADDRESS,
-                    abi: baseCardAbi,
-                    functionName: "mintBaseCard",
-                    args: [initialCardData, socialKeys, socialValues],
-                });
+                // writeContract({
+                //     address: BASECARD_CONTRACT_ADDRESS,
+                //     abi: baseCardAbi,
+                //     functionName: "mintBaseCard",
+                //     args: [initialCardData, socialKeys, socialValues],
+                // });
 
                 // Note: We can't wait here because writeContract is async but doesn't return the receipt
                 // The transaction hash will be available in the `hash` state

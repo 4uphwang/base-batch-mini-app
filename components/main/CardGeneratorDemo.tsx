@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useCardGeneration } from "@/hooks/useCardGeneration";
 import { useMintBaseCard } from "@/hooks/useMintBaseCard";
 import { executeCardMintFlow } from "@/lib/cardMintingFlow";
 import { convertFileToBase64DataURL } from "@/lib/imageUtils";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 export default function CardGeneratorDemo() {
@@ -61,7 +61,7 @@ export default function CardGeneratorDemo() {
         isConfirming: isMintConfirming,
         isSuccess: isMintSuccess,
         error: useMintError,
-    } = useMintBaseCard(address as `0x${string}`);
+    } = useMintBaseCard();
 
     const generatedSvg = result?.svg || null;
 
@@ -387,11 +387,10 @@ export default function CardGeneratorDemo() {
             </div>
 
             <div
-                className={`grid gap-x-30 ${
-                    generatedSvg
-                        ? "grid-cols-1 lg:grid-cols-2"
-                        : "grid-cols-1 lg:grid-cols-2"
-                }`}
+                className={`grid gap-x-30 ${generatedSvg
+                    ? "grid-cols-1 lg:grid-cols-2"
+                    : "grid-cols-1 lg:grid-cols-2"
+                    }`}
             >
                 {" "}
                 {/* Form Controls */}
@@ -519,9 +518,9 @@ export default function CardGeneratorDemo() {
                                 <p className="text-xs text-gray-500 mt-1">
                                     {connectedAddress
                                         ? `✅ Connected: ${connectedAddress.slice(
-                                              0,
-                                              6
-                                          )}...${connectedAddress.slice(-4)}`
+                                            0,
+                                            6
+                                        )}...${connectedAddress.slice(-4)}`
                                         : "⚠️ Please connect your wallet for minting NFT"}
                                 </p>
                                 {connectedAddress && (
@@ -587,11 +586,10 @@ export default function CardGeneratorDemo() {
                                         type="button"
                                         onClick={addSkill}
                                         disabled={skills.length >= 5}
-                                        className={`px-4 py-2 rounded-lg font-medium ${
-                                            skills.length >= 5
-                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                : "bg-blue-500 text-white hover:bg-blue-600"
-                                        }`}
+                                        className={`px-4 py-2 rounded-lg font-medium ${skills.length >= 5
+                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                            : "bg-blue-500 text-white hover:bg-blue-600"
+                                            }`}
                                     >
                                         Add
                                     </button>
@@ -703,11 +701,10 @@ export default function CardGeneratorDemo() {
                                 <button
                                     type="submit"
                                     disabled={isGenerating}
-                                    className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                                        isGenerating
-                                            ? "bg-gray-400 text-white cursor-not-allowed"
-                                            : "bg-blue-500 text-white hover:bg-blue-600"
-                                    }`}
+                                    className={`w-full py-3 rounded-lg font-medium transition-colors ${isGenerating
+                                        ? "bg-gray-400 text-white cursor-not-allowed"
+                                        : "bg-blue-500 text-white hover:bg-blue-600"
+                                        }`}
                                 >
                                     {isGenerating
                                         ? "Generating & Uploading to IPFS..."
@@ -720,11 +717,10 @@ export default function CardGeneratorDemo() {
                                             type="button"
                                             onClick={saveCardToDatabase}
                                             disabled={isSaving || !address}
-                                            className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                                                isSaving || !address
-                                                    ? "bg-gray-400 text-white cursor-not-allowed"
-                                                    : "bg-green-500 text-white hover:bg-green-600"
-                                            }`}
+                                            className={`w-full py-3 rounded-lg font-medium transition-colors ${isSaving || !address
+                                                ? "bg-gray-400 text-white cursor-not-allowed"
+                                                : "bg-green-500 text-white hover:bg-green-600"
+                                                }`}
                                         >
                                             {isSaving
                                                 ? "Saving to Database..."
@@ -741,25 +737,24 @@ export default function CardGeneratorDemo() {
                                                 !address ||
                                                 !connectedAddress
                                             }
-                                            className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                                                isMinting ||
+                                            className={`w-full py-3 rounded-lg font-medium transition-colors ${isMinting ||
                                                 isMintPending ||
                                                 isMintConfirming ||
                                                 !address ||
                                                 !connectedAddress
-                                                    ? "bg-gray-400 text-white cursor-not-allowed"
-                                                    : "bg-purple-500 text-white hover:bg-purple-600"
-                                            }`}
+                                                ? "bg-gray-400 text-white cursor-not-allowed"
+                                                : "bg-purple-500 text-white hover:bg-purple-600"
+                                                }`}
                                         >
                                             {isMinting
                                                 ? "Minting NFT (Complete Flow)..."
                                                 : isMintPending
-                                                ? "Preparing Transaction..."
-                                                : isMintConfirming
-                                                ? "Confirming..."
-                                                : isMintSuccess
-                                                ? "✓ Minted!"
-                                                : "🎨 Mint NFT (Full Flow)"}
+                                                    ? "Preparing Transaction..."
+                                                    : isMintConfirming
+                                                        ? "Confirming..."
+                                                        : isMintSuccess
+                                                            ? "✓ Minted!"
+                                                            : "🎨 Mint NFT (Full Flow)"}
                                         </button>
 
                                         {!connectedAddress && (
@@ -781,24 +776,23 @@ export default function CardGeneratorDemo() {
                                         isMintConfirming ||
                                         (!connectedAddress && !address)
                                     }
-                                    className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                                        isMinting ||
+                                    className={`w-full py-3 rounded-lg font-medium transition-colors ${isMinting ||
                                         isMintPending ||
                                         isMintConfirming ||
                                         (!connectedAddress && !address)
-                                            ? "bg-gray-400 text-white cursor-not-allowed"
-                                            : "bg-orange-500 text-white hover:bg-orange-600"
-                                    }`}
+                                        ? "bg-gray-400 text-white cursor-not-allowed"
+                                        : "bg-orange-500 text-white hover:bg-orange-600"
+                                        }`}
                                 >
                                     {isMinting
                                         ? "Testing Contract Call..."
                                         : isMintPending
-                                        ? "Preparing Transaction..."
-                                        : isMintConfirming
-                                        ? "Confirming..."
-                                        : connectedAddress
-                                        ? "🧪 Test Contract Call (Connected Wallet)"
-                                        : "🧪 Test Contract Call (Mock Data)"}
+                                            ? "Preparing Transaction..."
+                                            : isMintConfirming
+                                                ? "Confirming..."
+                                                : connectedAddress
+                                                    ? "🧪 Test Contract Call (Connected Wallet)"
+                                                    : "🧪 Test Contract Call (Mock Data)"}
                                 </button>
 
                                 {!connectedAddress && !address && (
@@ -1052,9 +1046,9 @@ export default function CardGeneratorDemo() {
                                         <p className="text-xs text-gray-600 font-mono break-all">
                                             {savedCard.profileImage
                                                 ? `${savedCard.profileImage.substring(
-                                                      0,
-                                                      100
-                                                  )}...`
+                                                    0,
+                                                    100
+                                                )}...`
                                                 : "N/A"}
                                         </p>
                                     </div>
@@ -1128,7 +1122,7 @@ export default function CardGeneratorDemo() {
                                             </label>
                                             <div className="flex flex-wrap gap-2 mt-1">
                                                 {savedCard.skills &&
-                                                savedCard.skills.length > 0 ? (
+                                                    savedCard.skills.length > 0 ? (
                                                     savedCard.skills.map(
                                                         (
                                                             skill: string,
