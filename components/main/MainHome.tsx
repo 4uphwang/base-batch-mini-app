@@ -6,6 +6,7 @@ import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
 
 import { useMiniappParams } from "@/hooks/useMiniappParams";
 import { useMyCard } from "@/hooks/useMyCard";
+import { useAccount } from "wagmi";
 import CardCollectionAdder from "./CardCollectionAdder";
 import CollectCardsSection from "./CollectCardsSection";
 import HeroSection from "./HeroSection";

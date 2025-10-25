@@ -8,6 +8,7 @@ import ErrorModal from '@/components/common/ErrorModal';
 import LoadingModal from '@/components/common/LoadingModal';
 import { useMyCard } from '@/hooks/useMyCard';
 import { addCollection } from '@/lib/addCollection';
+import { useAccount } from 'wagmi';
 import ConfirmationModal from '../common/ConfirmationModal';
 
 interface CardCollectionAdderProps {
@@ -16,7 +17,8 @@ interface CardCollectionAdderProps {
 
 export default function CardCollectionAdder({ collectedCardId }: CardCollectionAdderProps) {
     const router = useRouter();
-    const { data: myCard, isLoading: isCardLoading } = useMyCard(); // 로딩 상태 추가 활용
+    const { address } = useAccount();
+    const { data: myCard, isLoading: isCardLoading } = useMyCard(address);
 
     const [isReadyToConfirm, setIsReadyToConfirm] = useState(false); // 확인 팝업 상태
     const [isProcessing, setIsProcessing] = useState(false); // API 처리 로딩 상태
