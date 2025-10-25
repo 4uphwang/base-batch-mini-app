@@ -154,126 +154,123 @@ export function useMintBaseCard() {
     /**
      * Mint BaseCard NFT
      */
-    const mintCard = useCallback(
-        async (data: BaseCardMintData): Promise<MintResult> => {
-            setMintError(null);
-            setLastMintData(data);
-            console.log('userAddress', userAddress)
-            try {
-                // Check if on correct chain first
-                if (!isCorrectChain) {
-                    throw new Error(
-                        `Please switch to ${activeChain.name} network to mint your BaseCard`
-                    );
-                }
-
-                // Check if user has already minted
-                if (hasMinted) {
-                    throw new Error(
-                        "You have already minted a BaseCard. Each address can only mint once."
-                    );
-                }
-
-                // Validate inputs
-                if (!data.imageURI || !data.nickname || !data.role) {
-                    throw new Error(
-                        "Required fields missing: imageURI, nickname, role"
-                    );
-                }
-
-                // Prepare social links
-                // Note: Contract expects specific social keys (x, farcaster, github, etc.)
-                // "twitter" should be converted to "x" as per contract whitelist
-                const socialKeys: string[] = [];
-                const socialValues: string[] = [];
-
-                if (data.socials) {
-                    Object.entries(data.socials).forEach(([key, value]) => {
-                        if (value && value.trim() !== "") {
-                            // Convert "twitter" to "x" for contract compatibility
-                            const contractKey = key === "twitter" ? "x" : key;
-                            socialKeys.push(contractKey);
-                            socialValues.push(value.trim());
-                        }
-                    });
-                }
-
-                // Prepare card data tuple
-                const initialCardData = {
-                    imageURI: data.imageURI,
-                    nickname: data.nickname,
-                    role: data.role,
-                    bio: data.bio || "",
-                    basename: data.basename || "",
-                };
-
-                console.log("🎨 Minting BaseCard with data:", {
-                    contractAddress: BASECARD_CONTRACT_ADDRESS,
-                    initialCardData,
-                    socialKeys,
-                    socialValues,
-                    userAddress: data.userAddress,
-                });
-
-                // Validate contract address
-                if (
-                    !BASECARD_CONTRACT_ADDRESS ||
-                    BASECARD_CONTRACT_ADDRESS === "0x"
-                ) {
-                    throw new Error("Contract address not configured");
-                }
-
-                // Call smart contract
-                // writeContract({
-                //     address: BASECARD_CONTRACT_ADDRESS,
-                //     abi: baseCardAbi,
-                //     functionName: "mintBaseCard",
-                //     args: [initialCardData, socialKeys, socialValues],
-                // });
-
-                // Note: We can't wait here because writeContract is async but doesn't return the receipt
-                // The transaction hash will be available in the `hash` state
-                // The confirmation status will be available in `isConfirming` and `isSuccess`
-
-                return {
-                    success: true,
-                    hash: hash,
-                };
-            } catch (error) {
-                console.error("❌ Mint error:", error);
-
-                const errorMessage =
-                    error instanceof Error
-                        ? error.message
-                        : "Failed to mint BaseCard";
-
-                // Check if user rejected the transaction
-                const isUserRejection =
-                    error instanceof Error &&
-                    (error.message.includes("User rejected") ||
-                        error.message.includes("User denied") ||
-                        error.message.includes("user rejected") ||
-                        error.message.includes("rejected"));
-
-                if (isUserRejection) {
-                    console.log(
-                        "🚫 User cancelled transaction, cleaning up..."
-                    );
-                }
-
-                // Clean up IPFS and DB data on failure or cancellation
-                await cleanupMintData(data);
-
-                setMintError(errorMessage);
-
-                return {
-                    success: false,
-                    error: errorMessage,
-                };
+    const mintCard = async (data: BaseCardMintData): Promise<MintResult> => {
+        setMintError(null);
+        setLastMintData(data);
+        console.log('userAddress', userAddress)
+        try {
+            // Check if on correct chain first
+            if (!isCorrectChain) {
+                throw new Error(
+                    `Please switch to ${activeChain.name} network to mint your BaseCard`
+                );
             }
-        },
-        [writeContract, hash, cleanupMintData, hasMinted, isCorrectChain, userAddress]
-    );
+
+            // Check if user has already minted
+            if (hasMinted) {
+                throw new Error(
+                    "You have already minted a BaseCard. Each address can only mint once."
+                );
+            }
+
+            // Validate inputs
+            if (!data.imageURI || !data.nickname || !data.role) {
+                throw new Error(
+                    "Required fields missing: imageURI, nickname, role"
+                );
+            }
+
+            // Prepare social links
+            // Note: Contract expects specific social keys (x, farcaster, github, etc.)
+            // "twitter" should be converted to "x" as per contract whitelist
+            const socialKeys: string[] = [];
+            const socialValues: string[] = [];
+
+            if (data.socials) {
+                Object.entries(data.socials).forEach(([key, value]) => {
+                    if (value && value.trim() !== "") {
+                        // Convert "twitter" to "x" for contract compatibility
+                        const contractKey = key === "twitter" ? "x" : key;
+                        socialKeys.push(contractKey);
+                        socialValues.push(value.trim());
+                    }
+                });
+            }
+
+            // Prepare card data tuple
+            const initialCardData = {
+                imageURI: data.imageURI,
+                nickname: data.nickname,
+                role: data.role,
+                bio: data.bio || "",
+                basename: data.basename || "",
+            };
+
+            console.log("🎨 Minting BaseCard with data:", {
+                contractAddress: BASECARD_CONTRACT_ADDRESS,
+                initialCardData,
+                socialKeys,
+                socialValues,
+                userAddress: data.userAddress,
+            });
+
+            // Validate contract address
+            if (
+                !BASECARD_CONTRACT_ADDRESS ||
+                BASECARD_CONTRACT_ADDRESS === "0x"
+            ) {
+                throw new Error("Contract address not configured");
+            }
+
+            // Call smart contract
+            // writeContract({
+            //     address: BASECARD_CONTRACT_ADDRESS,
+            //     abi: baseCardAbi,
+            //     functionName: "mintBaseCard",
+            //     args: [initialCardData, socialKeys, socialValues],
+            // });
+
+            // Note: We can't wait here because writeContract is async but doesn't return the receipt
+            // The transaction hash will be available in the `hash` state
+            // The confirmation status will be available in `isConfirming` and `isSuccess`
+
+            return {
+                success: true,
+                hash: hash,
+            };
+        } catch (error) {
+            console.error("❌ Mint error:", error);
+
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to mint BaseCard";
+
+            // Check if user rejected the transaction
+            const isUserRejection =
+                error instanceof Error &&
+                (error.message.includes("User rejected") ||
+                    error.message.includes("User denied") ||
+                    error.message.includes("user rejected") ||
+                    error.message.includes("rejected"));
+
+            if (isUserRejection) {
+                console.log(
+                    "🚫 User cancelled transaction, cleaning up..."
+                );
+            }
+
+            // Clean up IPFS and DB data on failure or cancellation
+            await cleanupMintData(data);
+
+            setMintError(errorMessage);
+
+            return {
+                success: false,
+                error: errorMessage,
+            };
+        }
+    };
 
     // Combine errors
     const error =
