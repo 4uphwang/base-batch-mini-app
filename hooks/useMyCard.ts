@@ -8,10 +8,10 @@ export interface Card {
     role: string;
     bio: string;
     imageURI: string;
+    profileImage: string;
     basename: string;
     skills: string[];
     address: string;
-    createdAt?: string;
 }
 
 /**
@@ -19,7 +19,6 @@ export interface Card {
  */
 async function fetchCardByAddress(address: string): Promise<Card> {
     const response = await fetch(`/api/card/${address}`);
-
     if (!response.ok) {
         if (response.status === 404) {
             throw new Error("Card not found");
