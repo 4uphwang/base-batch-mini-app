@@ -228,12 +228,22 @@ export default function Earn() {
                                 >
                                     <div className="flex gap-4">
                                         {/* Bounty Image/Thumbnail */}
-                                        <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center">
-                                            <span className="text-white text-2xl font-k2d-bold">
-                                                {bounty.organization
-                                                    .substring(0, 2)
-                                                    .toUpperCase()}
-                                            </span>
+                                        <div className="w-24 h-24 rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center">
+                                            {bounty.thumbnailUrl ? (
+                                                <Image
+                                                    src={bounty.thumbnailUrl}
+                                                    alt={bounty.organization}
+                                                    width={96}
+                                                    height={96}
+                                                    className="w-full h-full object-cover rounded-lg"
+                                                />
+                                            ) : (
+                                                <span className="text-white text-2xl font-k2d-bold">
+                                                    {bounty.organization
+                                                        .substring(0, 2)
+                                                        .toUpperCase()}
+                                                </span>
+                                            )}
                                         </div>
 
                                         {/* Bounty Info */}
@@ -288,15 +298,33 @@ export default function Earn() {
                                                         )}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
-                                                    <svg
+                                                <div className="flex items-center bg-gray-100 gap-1 px-2 py-1 rounded-full">
+                                                    {/* <svg
                                                         width="14"
                                                         height="14"
                                                         viewBox="0 0 24 24"
                                                         fill="gray"
+                                                    > */}
+
+                                                    <svg
+                                                        width="42"
+                                                        height="21"
+                                                        viewBox="0 0 42 21"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
                                                     >
-                                                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                                        <rect
+                                                            width="41.2545"
+                                                            height="20.7994"
+                                                            rx="10.3997"
+                                                            fill="#62748D"
+                                                        />
+                                                        <path
+                                                            d="M6.81757 14.4025L6.96217 9.207C7.02534 8.9144 7.2459 8.68116 7.53451 8.60173L14.1709 5.45228C14.7183 5.30163 15.2451 5.75068 15.183 6.31504V11.3219C15.1477 11.6425 14.9242 11.911 14.6153 12.0037L7.83431 15.3419C7.24832 15.5179 6.68843 15.0006 6.81757 14.4025Z"
+                                                            fill="white"
+                                                        />
                                                     </svg>
+
                                                     <span className="text-xs text-gray-600 font-k2d-medium">
                                                         +{bounty.participants}
                                                     </span>
@@ -385,14 +413,25 @@ export default function Earn() {
                                                 </div>
                                                 <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full">
                                                     <svg
-                                                        width="14"
-                                                        height="14"
-                                                        viewBox="0 0 24 24"
-                                                        fill="gray"
+                                                        width="42"
+                                                        height="21"
+                                                        viewBox="0 0 42 21"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
                                                     >
-                                                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                                        <rect
+                                                            width="41.2545"
+                                                            height="20.7994"
+                                                            rx="10.3997"
+                                                            fill="#62748D"
+                                                        />
+                                                        <path
+                                                            d="M6.81757 14.4025L6.96217 9.207C7.02534 8.9144 7.2459 8.68116 7.53451 8.60173L14.1709 5.45228C14.7183 5.30163 15.2451 5.75068 15.183 6.31504V11.3219C15.1477 11.6425 14.9242 11.911 14.6153 12.0037L7.83431 15.3419C7.24832 15.5179 6.68843 15.0006 6.81757 14.4025Z"
+                                                            fill="white"
+                                                        />
                                                     </svg>
                                                     <span className="text-xs text-gray-600 font-k2d-medium">
+                                                        +
                                                         {
                                                             hackathon.participantCount
                                                         }
