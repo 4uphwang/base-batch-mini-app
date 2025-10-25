@@ -257,6 +257,7 @@ export default function Mint() {
                 return;
             }
 
+
             try {
                 const baseName = isBaseNameIncluded && username ? username : "";
 

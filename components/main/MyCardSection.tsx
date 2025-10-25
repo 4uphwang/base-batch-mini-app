@@ -43,7 +43,7 @@ export default function MyCardSection() {
             </h1>
 
             {/* Card Image Section - Takes up remaining space */}
-            <div className="w-full rounded-2xl sm:rounded-3xl overflow-hidden relative shadow-xl">
+            <div className="w-full rounded-2xl sm:rounded-3xl relative">
 
                 {isLoading ? (
                     // Loading state
@@ -61,26 +61,17 @@ export default function MyCardSection() {
                     </div>
                 ) : card ? (
                     // Card found - Display image (clickable)
-                    <div
-                        onClick={handleMyCardClick}
-                        className="cursor-pointer w-full h-full min-h-[300px] relative group"
-                    >
-                        {/* Image with drop shadow effect */}
-                        <div className="absolute inset-2 sm:inset-4 md:inset-6 transition-all duration-300 group-hover:inset-1 group-hover:sm:inset-3 group-hover:md:inset-5 group-active:inset-3 group-active:sm:inset-5 group-active:md:inset-7">
-                            <div className="relative px-10 w-full h-60 drop-shadow-2xl">
-                                <Image
-                                    src={getIPFSUrl(card.imageURI)}
-                                    alt={`${card.nickname}'s BaseCard`}
-                                    fill
-                                    className="object-contain h-full drop-shadow-[0_10px_30px_rgba(0,0,0,0.3)] group-hover:drop-shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all duration-300 select-none"
-                                    // sizes="(max-width: 640px) 100vw, (max-width: 768px) 80vw, 60vw"
-                                    priority
-                                />
-                            </div>
+                    <div className="h-60 drop-shadow-xl p-2">
+                        <div onClick={handleMyCardClick} className="relative w-full h-52  transition-all duration-300 overflow-visible select-none ">
+                            <Image
+                                src={getIPFSUrl(card.imageURI)}
+                                alt={`${card.nickname}'s BaseCard`}
+                                fill
+                                className="object-contain h-full select-none"
+                                style={{ userSelect: 'none' }}
+                                priority
+                            />
                         </div>
-
-                        {/* Subtle hover indicator */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                     </div>
                 ) : (
                     // No wallet connected
