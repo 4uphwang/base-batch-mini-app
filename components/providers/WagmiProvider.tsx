@@ -9,12 +9,13 @@ import { activeChain, getConfig } from "@/lib/wagmi";
 
 import { NetworkChecker } from "../common/NetworkChecker";
 
+const wagmiConfig = getConfig();
 
 export default function Provider({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient());
 
     return (
-        <WagmiProvider config={getConfig()}>
+        <WagmiProvider config={wagmiConfig}>
             <OnchainKitProvider
                 apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
                 chain={activeChain}
