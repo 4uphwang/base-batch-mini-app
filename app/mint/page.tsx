@@ -11,7 +11,6 @@ import { userProfileAtom } from "@/store/userProfileState";
 import BackButton from "@/components/common/BackButton";
 import ErrorModal from "@/components/common/ErrorModal";
 import LoadingModal from "@/components/common/LoadingModal";
-import { ModernToggle } from "@/components/common/ModernToggle";
 import SuccessModal from "@/components/common/SuccessModal";
 import WarningModal from "@/components/common/WarningModal";
 import ProfileImagePreview from "@/components/mint/ProfileImagePreview";
@@ -128,7 +127,6 @@ export default function Mint() {
     const [websites, setWebsites] = useState<string[]>([]);
     const [newWebsite, setNewWebsite] = useState("");
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-    const [isBaseNameIncluded, setIsBaseNameIncluded] = useState(false);
     const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
@@ -259,7 +257,7 @@ export default function Mint() {
 
 
         try {
-            const baseName = isBaseNameIncluded && username ? username : "";
+            const baseName = username ?? "";
 
             // Execute complete minting flow
             const result = await executeCardMintFlow(
@@ -337,7 +335,6 @@ export default function Mint() {
             defaultProfileUrl,
             generateCard,
             showError,
-            isBaseNameIncluded,
             username,
             selectedSkills,
             address,
@@ -574,13 +571,6 @@ export default function Mint() {
                             disabled
                             className="w-full p-3 text-base h-12 border border-gray-400 rounded-lg bg-gray-100 text-gray-700 cursor-default"
                         />
-
-                        <ModernToggle
-                            checked={isBaseNameIncluded}
-                            onChange={setIsBaseNameIncluded}
-                            disabled={!username}
-                        // color="green" // 색상 변경 가능
-                        />
                     </div>
                 </div>
 
@@ -626,22 +616,26 @@ export default function Mint() {
                         isWalletNotReady ||
                         !address
                     }
-                    className={`w-full py-3 mt-6 text-lg font-bold rounded-lg text-white transition-colors ${isGenerating || isMintPending || isMintConfirming
+                    className={`w-full py-3 mt-6 text-lg font-bold rounded-lg text-white transition-colors ${isGenerating || isMintPending || isMintConfirming || isWalletNotReady || !address
                         ? "bg-gray-400 cursor-not-allowed"
                         : isMintSuccess
                             ? "bg-green-600 hover:bg-green-700"
                             : "bg-blue-600 hover:bg-blue-700"
                         }`}
                 >
-                    {isGenerating
-                        ? "GENERATING..."
-                        : isMintPending
-                            ? "PREPARING..."
-                            : isMintConfirming
-                                ? "CONFIRMING..."
-                                : isMintSuccess
-                                    ? "✓ MINTED!"
-                                    : "MINT YOUR BASECARD"}
+                    {isWalletNotReady
+                        ? "CONNECTING WALLET..."
+                        : !address
+                            ? "CONNECT WALLET"
+                            : isGenerating
+                                ? "GENERATING..."
+                                : isMintPending
+                                    ? "PREPARING..."
+                                    : isMintConfirming
+                                        ? "CONFIRMING..."
+                                        : isMintSuccess
+                                            ? "✓ MINTED!"
+                                            : "MINT YOUR BASECARD"}
                 </button>
             </form>
 
