@@ -1,11 +1,11 @@
 "use client";
 
+import { isDevelopment } from "@/lib/utils";
 import { updateProfileAtom } from "@/store/userProfileState";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
-import { isDevelopment } from "./../app/rootProvider";
 
 interface MiniAppLoaderResult {
     isInMiniApp: boolean;
@@ -24,7 +24,6 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
     // 1. 환경 확인 및 Mini App Ready 호출 로직
     const checkEnvironmentAndSetReady = useCallback(async () => {
         try {
-            console.log('checkEnvironmentAndSetReady')
             // A. 환경 확인: 실제 Mini App 환경인지 확인 (개발 모드에서는 강제 true)
             const miniAppStatus = isDevelopment ? true : await sdk.isInMiniApp();
             setIsInMiniApp(miniAppStatus);

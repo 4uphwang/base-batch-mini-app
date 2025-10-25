@@ -7,8 +7,6 @@ import JotaiClientProvider from "@/components/providers/JotaiProvider";
 import UIThemeProvider from "@/components/providers/UIProvider";
 import Provider from "@/components/providers/WagmiProvider";
 
-import { isDevelopment } from "@/lib/wagmi";
-
 export function RootProvider({ children }: { children: ReactNode }) {
 
     return (
@@ -24,5 +22,3 @@ export function RootProvider({ children }: { children: ReactNode }) {
         </>
     );
 }
-
-export { isDevelopment };
