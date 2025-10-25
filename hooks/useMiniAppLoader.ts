@@ -50,7 +50,6 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
     // 3. 사용자 데이터 로딩 로직
     const loadUserData = useCallback(async () => {
         try {
-            console.log('loadUserData')
             // Mini App 환경이고, isMiniAppReady(Frame Ready) 신호가 완료되었는지 확인
             if (isInMiniApp) {
                 const context = await sdk.context;
