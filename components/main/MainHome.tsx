@@ -11,6 +11,7 @@ import CardCollectionAdder from "./CardCollectionAdder";
 import CollectCardsSection from "./CollectCardsSection";
 import HeroSection from "./HeroSection";
 import MyCardSection from "./MyCardSection";
+import { useAccount } from "wagmi";
 
 const ACTION_ADD_CARD = "addCardCollection";
 

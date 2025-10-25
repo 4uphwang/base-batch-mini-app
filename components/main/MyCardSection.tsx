@@ -1,14 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useMyCard } from "@/hooks/useMyCard";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
+import CardShareFloating from "./CardShareFloating";
 
 export default function MyCardSection() {
     const router = useRouter();
     const { address } = useAccount();
     const { data: card, isLoading, error } = useMyCard(address);
+    const [showShareFloating, setShowShareFloating] = useState(false);
 
     // IPFS Gateway URL
     const getIPFSUrl = (cid: string) => {
@@ -21,11 +24,19 @@ export default function MyCardSection() {
     };
 
     const handleShareClick = () => {
+        console.log("handleShareClick");
         if (card) {
-            // TODO: Implement share functionality
-            console.log("Share card:", card);
+            setShowShareFloating(true);
         }
     };
+
+    const handleCloseShareFloating = () => {
+        setShowShareFloating(false);
+    };
+
+    useEffect(() => {
+        console.log("showShareFloating changed:", showShareFloating);
+    }, [showShareFloating]);
 
     return (
         <div className="relative w-full px-4 sm:px-6 md:px-8 flex flex-col justify-center items-center py-3 sm:py-4 gap-4 sm:gap-6">
@@ -88,14 +99,21 @@ export default function MyCardSection() {
                 <button
                     onClick={handleShareClick}
                     disabled={!card}
-                    className={`flex flex-1 h-11 sm:h-12 md:h-14 rounded-xl justify-center items-center text-white font-semibold text-sm sm:text-base md:text-lg transition-all shadow-md ${card
-                        ? "bg-button-1 hover:bg-blue-700 hover:shadow-lg active:scale-95"
-                        : "bg-gray-400 cursor-not-allowed"
-                        }`}
+                    className={`flex flex-1 h-11 sm:h-12 md:h-14 rounded-xl justify-center items-center text-white font-semibold text-sm sm:text-base md:text-lg transition-all shadow-md ${
+                        card
+                            ? "bg-button-1 hover:bg-blue-700 hover:shadow-lg active:scale-95"
+                            : "bg-gray-400 cursor-not-allowed"
+                    }`}
                 >
                     Share
                 </button>
             </div>
-        </div >
+
+            {/* Share Floating Card */}
+            <CardShareFloating
+                isVisible={showShareFloating}
+                onClose={handleCloseShareFloating}
+            />
+        </div>
     );
 }

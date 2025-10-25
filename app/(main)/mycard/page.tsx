@@ -3,7 +3,6 @@
 import BackButton from "@/components/common/BackButton";
 import { useMyCard } from "@/hooks/useMyCard";
 import { useOpenUrl } from "@coinbase/onchainkit/minikit";
-import { url } from "inspector";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
@@ -14,7 +13,6 @@ export default function MyCard() {
     const router = useRouter();
     const { address } = useAccount();
     const { data: card, isLoading, error } = useMyCard(address);
-    // const imageUrl = `https://ipfs.io/ipfs/${card?.imageURI}`;
 
     if (isLoading) {
         return (
