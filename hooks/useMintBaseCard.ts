@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import {
-    useWriteContract,
-    useWaitForTransactionReceipt,
-    useReadContract,
-    useChainId,
-} from "wagmi";
 import { baseCardAbi } from "@/lib/abi/abi";
 import { activeChain } from "@/lib/wagmi";
+import { useCallback, useState } from "react";
+import {
+    useChainId,
+    useReadContract,
+    useWaitForTransactionReceipt,
+    useWriteContract,
+} from "wagmi";
 
 const BASECARD_CONTRACT_ADDRESS = process.env
     .NEXT_PUBLIC_BASECARD_NFT_CONTRACT_ADDRESS! as `0x${string}`;
@@ -270,7 +270,7 @@ export function useMintBaseCard(userAddress?: `0x${string}`) {
                 };
             }
         },
-        [writeContract, hash, cleanupMintData, hasMinted, isCorrectChain]
+        [writeContract, hash, cleanupMintData, hasMinted, isCorrectChain, userAddress]
     );
 
     // Combine errors
