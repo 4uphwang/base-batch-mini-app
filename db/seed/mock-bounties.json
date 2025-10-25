@@ -2,58 +2,47 @@
     "bounties": [
         {
             "id": "1",
-            "title": "Create Meme Content About Jellyjerry",
-            "organization": "Jellyjerry",
-            "rewardAmount": 20000,
+            "title": "Write a X Thread Explaining How Aerodrome's AMM Works on Base",
+            "organization": "Aerodrome",
+            "rewardAmount": 3000,
+            "rewardCurrency": "USDC",
+            "deadline": "2025-11-05T23:59:00Z",
+            "participants": 3,
+            "category": "Content",
+            "thumbnailUrl": "/assets/project-1-cover.png"
+        },
+        {
+            "id": "2",
+            "title": "Create Meme Content About Brett's Journey on Base",
+            "organization": "Brett",
+            "rewardAmount": 2000,
             "rewardCurrency": "USDC",
             "deadline": "2025-11-05T23:59:00Z",
             "participants": 5,
             "category": "Content",
-            "thumbnailUrl": "https://example.com/images/bounty/jelly.png"
-        },
-        {
-            "id": "2",
-            "title": "Build a Snapshot Voting Strategy Plugin",
-            "organization": "Snapshot Labs",
-            "rewardAmount": 15000,
-            "rewardCurrency": "DAI",
-            "deadline": "2025-11-20T23:59:00Z",
-            "participants": 8,
-            "category": "Dev",
-            "thumbnailUrl": "https://example.com/images/bounty/snapshot.png"
+            "thumbnailUrl": "/assets/project-2-cover.png"
         },
         {
             "id": "3",
-            "title": "Design New UI/UX for DeFi Dashboard",
-            "organization": "Aave Grants",
-            "rewardAmount": 25000,
+            "title": "Test the Echelon Dashboard on Base, Identify UX Issues",
+            "organization": "Echelon",
+            "rewardAmount": 20000,
             "rewardCurrency": "USDC",
-            "deadline": "2025-11-12T23:59:00Z",
-            "participants": 12,
-            "category": "Design",
-            "thumbnailUrl": "https://example.com/images/bounty/aave.png"
+            "deadline": "2025-11-05T23:59:00Z",
+            "participants": 5,
+            "category": "Dev",
+            "thumbnailUrl": "/assets/project-3-cover.png"
         },
         {
             "id": "4",
-            "title": "Write Technical Docs for L2 Bridge",
-            "organization": "Polygon",
-            "rewardAmount": 5000,
-            "rewardCurrency": "MATIC",
-            "deadline": "2025-11-30T23:59:00Z",
-            "participants": 3,
-            "category": "Other",
-            "thumbnailUrl": "https://example.com/images/bounty/polygon.png"
-        },
-        {
-            "id": "5",
-            "title": "Find Security Vulnerability in Smart Contract",
-            "organization": "Immunefi",
-            "rewardAmount": 100000,
-            "rewardCurrency": "ETH",
-            "deadline": "2025-12-15T23:59:00Z",
-            "participants": 21,
-            "category": "Dev",
-            "thumbnailUrl": "https://example.com/images/bounty/immunefi.png"
+            "title": "Create Meme Content About Normie's DeFi Features",
+            "organization": "Normie",
+            "rewardAmount": 2000,
+            "rewardCurrency": "USDC",
+            "deadline": "2025-11-05T23:59:00Z",
+            "participants": 1,
+            "category": "Content",
+            "thumbnailUrl": "/assets/project-4-cover.png"
         }
     ]
 }
