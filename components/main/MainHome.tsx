@@ -2,8 +2,6 @@
 
 import { useRouter } from "next/navigation";
 
-import { useBaseCardNFTs } from "@/hooks/useBaseCardNFTs";
-
 import { useMiniappParams } from "@/hooks/useMiniappParams";
 import { useMyCard } from "@/hooks/useMyCard";
 import { useAccount } from "wagmi";
@@ -16,7 +14,6 @@ const ACTION_ADD_CARD = "addCardCollection";
 
 export default function MainHome() {
     const router = useRouter();
-    useBaseCardNFTs();
     const { address } = useAccount();
     const { data: card } = useMyCard(address);
 

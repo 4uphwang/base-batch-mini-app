@@ -16,12 +16,8 @@ export default function BalanceDisplay({ className }: BalanceDisplayProps) {
     const { balance, isLoading } = balanceState;
 
     return (
-        <button
-            type="button"
-            className={`text-ock-foreground relative flex w-full items-center justify-between ${className} `}
-            disabled
-        >
-            <div className="flex items-center gap-1">
+        <div className={`text-ock-foreground relative flex w-full items-center justify-between ${className} `}>
+            <div className="flex items-center gap-x-1">
                 {isLoading ? (
                     <AiOutlineLoading size={14} className="animate-spin" />
                 ) : (
@@ -30,6 +26,6 @@ export default function BalanceDisplay({ className }: BalanceDisplayProps) {
                     </span>
                 )}
             </div>
-        </button>
+        </div>
     );
 }

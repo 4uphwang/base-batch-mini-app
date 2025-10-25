@@ -25,10 +25,10 @@ export default function Header() {
     };
 
     return (
-        <div className="h-[60px] w-full flex px-4 items-center border-b border-b-gray-200 bg-background-light">
+        <div className="w-full flex px-4 items-center justify-between border-b border-b-gray-200 bg-background-light" style={{ height: 60 }}>
             <div
                 onClick={handleLogoClick}
-                className="cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                className="relative flex flex-shrink-0 h-10"
             >
                 <Image
                     src={BaseCardLogoTypo}
@@ -38,10 +38,14 @@ export default function Header() {
                 />
             </div>
 
-            <div className="ml-auto flex justify-center items-center rounded-full bg-white min-w-16 h-8 gap-x-1">
-                <BalanceDisplay className="rounded-full pr-1 pl-2 font-bold" />
+            <div className="ml-auto flex items-center gap-x-1">
+                {/* 💡 h-8 대신 items-center를 사용하므로 h-8을 제거하거나, 필요하다면 유지 */}
 
-                <div>
+                {/* BalanceDisplay: 세로 높이 h-8과 패딩을 명확히 함 */}
+                <BalanceDisplay className="rounded-full pl-2 font-bold h-8 flex items-center" />
+
+                {/* 프로필 이미지/이니셜 컨테이너: h-8 고정 */}
+                <div className="h-8 flex-shrink-0">
                     {
                         userProfile?.pfpUrl && userProfile?.fid
                             ? <button
@@ -57,7 +61,7 @@ export default function Header() {
                             </button>
                             : <div
                                 style={{ background: backgroundStyle }}
-                                className="w-8 h-8 rounded-full flex justify-center items-center text-lg font-bold text-white"
+                                className="w-8 h-8 rounded-full flex justify-center items-center text-lg font-bold text-white flex-shrink-0"
                             >
                                 {initial}
                             </div>

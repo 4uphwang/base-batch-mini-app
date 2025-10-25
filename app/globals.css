@@ -389,3 +389,12 @@ textarea {
         --bg-position-y: bottom;
     }
 }
+
+@layer utilities {
+
+    /* @utility 구문은 Tailwind에서 직접 지원하지 않습니다. */
+    /* 대신, 클래스 이름과 CSS 속성을 직접 정의해야 합니다. */
+    .header-height {
+        height: 64px;
+    }
+}

@@ -169,7 +169,7 @@ export default function MainLayout({
     }
 
     return (
-        <div>
+        <div className="w-full h-full">
             <Header />
             <main className="pb-16 ">{children}</main>
             <FooterNav />

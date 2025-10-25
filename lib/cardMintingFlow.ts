@@ -1,6 +1,6 @@
-import { resizeAndCompressImage } from "./imageUtils";
-import type { BaseCardMintData, MintResult } from "@/hooks/useMintBaseCard";
 import type { CardGenerationResult } from "@/hooks/useCardGeneration";
+import type { BaseCardMintData, MintResult } from "@/hooks/useMintBaseCard";
+import { resizeAndCompressImage } from "./imageUtils";
 
 /**
  * Card minting flow data
@@ -111,7 +111,8 @@ export async function executeCardMintFlow(
             imageToUse,
             512,
             512,
-            1
+            1,
+            46
         );
 
         const dbResult = await saveCardToDatabase({
@@ -206,7 +207,7 @@ async function processImage(
         if (defaultProfileUrl) {
             const urlString =
                 typeof defaultProfileUrl === "object" &&
-                "src" in defaultProfileUrl
+                    "src" in defaultProfileUrl
                     ? defaultProfileUrl.src
                     : String(defaultProfileUrl);
 

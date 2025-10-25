@@ -16,7 +16,7 @@ export default function MyCard() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0050FF] to-[#0080FF]">
+            <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-b from-[#0050FF] to-[#0080FF]">
                 <div className="text-white font-k2d text-xl">Loading...</div>
             </div>
         );
@@ -24,7 +24,7 @@ export default function MyCard() {
 
     if (error || !card) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#0050FF] to-[#0080FF] px-6 py-8">
+            <div className="h-[100svh] flex flex-col items-center justify-center bg-gradient-to-b from-[#0050FF] to-[#0080FF] px-6 py-8">
                 <div className="flex flex-col items-center text-center gap-6">
                     {/* Title */}
                     <h1

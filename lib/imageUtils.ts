@@ -147,18 +147,20 @@ export function isValidImageURI(imageURI: string | null | undefined): boolean {
 
 /**
  * File 객체의 이미지를 Base64 data URL로 변환하기 전에,
- * 지정된 최대 크기에 맞춰 압축 및 리사이징하는 함수
+ * 지정된 최대 크기에 맞춰 압축 및 리사이징하고, 우측 상하단만 라운딩 처리하는 함수
  * @param file - 원본 File 객체 (이미지)
  * @param maxWidth - 이미지의 최대 너비 (픽셀)
  * @param maxHeight - 이미지의 최대 높이 (픽셀)
  * @param quality - 이미지 압축 품질 (0.0 ~ 1.0)
+ * @param borderRadius - 우측 모서리 둥글기 반지름 (픽셀) 💡 수정된 파라미터
  * @returns Base64 Data URL 문자열
  */
 export const resizeAndCompressImage = (
     file: File,
     maxWidth: number,
     maxHeight: number,
-    quality: number = 0.8
+    quality: number = 0.8,
+    borderRadius: number = 0 // 💡 우측 모서리에 적용할 반지름
 ): Promise<string> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -171,30 +173,54 @@ export const resizeAndCompressImage = (
                 const canvas = document.createElement("canvas");
                 const ctx = canvas.getContext("2d");
 
-                let width = img.width;
-                let height = img.height;
+                // 캔버스 크기는 목표 크기로 고정합니다.
+                canvas.width = maxWidth;
+                canvas.height = maxHeight;
 
-                // 비율에 맞게 리사이징 (최대 너비/높이 제한)
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height *= maxWidth / width;
-                        width = maxWidth;
-                    }
+                const imageRatio = img.width / img.height;
+                const canvasRatio = maxWidth / maxHeight;
+
+                let sourceX = 0;
+                let sourceY = 0;
+                let sourceWidth = img.width;
+                let sourceHeight = img.height;
+
+                // 🔑 Cover 로직: 이미지의 어떤 부분이 잘릴지 계산
+                if (imageRatio > canvasRatio) {
+                    // 이미지가 캔버스보다 가로로 길다 (좌우가 잘림)
+                    sourceWidth = img.height * canvasRatio;
+                    sourceX = (img.width - sourceWidth) / 2; // 중앙 정렬
                 } else {
-                    if (height > maxHeight) {
-                        width *= maxHeight / height;
-                        height = maxHeight;
-                    }
+                    // 이미지가 캔버스보다 세로로 길거나 같다 (상하가 잘림)
+                    sourceHeight = img.width / canvasRatio;
+                    sourceY = (img.height - sourceHeight) / 2; // 중앙 정렬
                 }
 
-                canvas.width = width;
-                canvas.height = height;
+                if (ctx && borderRadius > 0) {
+                    // 캔버스 크기(maxWidth, maxHeight)를 기준으로 라운딩 경로 설정
+                    ctx.beginPath();
+                    const radius = Math.min(borderRadius, maxWidth / 2, maxHeight / 2);
+
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(maxWidth - radius, 0);
+                    ctx.arcTo(maxWidth, 0, maxWidth, radius, radius);
+                    ctx.lineTo(maxWidth, maxHeight - radius);
+                    ctx.arcTo(maxWidth, maxHeight, maxWidth - radius, maxHeight, radius);
+                    ctx.lineTo(0, maxHeight);
+                    ctx.lineTo(0, 0);
+
+                    ctx.clip();
+                }
 
                 // 캔버스에 이미지 그리기
-                ctx?.drawImage(img, 0, 0, width, height);
+                ctx?.drawImage(
+                    img,
+                    sourceX, sourceY, sourceWidth, sourceHeight,
+                    0, 0, maxWidth, maxHeight
+                );
 
                 // 압축 및 Base64로 변환
-                const dataUrl = canvas.toDataURL("image/jpeg", quality);
+                const dataUrl = canvas.toDataURL("image/webp", quality);
                 resolve(dataUrl);
             };
 

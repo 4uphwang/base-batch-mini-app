@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GoHomeFill } from 'react-icons/go';
 import { BsCreditCard } from 'react-icons/bs';
 import { FaMoneyBillAlt } from 'react-icons/fa';
+import { GoHomeFill } from 'react-icons/go';
 
 const navItems = [
     { href: '/mycard', label: 'My BaseCard', icon: BsCreditCard },
@@ -16,7 +16,7 @@ export default function FooterNav() {
     const pathname = usePathname();
 
     return (
-        <footer className="fixed bottom-0 left-0 right-0 border-t bg-white z-10">
+        <footer className="fixed bottom-0 left-0 right-0 border-t bg-white z-50">
             <nav className="flex justify-around max-w-lg mx-auto p-2">
                 {navItems.map((item) => {
                     const IconComponent = item.icon;
@@ -29,7 +29,7 @@ export default function FooterNav() {
               ${pathname === item.href ? 'text-blue-600 font-bold' : 'text-gray-500 hover:text-gray-800'}`
                             }
                         >
-                            <IconComponent className="text-xl"/>
+                            <IconComponent className="text-xl" />
                             <span className="mt-1">{item.label}</span>
                         </Link>
                     )
