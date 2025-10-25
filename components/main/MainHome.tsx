@@ -29,10 +29,9 @@ export default function MainHome() {
 
     return (
         <div className="min-h-screen bg-white">
-            {
-                action === ACTION_ADD_CARD && cardId &&
+            {action === ACTION_ADD_CARD && cardId && (
                 <CardCollectionAdder collectedCardId={cardId} />
-            }
+            )}
             {card ? (
                 <div className="flex flex-col">
                     <MyCardSection />

@@ -2,11 +2,15 @@
 
 import BackButton from "@/components/common/BackButton";
 import { useMyCard } from "@/hooks/useMyCard";
+import { useOpenUrl } from "@coinbase/onchainkit/minikit";
+import { url } from "inspector";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 
 export default function MyCard() {
+    const openUrl = useOpenUrl();
+
     const router = useRouter();
     const { address } = useAccount();
     const { data: card, isLoading, error } = useMyCard(address);
@@ -96,7 +100,11 @@ export default function MyCard() {
                             {/* Avatar */}
                             <div className="w-24 h-24 rounded-full overflow-hidden mb-4 shadow-lg">
                                 <Image
-                                    src={"/assets/default-profile.png"}
+                                    src={
+                                        card.profileImage.length > 0
+                                            ? card.profileImage
+                                            : "/assets/default-profile.png"
+                                    }
                                     alt={card.nickname}
                                     width={96}
                                     height={96}
@@ -205,16 +213,16 @@ export default function MyCard() {
 
                         {/* Basename Button */}
                         <button
-                            onClick={() => {
-                                // TODO: Add basename link functionality
-                                window.open(
-                                    `https://base.org/name/${card.basename}`,
-                                    "_blank"
-                                );
-                            }}
+                            onClick={() =>
+                                openUrl(
+                                    `https://base.org/name/${card.basename}`
+                                )
+                            }
                             className="w-full py-4 bg-[#0050FF] text-white font-k2d-semibold text-lg rounded-2xl hover:bg-[#0040DD] transition-colors shadow-lg"
                         >
-                            {card.basename}
+                            {card.basename.length > 0
+                                ? card.basename
+                                : "No Basename"}
                         </button>
                     </div>
                 </div>
