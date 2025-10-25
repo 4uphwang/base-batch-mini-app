@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useCardGeneration } from "@/hooks/useCardGeneration";
 import { useMintBaseCard } from "@/hooks/useMintBaseCard";
-import { userProfileAtom } from "@/store/userProfileState";
 import { executeCardMintFlow } from "@/lib/cardMintingFlow";
+import { userProfileAtom } from "@/store/userProfileState";
 
 import BackButton from "@/components/common/BackButton";
 import ErrorModal from "@/components/common/ErrorModal";
@@ -78,9 +78,8 @@ const SkillTag = ({ skill, isSelected, onClick }: SkillTagProps) => {
         <div
             // type="button"
             onClick={onClick}
-            className={`${baseClasses} ${
-                isSelected ? selectedClasses : defaultClasses
-            }`}
+            className={`${baseClasses} ${isSelected ? selectedClasses : defaultClasses
+                }`}
         >
             {skill}
             <div
@@ -97,7 +96,9 @@ export default function Mint() {
     const [userProfile] = useAtom(userProfileAtom);
     const username = userProfile.username;
     const defaultProfileUrl = userProfile.pfpUrl || FALLBACK_PROFILE_IMAGE;
-    const { address } = useAccount();
+    const { address, status } = useAccount();
+
+    const isWalletNotReady = status !== 'connected' && status !== 'disconnected';
 
     // Card generation hook
     const {
@@ -237,98 +238,97 @@ export default function Mint() {
         [setWebsites]
     );
 
-    const handleSubmit = useCallback(
-        async (e: React.FormEvent) => {
-            e.preventDefault();
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
+        e.preventDefault();
 
-            if (!name || !role) {
-                showError(
-                    "Required Fields Missing",
-                    "Please fill in your name and role to continue."
-                );
-                return;
-            }
+        if (!name || !role) {
+            showError(
+                "Required Fields Missing",
+                "Please fill in your name and role to continue."
+            );
+            return;
+        }
 
-            if (!address) {
-                showError(
-                    "Wallet Not Connected",
-                    "Please connect your wallet to mint a BaseCard."
-                );
-                return;
-            }
+        if (!address) {
+            showError(
+                "Wallet Not Connected",
+                "Please connect your wallet to mint a BaseCard."
+            );
+            return;
+        }
 
 
-            try {
-                const baseName = isBaseNameIncluded && username ? username : "";
+        try {
+            const baseName = isBaseNameIncluded && username ? username : "";
 
-                // Execute complete minting flow
-                const result = await executeCardMintFlow(
-                    {
-                        name,
-                        role,
-                        bio,
-                        baseName,
-                        address,
-                        profileImageFile: profileImageFile || undefined,
-                        defaultProfileUrl,
-                        skills: selectedSkills,
-                        socials: {
-                            twitter: twitter || "",
-                            github: github || "",
-                            farcaster: facaster || "",
-                        },
+            // Execute complete minting flow
+            const result = await executeCardMintFlow(
+                {
+                    name,
+                    role,
+                    bio,
+                    baseName,
+                    address,
+                    profileImageFile: profileImageFile || undefined,
+                    defaultProfileUrl,
+                    skills: selectedSkills,
+                    socials: {
+                        twitter: twitter || "",
+                        github: github || "",
+                        farcaster: facaster || "",
                     },
-                    generateCard,
-                    mintCard
-                );
+                },
+                generateCard,
+                mintCard
+            );
 
-                if (!result.success) {
-                    // Handle errors by step
-                    switch (result.step) {
-                        case "image":
-                            showError(
-                                "Image Processing Failed",
-                                result.error ||
-                                    "Failed to process profile image"
-                            );
-                            break;
-                        case "generation":
-                            showError(
-                                "Card Generation Failed",
-                                result.error ||
-                                    "Failed to generate card or upload to IPFS"
-                            );
-                            break;
-                        case "database":
-                            showError(
-                                "Database Save Failed",
-                                result.error ||
-                                    "Failed to save card to database"
-                            );
-                            break;
-                        case "minting":
-                            showError(
-                                "Minting Failed",
-                                result.error || "Failed to mint NFT"
-                            );
-                            break;
-                        default:
-                            showError(
-                                "Error Occurred",
-                                result.error || "An unknown error occurred"
-                            );
-                    }
+            if (!result.success) {
+                // Handle errors by step
+                switch (result.step) {
+                    case "image":
+                        showError(
+                            "Image Processing Failed",
+                            result.error ||
+                            "Failed to process profile image"
+                        );
+                        break;
+                    case "generation":
+                        showError(
+                            "Card Generation Failed",
+                            result.error ||
+                            "Failed to generate card or upload to IPFS"
+                        );
+                        break;
+                    case "database":
+                        showError(
+                            "Database Save Failed",
+                            result.error ||
+                            "Failed to save card to database"
+                        );
+                        break;
+                    case "minting":
+                        showError(
+                            "Minting Failed",
+                            result.error || "Failed to mint NFT"
+                        );
+                        break;
+                    default:
+                        showError(
+                            "Error Occurred",
+                            result.error || "An unknown error occurred"
+                        );
                 }
-            } catch (error) {
-                console.error("❌ Card minting error:", error);
-                showError(
-                    "Unexpected Error",
-                    error instanceof Error
-                        ? error.message
-                        : "An unexpected error occurred"
-                );
             }
-        },
+        } catch (error) {
+            console.error("❌ Card minting error:", error);
+            showError(
+                "Unexpected Error",
+                error instanceof Error
+                    ? error.message
+                    : "An unexpected error occurred"
+            );
+        }
+    },
         [
             name,
             role,
@@ -408,11 +408,10 @@ export default function Mint() {
                                     key={roleOption}
                                     type="button"
                                     onClick={() => setRole(roleOption)}
-                                    className={`p-4 rounded-2xl outline-2 transition-all duration-200 text-left ${
-                                        role === roleOption
-                                            ? "bg-gradient-to-r from-[#0050FF] to-[#4A90E2] text-white border-transparent shadow-lg"
-                                            : "bg-white text-black border-gray-200 hover:outline-[#0050FF] hover:shadow-md"
-                                    }`}
+                                    className={`p-4 rounded-2xl outline-2 transition-all duration-200 text-left ${role === roleOption
+                                        ? "bg-gradient-to-r from-[#0050FF] to-[#4A90E2] text-white border-transparent shadow-lg"
+                                        : "bg-white text-black border-gray-200 hover:outline-[#0050FF] hover:shadow-md"
+                                        }`}
                                 >
                                     <div className="flex items-center justify-between relative">
                                         <div>
@@ -524,12 +523,11 @@ export default function Mint() {
                                 websites.length >= MAX_WEBSITES
                             }
                             // 🚨 w-12 h-12로 크기를 Input과 동일하게 고정
-                            className={`w-12 h-12 flex items-center justify-center rounded-lg font-medium text-white transition-colors ${
-                                !newWebsite.trim() ||
+                            className={`w-12 h-12 flex items-center justify-center rounded-lg font-medium text-white transition-colors ${!newWebsite.trim() ||
                                 websites.length >= MAX_WEBSITES
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-blue-600 hover:bg-blue-700"
-                            }`}
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700"
+                                }`}
                         >
                             {/* 아이콘 크기를 조정하고, flex-center로 중앙 정렬 */}
                             <FaPlus size={18} />
@@ -581,7 +579,7 @@ export default function Mint() {
                             checked={isBaseNameIncluded}
                             onChange={setIsBaseNameIncluded}
                             disabled={!username}
-                            // color="green" // 색상 변경 가능
+                        // color="green" // 색상 변경 가능
                         />
                     </div>
                 </div>
@@ -621,24 +619,29 @@ export default function Mint() {
                 {/* 민팅 버튼 */}
                 <button
                     type="submit"
-                    disabled={isGenerating || isMintPending || isMintConfirming}
-                    className={`w-full py-3 mt-6 text-lg font-bold rounded-lg text-white transition-colors ${
-                        isGenerating || isMintPending || isMintConfirming
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : isMintSuccess
+                    disabled={
+                        isGenerating ||
+                        isMintPending ||
+                        isMintConfirming ||
+                        isWalletNotReady ||
+                        !address
+                    }
+                    className={`w-full py-3 mt-6 text-lg font-bold rounded-lg text-white transition-colors ${isGenerating || isMintPending || isMintConfirming
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : isMintSuccess
                             ? "bg-green-600 hover:bg-green-700"
                             : "bg-blue-600 hover:bg-blue-700"
-                    }`}
+                        }`}
                 >
                     {isGenerating
                         ? "GENERATING..."
                         : isMintPending
-                        ? "PREPARING..."
-                        : isMintConfirming
-                        ? "CONFIRMING..."
-                        : isMintSuccess
-                        ? "✓ MINTED!"
-                        : "MINT YOUR BASECARD"}
+                            ? "PREPARING..."
+                            : isMintConfirming
+                                ? "CONFIRMING..."
+                                : isMintSuccess
+                                    ? "✓ MINTED!"
+                                    : "MINT YOUR BASECARD"}
                 </button>
             </form>
 
