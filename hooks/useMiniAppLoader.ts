@@ -20,18 +20,12 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
 
     const { isMiniAppReady, setMiniAppReady } = useMiniKit();
 
-
-    // 1. 환경 확인 및 Mini App Ready 호출 로직
-    const checkEnvironmentAndSetReady = useCallback(async () => {
+    // 1. 환경 확인 로직만 수행 
+    const checkEnvironment = useCallback(async () => {
         try {
             // A. 환경 확인: 실제 Mini App 환경인지 확인 (개발 모드에서는 강제 true)
             const miniAppStatus = isDevelopment ? true : await sdk.isInMiniApp();
             setIsInMiniApp(miniAppStatus);
-
-            // B. Mini App 환경일 경우에만 Frame Ready 신호 전송
-            if (miniAppStatus && !isMiniAppReady) {
-                setMiniAppReady();
-            }
         } catch (error) {
             console.error("Error checking Mini App status:", error);
             setIsInMiniApp(false);
@@ -39,20 +33,16 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
             // 환경 확인 로직이 끝났음을 표시
             setIsEnvironmentChecked(true);
         }
-    }, [isMiniAppReady, setMiniAppReady]);
+    }, []);
 
-    // 2. 환경 확인 로직은 앱 마운트 시점에 한 번 실행
-    useEffect(() => {
-        checkEnvironmentAndSetReady();
-    }, [checkEnvironmentAndSetReady]);
-
-
-    // 3. 사용자 데이터 로딩 로직
-    const loadUserData = useCallback(async () => {
+    // 2. 사용자 데이터 로딩 및 Ready 신호 전송 로직 (결합)
+    const loadUserDataAndSetReady = useCallback(async () => {
         try {
-            // Mini App 환경이고, isMiniAppReady(Frame Ready) 신호가 완료되었는지 확인
             if (isInMiniApp) {
+                // A. 필수 데이터 로딩 (sdk.context)
                 const context = await sdk.context;
+                if (!context) return;
+
                 const userData = context.user;
 
                 setProfile({
@@ -61,29 +51,36 @@ export function useMiniAppLoader(): MiniAppLoaderResult {
                     displayName: userData.displayName || null,
                     pfpUrl: userData.pfpUrl || null,
                 });
+
+                // B. 데이터 로딩이 완료된 후, 그리고 아직 신호를 보내지 않았을 때만 setMiniAppReady 호출
+                if (!isMiniAppReady) {
+                    setMiniAppReady();
+                }
             }
         } catch (error) {
             console.error("Error loading Mini App data:", error);
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // 로딩 종료
         }
-    }, [isInMiniApp, setProfile]);
+    }, [isInMiniApp, isMiniAppReady, setMiniAppReady, setProfile]);
 
-    // 4. 데이터 로딩 실행 useEffect:
-    // 환경 확인이 완료되었고 (isEnvironmentChecked),
-    // Frame Ready 신호가 완료되었거나 (isMiniAppReady),
-    // Mini App 환경이 아닐 때 (isInMiniApp이 false일 때) 실행합니다.
+
+    // 3. 환경 확인 실행: 앱 마운트 시점에 한 번 실행
+    useEffect(() => {
+        checkEnvironment();
+    }, [checkEnvironment]);
+
+
+    // 4. 데이터 로딩 및 Ready 신호 발송 실행
     useEffect(() => {
         if (isEnvironmentChecked) {
             if (!isInMiniApp) {
-                // Mini App이 아니면, 데이터 로딩 없이 즉시 완료 (isLoading: false)
                 setIsLoading(false);
-            } else if (isMiniAppReady) {
-                // Mini App이 맞고, Frame Ready 신호가 완료되면 데이터 로딩 시작
-                loadUserData();
+            } else {
+                loadUserDataAndSetReady();
             }
         }
-    }, [isEnvironmentChecked, isInMiniApp, isMiniAppReady, loadUserData]);
+    }, [isEnvironmentChecked, isInMiniApp, loadUserDataAndSetReady]);
 
     return {
         isInMiniApp,
