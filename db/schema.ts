@@ -1,12 +1,12 @@
+import { relations } from "drizzle-orm";
 import {
+    integer,
     pgTable,
     serial,
     text,
-    varchar,
-    integer,
     unique,
+    varchar,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 
 // cards 테이블
 export const cards = pgTable("cards", {

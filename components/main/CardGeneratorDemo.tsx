@@ -4,12 +4,13 @@ import { useCardGeneration } from "@/hooks/useCardGeneration";
 import { useMintBaseCard } from "@/hooks/useMintBaseCard";
 import { executeCardMintFlow } from "@/lib/cardMintingFlow";
 import { convertFileToBase64DataURL } from "@/lib/imageUtils";
+import { walletAddressAtom } from "@/store/walletState";
+import { useAtom } from "jotai";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
 
 export default function CardGeneratorDemo() {
-    const { address: connectedAddress } = useAccount();
+    const [connectedAddress] = useAtom(walletAddressAtom);
 
     const [nickname, setNickname] = useState("My Nickname");
     const [role, setRole] = useState("Base Developer");

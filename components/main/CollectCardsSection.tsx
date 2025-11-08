@@ -1,79 +1,37 @@
 "use client";
 
-import { safeImageURI } from "@/lib/imageUtils";
-import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { CiSearch } from "react-icons/ci";
+import { useFetchCards } from "@/hooks/card/useFetchCards";
+import { CollectionFilterTag } from "@/lib/collection";
+import { filterCollections } from "@/lib/utils";
 import { useOpenUrl } from "@coinbase/onchainkit/minikit";
-
-interface CardData {
-    id: number;
-    nickname: string;
-    bio?: string;
-    imageURI?: string;
-    basename?: string;
-    role?: string;
-    skills?: string[];
-    address: string;
-}
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CiSearch } from "react-icons/ci";
+import { CollectionFilter } from "../collection/CollectionFilter";
+import CardItem from "./collections/CardItem";
 
 export default function CollectCardsSection() {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedTag, setSelectedTag] = useState("All");
-    const [cards, setCards] = useState<CardData[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [activeCardId, setActiveCardId] = useState<number | null>(null);
     const openUrl = useOpenUrl();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedTag, setSelectedTag] = useState<CollectionFilterTag>("All");
+    const [activeCardId, setActiveCardId] = useState<number | null>(null);
 
-    const tags = ["All", "Designer", "Developer", "Marketer"];
+    const {
+        data: cards = [],
+        isLoading,
+        isError,
+        error
+    } = useFetchCards();
+
     const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-    // API에서 카드 데이터 가져오기
-    useEffect(() => {
-        const fetchCards = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch("/api/cards");
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch cards");
-                }
-
-                const data = await response.json();
-                setCards(data);
-                setError(null);
-            } catch (err) {
-                console.error("Error fetching cards:", err);
-                setError(
-                    err instanceof Error ? err.message : "Failed to fetch cards"
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCards();
+    const handleSearch = useCallback(() => {
+        setSearchTerm((current) => current.trim());
     }, []);
 
-    const handleSearch = () => {
-        console.log(`Searching for: ${searchTerm}`);
-    };
-
-    // 필터링된 카드 목록
-    const filteredCards = cards.filter((card) => {
-        const matchesSearch =
-            searchTerm === "" ||
-            card.nickname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            card.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            card.skills?.some((skill) =>
-                skill.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-
-        const matchesTag = selectedTag === "All" || card.role === selectedTag;
-
-        return matchesSearch && matchesTag;
-    });
+    const { filteredCards, tags } = useMemo(
+        () => filterCollections(cards, selectedTag, searchTerm),
+        [cards, selectedTag, searchTerm]
+    );
 
     // Intersection Observer로 중앙 카드 감지
     useEffect(() => {
@@ -127,20 +85,13 @@ export default function CollectCardsSection() {
             } else {
                 cardRefs.current.delete(id);
             }
-        },
-        []
-    );
+        }, []);
 
     return (
         <div className="bg-white px-4 sm:px-6 py-6 sm:py-8">
             {/* Header */}
             <div className="text-left mb-6">
-                <h2
-                    className="text-3xl sm:text-4xl font-k2d-bold text-black mb-2"
-                    style={{
-                        letterSpacing: "-0.05em",
-                    }}
-                >
+                <h2 className="text-3xl sm:text-4xl font-k2d-bold text-black mb-2 tracking-tight">
                     Collect cards
                 </h2>
                 <p className="text-base sm:text-lg text-gray-500 font-k2d-medium">
@@ -168,36 +119,23 @@ export default function CollectCardsSection() {
             </div>
 
             {/* Filter Tags */}
-            <div className="flex gap-2 mb-8 pb-2 justify-start flex-wrap">
-                {tags.map((tag) => (
-                    <button
-                        key={tag}
-                        onClick={() => setSelectedTag(tag)}
-                        className={`px-3 py-1.5 rounded-full font-k2d-medium transition-colors text-xs flex-1 min-w-0 ${
-                            selectedTag === tag
-                                ? "bg-[#0050FF] text-white"
-                                : "bg-white text-black border border-gray-200 hover:border-[#0050FF]"
-                        }`}
-                    >
-                        {tag}
-                    </button>
-                ))}
-            </div>
+            <CollectionFilter
+                tags={tags}
+                selectedTag={selectedTag}
+                onTagChange={setSelectedTag}
+            />
 
             {/* Cards List */}
-            <div className="space-y-4">
-                {loading ? (
+            <div className="space-y-4 mt-5">
+                {isLoading ? (
                     <div className="text-center py-8">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0050FF]"></div>
                         <p className="mt-2 text-gray-500 font-k2d-regular">
                             Loading cards...
                         </p>
                     </div>
-                ) : error ? (
+                ) : isError ? (
                     <div className="text-center py-8">
-                        <p className="text-red-500 font-k2d-regular">
-                            Error: {error}
-                        </p>
                         <button
                             onClick={() => window.location.reload()}
                             className="mt-2 px-4 py-2 bg-[#0050FF] text-white rounded-lg font-k2d-medium hover:bg-[#0040CC] transition-colors"
@@ -212,112 +150,15 @@ export default function CollectCardsSection() {
                         </p>
                     </div>
                 ) : (
-                    <div className="flex flex-col -space-y-16 sm:-space-y-20 md:-space-y-24 mb-24">
+                    <div className="flex flex-col px-5 space-y-1" style={{ paddingBottom: "40vh" }}>
                         {filteredCards.map((card) => (
-                            <div
+                            <CardItem
                                 key={card.id}
-                                ref={(el) => setCardRef(card.id, el)}
-                                data-card-id={card.id}
-                                className={`group cursor-pointer transition-all duration-700 ease-in-out ${
-                                    activeCardId === card.id
-                                        ? "scale-110 z-20"
-                                        : "scale-100 z-10"
-                                }`}
-                                style={{
-                                    opacity:
-                                        activeCardId === null
-                                            ? 1
-                                            : activeCardId === card.id
-                                            ? 1
-                                            : 0.7,
-                                }}
-                                onClick={() =>
-                                    openUrl(
-                                        `https://base.app/profile/${card.address}`
-                                    )
-                                }
-                            >
-                                <div className="relative w-full h-56 sm:h-64 md:h-72 lg:h-80 shadow-xl rounded-2xl overflow-hidden bg-white border-4 border-white">
-                                    <Image
-                                        src={
-                                            safeImageURI(
-                                                card.imageURI,
-                                                "/assets/default-profile.png"
-                                            ) || "/assets/default-profile.png"
-                                        }
-                                        alt={
-                                            card.nickname ||
-                                            card.address ||
-                                            "Card image"
-                                        }
-                                        fill
-                                        className="object-contain"
-                                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 100vw, 100vw"
-                                        unoptimized={
-                                            card.imageURI?.startsWith(
-                                                "data:"
-                                            ) || false
-                                        }
-                                        onError={(e) => {
-                                            // 이미지 로드 실패 시 기본 이미지로 대체
-                                            e.currentTarget.src =
-                                                "/assets/default-profile.png";
-                                        }}
-                                    />
-
-                                    {/* Overlay Info - 중앙 카드에만 표시 */}
-                                    {activeCardId === card.id && (
-                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 animate-fade-in">
-                                            <h3 className="font-k2d-bold text-lg text-white truncate">
-                                                {card.nickname}
-                                            </h3>
-                                            <p className="text-sm text-white/90 font-k2d-regular truncate">
-                                                {card.basename || card.address}
-                                            </p>
-                                            {card.role && (
-                                                <p className="text-sm text-blue-300 font-k2d-medium mt-1">
-                                                    {card.role}
-                                                </p>
-                                            )}
-                                            {card.skills &&
-                                                card.skills.length > 0 && (
-                                                    <div className="flex flex-wrap gap-1 mt-2">
-                                                        {card.skills
-                                                            .slice(0, 3)
-                                                            .map(
-                                                                (
-                                                                    skill,
-                                                                    idx
-                                                                ) => (
-                                                                    <span
-                                                                        key={
-                                                                            idx
-                                                                        }
-                                                                        className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular"
-                                                                    >
-                                                                        {skill}
-                                                                    </span>
-                                                                )
-                                                            )}
-                                                        {card.skills.length >
-                                                            3 && (
-                                                            <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular">
-                                                                +
-                                                                {card.skills
-                                                                    .length - 3}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                )}
-                                        </div>
-                                    )}
-
-                                    {/* Active Indicator */}
-                                    {activeCardId === card.id && (
-                                        <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50" />
-                                    )}
-                                </div>
-                            </div>
+                                card={card}
+                                activeCardId={activeCardId}
+                                setCardRef={setCardRef}
+                                openUrl={openUrl}
+                            />
                         ))}
                     </div>
                 )}

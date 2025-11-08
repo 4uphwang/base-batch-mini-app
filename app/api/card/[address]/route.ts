@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { cards } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { MOCK_CARD, MOCK_WALLET_ADDRESS, USE_MOCK_DATA } from "@/lib/mockData";
+import { eq, lte, sql } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
 // GET /api/card/[address] - Get card by address
 export async function GET(
@@ -11,19 +12,31 @@ export async function GET(
     try {
         const { address } = await params;
 
-        const card = await db
-            .select()
-            .from(cards)
-            .where(eq(cards.address, address));
+        // 목업 모드일 때 목업 데이터 반환
+        if (USE_MOCK_DATA && address.toLowerCase() === MOCK_WALLET_ADDRESS.toLowerCase()) {
+            return NextResponse.json(MOCK_CARD);
+        }
 
-        if (card.length === 0) {
+        const card = await db.query.cards.findFirst({
+            where: (cards, { eq }) => eq(cards.address, address),
+        });
+
+        if (!card) {
             return NextResponse.json(
                 { message: "Card not found" },
                 { status: 404 }
             );
         }
 
-        return NextResponse.json(card[0]);
+        const [{ count }] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(cards)
+            .where(lte(cards.id, card.id));
+
+        return NextResponse.json({
+            ...card,
+            tokenId: count, // 1부터 시작하는 순서
+        });
     } catch (error) {
         console.error("Error fetching card:", error);
         return NextResponse.json(

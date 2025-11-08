@@ -2,13 +2,14 @@
 
 import { baseCardAbi } from "@/lib/abi/abi";
 import { activeChain } from "@/lib/wagmi";
+import { walletAddressAtom } from "@/store/walletState";
+import { useAtom } from "jotai";
 import { useCallback, useState } from "react";
 import {
-    useAccount,
     useChainId,
     useReadContract,
     useWaitForTransactionReceipt,
-    useWriteContract,
+    useWriteContract
 } from "wagmi";
 
 const BASECARD_CONTRACT_ADDRESS = process.env
@@ -64,7 +65,7 @@ export interface MintResult {
  * ```
  */
 export function useMintBaseCard() {
-    const { address: userAddress } = useAccount();
+    const [userAddress] = useAtom(walletAddressAtom);
     const [mintError, setMintError] = useState<string | null>(null);
     const [lastMintData, setLastMintData] = useState<BaseCardMintData | null>(
         null
@@ -157,7 +158,7 @@ export function useMintBaseCard() {
     const mintCard = async (data: BaseCardMintData): Promise<MintResult> => {
         setMintError(null);
         setLastMintData(data);
-        console.log('userAddress', userAddress)
+
         try {
             // Check if on correct chain first
             if (!isCorrectChain) {

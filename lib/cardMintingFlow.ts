@@ -1,6 +1,5 @@
 import type { CardGenerationResult } from "@/hooks/useCardGeneration";
 import type { BaseCardMintData, MintResult } from "@/hooks/useMintBaseCard";
-import { resizeAndCompressImage } from "./imageUtils";
 
 /**
  * Card minting flow data
@@ -40,6 +39,7 @@ export interface CardMintFlowResult {
         mintHash?: string;
     };
 }
+
 
 /**
  * Complete card minting flow
@@ -105,16 +105,6 @@ export async function executeCardMintFlow(
 
         const ipfsImageURI = `ipfs://${generationResult.ipfs.cid}`;
 
-        // Step 3: Save to database
-        console.log("💾 Saving card to database...");
-        const profileImageDataURL: string = await resizeAndCompressImage(
-            imageToUse,
-            512,
-            512,
-            1,
-            46
-        );
-
         const dbResult = await saveCardToDatabase({
             nickname: data.name,
             role: data.role,
@@ -123,7 +113,7 @@ export async function executeCardMintFlow(
             basename: data.baseName || "",
             skills: data.skills || [],
             address: data.address,
-            profileImage: profileImageDataURL,
+            profileImage: generationResult.profileImageBase64 || "",
         });
 
         if (!dbResult.success) {
