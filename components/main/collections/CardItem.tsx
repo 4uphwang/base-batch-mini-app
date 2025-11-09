@@ -6,6 +6,7 @@ import { safeImageURI } from "@/lib/imageUtils"; // 기존 임포트 경로에 �
 import { Card } from "@/lib/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import clsx from "clsx";
 import React from "react";
 import CardOverlayInfo from "./CardOverlayInfo";
 
@@ -19,6 +20,7 @@ const CardItem = React.memo(function CardItem({ card, isActive, style }: CardIte
     const router = useRouter();
     const cardStyle = {
         opacity: isActive ? 1 : 0.7,
+        zIndex: isActive ? 9999 : 10,
     };
 
     const handleCardClick = () => {
@@ -28,7 +30,10 @@ const CardItem = React.memo(function CardItem({ card, isActive, style }: CardIte
     return (
         <div
             data-card-id={card.id}
-            className={`group cursor-pointer transition-all duration-700 ease-in-out shadow-xl rounded-2xl flex w-full mx-auto overflow-hidden ${isActive ? "scale-110 z-20" : "scale-100 z-10"}`}
+            className={clsx(
+                "group cursor-pointer transition-all duration-700 ease-in-out shadow-xl rounded-2xl flex w-full mx-auto",
+                isActive ? "scale-110 overflow-visible" : "scale-100 overflow-hidden"
+            )}
             style={{ ...style, ...cardStyle }}
             onClick={handleCardClick}
         >
