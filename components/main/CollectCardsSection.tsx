@@ -70,15 +70,27 @@ export default function CollectCardsSection() {
 
         const viewportHeight =
             typeof window !== "undefined" ? window.innerHeight : 0;
+        const usableHeight = viewportHeight > 0 ? viewportHeight * 0.6 : 1;
         const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
-        const viewportCenter = scrollOffset + viewportHeight / 2;
+        const viewportCenter = scrollOffset + usableHeight / 2;
         const relativeCenter = viewportCenter - listOffsetTop;
 
-        const centeredItem =
+        const firstItem = virtualItems[0];
+        const lastItem = virtualItems[virtualItems.length - 1];
+
+        let centeredItem =
             virtualItems.find(
                 (item) =>
                     relativeCenter >= item.start && relativeCenter <= item.end
-            ) ?? virtualItems[Math.floor(virtualItems.length / 2)];
+            ) ?? null;
+
+        if (!centeredItem) {
+            if (relativeCenter < firstItem.start) {
+                centeredItem = firstItem;
+            } else if (relativeCenter > lastItem.end) {
+                centeredItem = lastItem;
+            }
+        }
 
         if (!centeredItem) {
             return null;
@@ -153,9 +165,9 @@ export default function CollectCardsSection() {
                     <div ref={listContainerRef} className="relative flex-1">
                         <div
                             style={{
-                                height: `${rowVirtualizer.getTotalSize()}px`,
+                                height: `${rowVirtualizer.getTotalSize() + (typeof window !== "undefined" ? window.innerHeight * 0.3 : 0)}px`,
                                 position: "relative",
-                                overflow: "visible",
+                                paddingBottom: "20vh",
                             }}
                         >
                             {virtualItems.map((virtualItem) => {
@@ -180,6 +192,7 @@ export default function CollectCardsSection() {
                                             left: 0,
                                             width: "100%",
                                             transform: `translateY(${virtualItem.start}px)`,
+                                            zIndex: card.id === activeCardId ? 9999 : 10,
                                         }}
                                     >
                                         <CardItem
