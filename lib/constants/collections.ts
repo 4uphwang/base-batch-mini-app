@@ -1,3 +1,5 @@
+import { CollectionFilterTag } from "../collection";
+
 export const COLLECTION_TAGS: CollectionFilterTag[] = ["All", "Designer", "Dev", "MKT"];
 
 export const TAG_ROLE_MAP: Record<CollectionFilterTag, string | null> = {
