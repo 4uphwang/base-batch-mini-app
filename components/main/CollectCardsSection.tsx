@@ -15,6 +15,7 @@ export default function CollectCardsSection() {
     const [selectedTag, setSelectedTag] = useState<CollectionFilterTag>("All");
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const [listOffsetTop, setListOffsetTop] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(0);
 
     const {
         data: cards = [],
@@ -32,14 +33,15 @@ export default function CollectCardsSection() {
         count: filteredCards.length,
         estimateSize: () => 200,
         overscan: 6,
-        paddingEnd: typeof window !== "undefined" ? window.innerHeight / 3 : 0,
+        paddingEnd: Math.max(viewportHeight / 2, 0),
     });
 
     useLayoutEffect(() => {
-        const updateOffset = () => {
+        const recalcMeasurements = () => {
             const element = listContainerRef.current;
             if (!element) {
                 setListOffsetTop(0);
+                setViewportHeight(typeof window !== "undefined" ? window.innerHeight : 0);
                 return;
             }
 
@@ -52,13 +54,14 @@ export default function CollectCardsSection() {
             }
 
             setListOffsetTop(offset);
+            setViewportHeight(typeof window !== "undefined" ? window.innerHeight : 0);
         };
 
-        updateOffset();
-        window.addEventListener("resize", updateOffset);
+        recalcMeasurements();
+        window.addEventListener("resize", recalcMeasurements);
 
         return () => {
-            window.removeEventListener("resize", updateOffset);
+            window.removeEventListener("resize", recalcMeasurements);
         };
     }, [filteredCards.length]);
 
@@ -69,8 +72,6 @@ export default function CollectCardsSection() {
             return null;
         }
 
-        const viewportHeight =
-            typeof window !== "undefined" ? window.innerHeight : 0;
         const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
         const viewportCenter = scrollOffset + viewportHeight / 2;
 
@@ -94,7 +95,9 @@ export default function CollectCardsSection() {
 
             if (distance === 0) {
                 break;
-            } else if (distance < 0) {
+            }
+
+            if (distance < 0) {
                 left = mid + 1;
             } else {
                 right = mid - 1;
@@ -107,7 +110,7 @@ export default function CollectCardsSection() {
         );
 
         return filteredCards[clampedIndex]?.id ?? null;
-    }, [filteredCards, virtualItems, listOffsetTop, rowVirtualizer.scrollOffset]);
+    }, [filteredCards, virtualItems, listOffsetTop, viewportHeight, rowVirtualizer.scrollOffset]);
 
     return (
         <div className="bg-white px-4 sm:px-6 pt-6">
