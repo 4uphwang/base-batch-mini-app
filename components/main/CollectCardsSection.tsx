@@ -41,7 +41,8 @@ export default function CollectCardsSection() {
 
         const viewportHeight =
             typeof window !== "undefined" ? window.innerHeight : 0;
-        const viewportCenter = rowVirtualizer.scrollOffset + viewportHeight / 2;
+        const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
+        const viewportCenter = scrollOffset + viewportHeight / 2;
 
         const centeredItem =
             virtualItems.find(
