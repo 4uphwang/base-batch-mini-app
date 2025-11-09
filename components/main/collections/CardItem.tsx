@@ -19,9 +19,9 @@ interface CardItemProps {
 const CardItem = React.memo(function CardItem({ card, isActive, style }: CardItemProps) {
     const router = useRouter();
     const cardStyle = {
-        opacity: isActive ? 1 : 0.7,
-        zIndex: isActive ? 9999 : 10,
-    };
+        opacity: isActive ? 1 : 0.85,
+        zIndex: isActive ? 20 : 10,
+    } satisfies React.CSSProperties;
 
     const handleCardClick = () => {
         router.push(`/card/${card.address}`);
@@ -31,28 +31,36 @@ const CardItem = React.memo(function CardItem({ card, isActive, style }: CardIte
         <div
             data-card-id={card.id}
             className={clsx(
-                "group relative cursor-pointer transition-all duration-700 ease-in-out rounded-2xl flex w-full mx-auto px-5",
-                isActive ? "scale-110 overflow-visible" : "scale-100 overflow-hidden"
+                "group relative cursor-pointer flex w-full mx-auto px-5 rounded-2xl",
+                "transition-all duration-400 ease-out will-change-transform will-change-opacity",
+                isActive
+                    ? "scale-[1.06] drop-shadow-2xl shadow-black/25"
+                    : "scale-100 drop-shadow-md shadow-black/10"
             )}
             style={{ ...style, ...cardStyle }}
             onClick={handleCardClick}
         >
-            <div className="relative overflow-hidden" style={{ aspectRatio: "5/3", width: "100%" }}>
+            <div
+                className="relative overflow-hidden rounded-2xl"
+                style={{ aspectRatio: "5/3", width: "100%" }}
+            >
                 <Image
                     src={
                         safeImageURI(card.imageURI, "/assets/default-profile.png") ||
                         "/assets/default-profile.png"
                     }
                     alt={card.nickname || card.address || "Card image"}
+                    fill={true}
+                    priority={isActive}
                     style={{ objectFit: "cover" }}
-                    className="object-cover aspect-[5/3]"
+                    className="object-cover aspect-[5/3] transition-transform duration-500 ease-out group-hover:scale-[1.02]"
                     unoptimized={card.imageURI?.startsWith("data:") || false}
                     onError={(e) => {
                         e.currentTarget.src = "/assets/default-profile.png";
                     }}
                 />
 
-                {isActive && <CardOverlayInfo card={card} />}
+                <CardOverlayInfo card={card} isActive={isActive} />
             </div>
         </div>
     );

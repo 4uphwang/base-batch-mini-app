@@ -1,37 +1,45 @@
 import { Card } from "@/lib/types";
+import clsx from "clsx";
 
 interface CardOverlayInfoProps {
     card: Card;
+    isActive: boolean;
 }
 
-const CardOverlayInfo: React.FC<CardOverlayInfoProps> = ({ card }) => {
+const CardOverlayInfo: React.FC<CardOverlayInfoProps> = ({ card, isActive }) => {
     return (
         <div
-            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 animate-fade-in"
-            style={{ textAlign: 'right' }}>
-            {/* <h3 className="font-k2d-bold text-lg text-white truncate">
-                {card.nickname}
+            className={clsx(
+                "absolute inset-x-0 bottom-0 rounded-b-2xl bg-gradient-to-t from-black/85 via-black/30 to-transparent p-4 text-right backdrop-blur-[2px]",
+                "transition-all duration-400 ease-out will-change-transform will-change-opacity",
+                isActive
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4 pointer-events-none"
+            )}
+        >
+            <h3 className="font-k2d-semibold text-lg text-white truncate">
+                {card.nickname || "Unknown BaseCard"}
             </h3>
-            <p className="text-sm text-white font-k2d-regular truncate">
+            <p className="text-sm text-white/80 font-k2d-regular truncate">
                 {card.basename || card.address}
             </p>
             {card.role && (
-                <p className="text-sm text-blue-300 font-k2d-medium mt-1">
+                <p className="text-xs uppercase tracking-wide text-blue-200 font-k2d-medium mt-1">
                     {card.role}
                 </p>
-            )} */}
+            )}
             {card.skills && card.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2 justify-end">
+                <div className="flex flex-wrap gap-1 mt-3 justify-end">
                     {card.skills.slice(0, 3).map((skill: string, idx: number) => (
                         <span
                             key={idx}
-                            className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular"
+                            className="px-2 py-1 bg-white/15 text-white rounded-full text-[11px] font-k2d-regular"
                         >
                             {skill}
                         </span>
                     ))}
                     {card.skills.length > 3 && (
-                        <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded text-xs font-k2d-regular">
+                        <span className="px-2 py-1 bg-white/15 text-white rounded-full text-[11px] font-k2d-regular">
                             +{card.skills.length - 3}
                         </span>
                     )}
