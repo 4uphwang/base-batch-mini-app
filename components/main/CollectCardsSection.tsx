@@ -4,7 +4,7 @@ import { useFetchCards } from "@/hooks/card/useFetchCards";
 import { CollectionFilterTag } from "@/lib/collection";
 import { filterCollections } from "@/lib/utils";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { CollectionFilter } from "../collection/CollectionFilter";
 import CardItem from "./collections/CardItem";
@@ -13,6 +13,8 @@ export default function CollectCardsSection() {
     const [searchInput, setSearchInput] = useState("");
     const deferredSearchTerm = useDeferredValue(searchInput);
     const [selectedTag, setSelectedTag] = useState<CollectionFilterTag>("All");
+    const listContainerRef = useRef<HTMLDivElement | null>(null);
+    const [listOffsetTop, setListOffsetTop] = useState(0);
 
     const {
         data: cards = [],
@@ -32,6 +34,33 @@ export default function CollectCardsSection() {
         overscan: 8,
     });
 
+    useLayoutEffect(() => {
+        const updateOffset = () => {
+            const element = listContainerRef.current;
+            if (!element) {
+                setListOffsetTop(0);
+                return;
+            }
+
+            let offset = 0;
+            let current: HTMLElement | null = element;
+
+            while (current) {
+                offset += current.offsetTop;
+                current = current.offsetParent as HTMLElement | null;
+            }
+
+            setListOffsetTop(offset);
+        };
+
+        updateOffset();
+        window.addEventListener("resize", updateOffset);
+
+        return () => {
+            window.removeEventListener("resize", updateOffset);
+        };
+    }, [filteredCards.length]);
+
     const virtualItems = rowVirtualizer.getVirtualItems();
 
     const activeCardId = useMemo(() => {
@@ -43,10 +72,12 @@ export default function CollectCardsSection() {
             typeof window !== "undefined" ? window.innerHeight : 0;
         const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
         const viewportCenter = scrollOffset + viewportHeight / 2;
+        const relativeCenter = viewportCenter - listOffsetTop;
 
         const centeredItem =
             virtualItems.find(
-                (item) => viewportCenter >= item.start && viewportCenter <= item.end
+                (item) =>
+                    relativeCenter >= item.start && relativeCenter <= item.end
             ) ?? virtualItems[Math.floor(virtualItems.length / 2)];
 
         if (!centeredItem) {
@@ -54,7 +85,7 @@ export default function CollectCardsSection() {
         }
 
         return filteredCards[centeredItem.index]?.id ?? null;
-    }, [filteredCards, virtualItems]);
+    }, [filteredCards, virtualItems, listOffsetTop]);
 
     return (
         <div className="bg-white px-4 sm:px-6 pt-6">
@@ -119,7 +150,7 @@ export default function CollectCardsSection() {
                         </p>
                     </div>
                 ) : (
-                    <div className="relative flex-1 px-5">
+                    <div ref={listContainerRef} className="relative flex-1 px-5">
                         <div
                             style={{
                                 height: `${rowVirtualizer.getTotalSize()}px`,
