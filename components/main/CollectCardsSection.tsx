@@ -88,12 +88,25 @@ export default function CollectCardsSection() {
             }
         }
 
-        if (!closestItem) {
-            return null;
+        if (closestItem) {
+            const clampedIndex = Math.min(
+                Math.max(closestItem.index, 0),
+                filteredCards.length - 1
+            );
+
+            return filteredCards[clampedIndex]?.id ?? null;
         }
 
+        const totalHeight = rowVirtualizer.getTotalSize();
+        const averageItemSize =
+            totalHeight > 0 && filteredCards.length > 0
+                ? totalHeight / filteredCards.length
+                : 1;
+        const relativeCenter = viewportCenter - listOffsetTop;
+        const approximateIndex = Math.round(relativeCenter / averageItemSize);
+
         const clampedIndex = Math.min(
-            Math.max(closestItem.index, 0),
+            Math.max(approximateIndex, 0),
             filteredCards.length - 1
         );
 
