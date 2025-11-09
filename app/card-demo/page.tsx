@@ -1,9 +1,6 @@
-import dynamic from "next/dynamic";
+import CardGeneratorDemo from "@/components/main/CardGeneratorDemo";
 import { Suspense } from "react";
 
-const CardGeneratorDemo = dynamic(() => import("@/components/main/CardGeneratorDemo"), {
-    ssr: false,
-});
 
 const DemoSkeleton = () => (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
