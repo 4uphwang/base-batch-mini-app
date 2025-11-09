@@ -150,11 +150,12 @@ export default function CollectCardsSection() {
                         </p>
                     </div>
                 ) : (
-                    <div ref={listContainerRef} className="relative flex-1 px-5">
+                    <div ref={listContainerRef} className="relative flex-1">
                         <div
                             style={{
                                 height: `${rowVirtualizer.getTotalSize()}px`,
                                 position: "relative",
+                                overflow: "visible",
                             }}
                         >
                             {virtualItems.map((virtualItem) => {
