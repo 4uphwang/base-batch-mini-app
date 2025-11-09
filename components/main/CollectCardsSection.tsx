@@ -1,11 +1,12 @@
 "use client";
 
-import { useFetchCards } from "@/hooks/card/useFetchCards";
-import { CollectionFilterTag } from "@/lib/collection";
-import { filterCollections } from "@/lib/utils";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useDeferredValue, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CiSearch } from "react-icons/ci";
+
+import { useFetchCards } from "@/hooks/card/useFetchCards";
+import { CollectionFilterTag } from "@/lib/collection";
+import { filterCollections } from "@/lib/utils";
 import { CollectionFilter } from "../collection/CollectionFilter";
 import CardItem from "./collections/CardItem";
 
@@ -14,7 +15,6 @@ export default function CollectCardsSection() {
     const deferredSearchTerm = useDeferredValue(searchInput);
     const [selectedTag, setSelectedTag] = useState<CollectionFilterTag>("All");
     const listContainerRef = useRef<HTMLDivElement | null>(null);
-    const prevFilterKeyRef = useRef<string>("");
     const [listOffsetTop, setListOffsetTop] = useState(0);
     const [viewportHeight, setViewportHeight] = useState(0);
 
@@ -68,13 +68,6 @@ export default function CollectCardsSection() {
 
     const virtualItems = rowVirtualizer.getVirtualItems();
 
-    useLayoutEffect(() => {
-        const signature = `${selectedTag}:${deferredSearchTerm}`;
-        if (prevFilterKeyRef.current !== signature) {
-            prevFilterKeyRef.current = signature;
-            rowVirtualizer.scrollToIndex(0, { align: "start" });
-        }
-    }, [selectedTag, deferredSearchTerm, rowVirtualizer]);
 
     const activeCardId = useMemo(() => {
         if (filteredCards.length === 0 || virtualItems.length === 0) {
