@@ -3,17 +3,16 @@
 import { useFetchCards } from "@/hooks/card/useFetchCards";
 import { CollectionFilterTag } from "@/lib/collection";
 import { filterCollections } from "@/lib/utils";
-import { useOpenUrl } from "@coinbase/onchainkit/minikit";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { CollectionFilter } from "../collection/CollectionFilter";
 import CardItem from "./collections/CardItem";
 
 export default function CollectCardsSection() {
-    const openUrl = useOpenUrl();
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchInput, setSearchInput] = useState("");
+    const deferredSearchTerm = useDeferredValue(searchInput);
     const [selectedTag, setSelectedTag] = useState<CollectionFilterTag>("All");
-    const [activeCardId, setActiveCardId] = useState<number | null>(null);
 
     const {
         data: cards = [],
@@ -22,70 +21,42 @@ export default function CollectCardsSection() {
         error
     } = useFetchCards();
 
-    const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-
-    const handleSearch = useCallback(() => {
-        setSearchTerm((current) => current.trim());
-    }, []);
+    const scrollParentRef = useRef<HTMLDivElement | null>(null);
 
     const { filteredCards, tags } = useMemo(
-        () => filterCollections(cards, selectedTag, searchTerm),
-        [cards, selectedTag, searchTerm]
+        () => filterCollections(cards, selectedTag, deferredSearchTerm),
+        [cards, selectedTag, deferredSearchTerm]
     );
 
-    // Intersection Observer로 중앙 카드 감지
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    // 의미: 카드가 화면에 50% 이상 보일 때 활성화
-                    if (entry.isIntersecting && entry.intersectionRatio > 0.9) {
-                        const cardId = parseInt(
-                            entry.target.getAttribute("data-card-id") || "0"
-                        );
-                        setActiveCardId(cardId);
-                    }
-                });
-            },
-            {
-                root: null,
+    const rowVirtualizer = useVirtualizer({
+        count: filteredCards.length,
+        getScrollElement: () => scrollParentRef.current,
+        estimateSize: () => 360,
+        overscan: 8,
+    });
 
-                // 더 넓은 영역 (상하 10%씩 제외 = 80% 감지)
-                // rootMargin: "-10% 0px -10% 0px"
-                // 더 좁은 영역 (상하 40%씩 제외 = 20% 감지 - 정확히 중앙만)
-                // rootMargin: "-40% 0px -40% 0px"
-                // 화면 전체 (감지 영역 제한 없음)
-                // rootMargin: "0px"
-                // 정확히 중앙 한 점 (거의 50% 지점)
-                // rootMargin: "-49% 0px -49% 0px"
+    const virtualItems = rowVirtualizer.getVirtualItems();
 
-                rootMargin: "-25% 0px -25% 0px", // 중앙 50% 영역
-                threshold: [0, 0.25, 0.5, 0.75, 1],
-            }
-        );
+    const activeCardId = useMemo(() => {
+        if (filteredCards.length === 0 || virtualItems.length === 0) {
+            return null;
+        }
 
-        // Copy refs to local variable for cleanup
-        const currentRefs = Array.from(cardRefs.current.values());
+        const parent = scrollParentRef.current;
+        const viewportCenter =
+            (parent?.clientHeight ?? 0) / 2 + (parent?.scrollTop ?? 0);
 
-        currentRefs.forEach((ref) => {
-            if (ref) observer.observe(ref);
-        });
+        const centeredItem =
+            virtualItems.find(
+                (item) => viewportCenter >= item.start && viewportCenter <= item.end
+            ) ?? virtualItems[Math.floor(virtualItems.length / 2)];
 
-        return () => {
-            currentRefs.forEach((ref) => {
-                if (ref) observer.unobserve(ref);
-            });
-        };
-    }, [filteredCards]);
+        if (!centeredItem) {
+            return null;
+        }
 
-    const setCardRef = useCallback(
-        (id: number, element: HTMLDivElement | null) => {
-            if (element) {
-                cardRefs.current.set(id, element);
-            } else {
-                cardRefs.current.delete(id);
-            }
-        }, []);
+        return filteredCards[centeredItem.index]?.id ?? null;
+    }, [filteredCards, virtualItems]);
 
     return (
         <div className="bg-white px-4 sm:px-6 py-6 sm:py-8">
@@ -105,12 +76,12 @@ export default function CollectCardsSection() {
                     <input
                         type="text"
                         placeholder="designer, dev, marketer, ..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
                         className="w-full h-12 px-4 pr-12 bg-white border-2 border-gray-200 rounded-xl text-black placeholder-gray-400 focus:border-[#0050FF] focus:outline-none transition-colors text-base font-k2d-regular"
                     />
                     <button
-                        onClick={handleSearch}
+                        onClick={() => setSearchInput((value) => value.trim())}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#0050FF] transition-colors"
                     >
                         <CiSearch size={24} />
@@ -150,16 +121,48 @@ export default function CollectCardsSection() {
                         </p>
                     </div>
                 ) : (
-                    <div className="flex flex-col px-5 space-y-1" style={{ paddingBottom: "40vh" }}>
-                        {filteredCards.map((card) => (
-                            <CardItem
-                                key={card.id}
-                                card={card}
-                                activeCardId={activeCardId}
-                                setCardRef={setCardRef}
-                                openUrl={openUrl}
-                            />
-                        ))}
+                    <div
+                        ref={scrollParentRef}
+                        className="relative flex-1 overflow-y-auto px-5"
+                        style={{ maxHeight: "70vh" }}
+                    >
+                        <div
+                            style={{
+                                height: `${rowVirtualizer.getTotalSize()}px`,
+                                position: "relative",
+                            }}
+                        >
+                            {virtualItems.map((virtualItem) => {
+                                const card = filteredCards[virtualItem.index];
+
+                                if (!card) {
+                                    return null;
+                                }
+
+                                return (
+                                    <div
+                                        key={card.id}
+                                        ref={(element) => {
+                                            if (element) {
+                                                rowVirtualizer.measureElement(element);
+                                            }
+                                        }}
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            width: "100%",
+                                            transform: `translateY(${virtualItem.start}px)`,
+                                        }}
+                                    >
+                                        <CardItem
+                                            card={card}
+                                            isActive={card.id === activeCardId}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </div>
