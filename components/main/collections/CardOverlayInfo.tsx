@@ -17,17 +17,8 @@ const CardOverlayInfo: React.FC<CardOverlayInfoProps> = ({ card, isActive }) => 
                     : "opacity-0 translate-y-4 pointer-events-none"
             )}
         >
-            <h3 className="font-k2d-semibold text-lg text-white truncate">
-                {card.nickname || "Unknown BaseCard"}
-            </h3>
-            <p className="text-sm text-white/80 font-k2d-regular truncate">
-                {card.basename || card.address}
-            </p>
-            {card.role && (
-                <p className="text-xs uppercase tracking-wide text-blue-200 font-k2d-medium mt-1">
-                    {card.role}
-                </p>
-            )}
+
+
             {card.skills && card.skills.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-3 justify-end">
                     {card.skills.slice(0, 3).map((skill: string, idx: number) => (

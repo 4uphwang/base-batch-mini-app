@@ -1,7 +1,5 @@
 "use client";
 
-// CardItem.tsx
-
 import { safeImageURI } from "@/lib/imageUtils";
 import { Card } from "@/lib/types";
 import clsx from "clsx";
@@ -32,9 +30,9 @@ const CardItem = React.memo(function CardItem({ card, isActive, style }: CardIte
             data-card-id={card.id}
             className={clsx(
                 "group relative cursor-pointer flex w-full mx-auto px-5 rounded-2xl",
-                "transition-all duration-400 ease-out will-change-transform will-change-opacity",
+                "transition-all duration-700 ease-out will-change-transform will-change-opacity",
                 isActive
-                    ? "scale-[1.06] drop-shadow-2xl shadow-black/25"
+                    ? "scale-[1.10] drop-shadow-2xl shadow-black/25"
                     : "scale-100 drop-shadow-md shadow-black/10"
             )}
             style={{ ...style, ...cardStyle }}
@@ -53,7 +51,7 @@ const CardItem = React.memo(function CardItem({ card, isActive, style }: CardIte
                     fill={true}
                     priority={isActive}
                     style={{ objectFit: "cover" }}
-                    className="object-cover aspect-[5/3] transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+                    className="object-cover aspect-[5/3] transition-transform duration-500 ease-out group-hover:scale-[1.05]"
                     unoptimized={card.imageURI?.startsWith("data:") || false}
                     onError={(e) => {
                         e.currentTarget.src = "/assets/default-profile.png";

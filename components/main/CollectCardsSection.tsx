@@ -217,7 +217,7 @@ export default function CollectCardsSection() {
                                             left: 0,
                                             width: "100%",
                                             transform: `translateY(${virtualItem.start}px)`,
-                                            zIndex: card.id === activeCardId ? 9999 : 10,
+                                            zIndex: card.id === activeCardId ? 20 : 10,
                                         }}
                                     >
                                         <CardItem

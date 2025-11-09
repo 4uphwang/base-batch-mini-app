@@ -6,7 +6,6 @@ import { CollectionFilter } from "@/components/collection/CollectionFilter";
 import { CollectionList } from "@/components/collection/CollectionList";
 import { CollectionLoading } from "@/components/collection/CollectionLoading";
 import BackButton from "@/components/common/BackButton";
-import Header from "@/components/layouts/Header";
 import { useCollectionPage } from "@/hooks/collection/useCollectionPage";
 
 export default function Collection() {
@@ -15,8 +14,6 @@ export default function Collection() {
         setSelectedTag,
         tags,
         filteredCards,
-        openUrl,
-        setCardRef,
         isMyCardLoading,
         myCardError,
         isLoading,
@@ -46,7 +43,7 @@ export default function Collection() {
                         selectedTag={selectedTag}
                         onTagChange={setSelectedTag}
                     />
-                    <div className="space-y-4 mt-5 px-5">
+                    <div className="space-y-4 mt-5">
                         {isMyCardLoading || isLoading ? (
                             <CollectionLoading />
                         ) : myCardError || error ? (
@@ -56,8 +53,6 @@ export default function Collection() {
                         ) : (
                             <CollectionList
                                 cards={filteredCards}
-                                openUrl={openUrl}
-                                setCardRef={setCardRef}
                             />
                         )}
                     </div>
