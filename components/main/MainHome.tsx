@@ -46,7 +46,7 @@ const MainSkeleton = () => (<div className="flex flex-col w-full gap-4 px-5">
 export default function MainHome() {
     const router = useRouter();
     const [address] = useAtom(walletAddressAtom);
-    const { data: card, isLoading, isFetched, isError } = useMyCard(address);
+    const { data: card, status } = useMyCard(address);
 
     // 딥링크 파라미터 추출
     const { action, cardId } = useMiniappParams();
@@ -55,16 +55,20 @@ export default function MainHome() {
         router.push("/mint");
     };
 
-    // address가 존재하는데 아직 쿼리 최초 결과를 받지 못했다면
-    // 스켈레톤을 먼저 노출해 초기 깜빡임을 방지한다.
-    if (address && !isFetched) {
-        return <MainSkeleton />
+    const renderHero = () => (
+        <div className="flex flex-col flex-1">
+            <HeroSection onMintClick={handleMintRedirect} />
+            <CollectCardsSection />
+        </div>
+    );
+
+    if (!address) {
+        return <div className="bg-white">{renderHero()}</div>;
     }
 
-    // 에러 발생 시에도 스켈레톤 대신 에러 처리 가능하지만, 일단은 기본 UI 표시
-    // if (address && isError) {
-    //     return <MainSkeleton />
-    // }
+    if (status === "pending") {
+        return <MainSkeleton />;
+    }
 
     return (
         <div className="bg-white">
@@ -77,10 +81,7 @@ export default function MainHome() {
                     <CollectCardsSection />
                 </div>
             ) : (
-                <div className="flex flex-col flex-1">
-                    <HeroSection onMintClick={handleMintRedirect} />
-                    <CollectCardsSection />
-                </div>
+                renderHero()
             )}
         </div>
     );
