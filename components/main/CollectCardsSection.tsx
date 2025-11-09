@@ -15,6 +15,7 @@ export default function CollectCardsSection() {
     const [selectedTag, setSelectedTag] = useState<CollectionFilterTag>("All");
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const [listOffsetTop, setListOffsetTop] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(0);
 
     const {
         data: cards = [],
@@ -32,14 +33,15 @@ export default function CollectCardsSection() {
         count: filteredCards.length,
         estimateSize: () => 360,
         overscan: 8,
-        paddingEnd: 400,
+        paddingEnd: Math.max(viewportHeight / 2, 0),
     });
 
     useLayoutEffect(() => {
-        const updateOffset = () => {
+        const updateMeasurements = () => {
             const element = listContainerRef.current;
             if (!element) {
                 setListOffsetTop(0);
+                setViewportHeight(typeof window !== "undefined" ? window.innerHeight : 0);
                 return;
             }
 
@@ -52,13 +54,14 @@ export default function CollectCardsSection() {
             }
 
             setListOffsetTop(offset);
+            setViewportHeight(typeof window !== "undefined" ? window.innerHeight : 0);
         };
 
-        updateOffset();
-        window.addEventListener("resize", updateOffset);
+        updateMeasurements();
+        window.addEventListener("resize", updateMeasurements);
 
         return () => {
-            window.removeEventListener("resize", updateOffset);
+            window.removeEventListener("resize", updateMeasurements);
         };
     }, [filteredCards.length]);
 
@@ -69,8 +72,6 @@ export default function CollectCardsSection() {
             return null;
         }
 
-        const viewportHeight =
-            typeof window !== "undefined" ? window.innerHeight : 0;
         const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
         const viewportCenter = scrollOffset + viewportHeight / 2;
 
@@ -111,7 +112,7 @@ export default function CollectCardsSection() {
         );
 
         return filteredCards[clampedIndex]?.id ?? null;
-    }, [filteredCards, virtualItems, listOffsetTop]);
+    }, [filteredCards, virtualItems, listOffsetTop, viewportHeight]);
 
     return (
         <div className="bg-white px-4 sm:px-6 pt-6">
