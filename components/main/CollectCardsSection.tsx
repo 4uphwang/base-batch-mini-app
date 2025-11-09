@@ -32,6 +32,7 @@ export default function CollectCardsSection() {
         count: filteredCards.length,
         estimateSize: () => 360,
         overscan: 8,
+        paddingEnd: 400,
     });
 
     useLayoutEffect(() => {
@@ -70,33 +71,33 @@ export default function CollectCardsSection() {
 
         const viewportHeight =
             typeof window !== "undefined" ? window.innerHeight : 0;
-        const usableHeight = viewportHeight > 0 ? viewportHeight * 0.6 : 1;
         const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
-        const viewportCenter = scrollOffset + usableHeight / 2;
-        const relativeCenter = viewportCenter - listOffsetTop;
+        const viewportCenter = scrollOffset + viewportHeight / 2;
 
-        const firstItem = virtualItems[0];
-        const lastItem = virtualItems[virtualItems.length - 1];
+        let closestItem = null;
+        let smallestDistance = Number.POSITIVE_INFINITY;
 
-        let centeredItem =
-            virtualItems.find(
-                (item) =>
-                    relativeCenter >= item.start && relativeCenter <= item.end
-            ) ?? null;
+        for (const item of virtualItems) {
+            const itemMiddle =
+                listOffsetTop + item.start + item.size / 2;
+            const distance = Math.abs(itemMiddle - viewportCenter);
 
-        if (!centeredItem) {
-            if (relativeCenter < firstItem.start) {
-                centeredItem = firstItem;
-            } else if (relativeCenter > lastItem.end) {
-                centeredItem = lastItem;
+            if (distance < smallestDistance) {
+                smallestDistance = distance;
+                closestItem = item;
             }
         }
 
-        if (!centeredItem) {
+        if (!closestItem) {
             return null;
         }
 
-        return filteredCards[centeredItem.index]?.id ?? null;
+        const clampedIndex = Math.min(
+            Math.max(closestItem.index, 0),
+            filteredCards.length - 1
+        );
+
+        return filteredCards[clampedIndex]?.id ?? null;
     }, [filteredCards, virtualItems, listOffsetTop]);
 
     return (
@@ -165,9 +166,8 @@ export default function CollectCardsSection() {
                     <div ref={listContainerRef} className="relative flex-1">
                         <div
                             style={{
-                                height: `${rowVirtualizer.getTotalSize() + (typeof window !== "undefined" ? window.innerHeight * 0.3 : 0)}px`,
+                                height: `${rowVirtualizer.getTotalSize()}px`,
                                 position: "relative",
-                                paddingBottom: "20vh",
                             }}
                         >
                             {virtualItems.map((virtualItem) => {
