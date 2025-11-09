@@ -147,6 +147,7 @@ export default function CollectCardsSection() {
                                                 rowVirtualizer.measureElement(element);
                                             }
                                         }}
+                                        data-index={virtualItem.index}
                                         style={{
                                             position: "absolute",
                                             top: 0,
