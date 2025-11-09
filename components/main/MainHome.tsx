@@ -71,7 +71,7 @@ export default function MainHome() {
     return (
         <div className="bg-white">
             {card ? (
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1">
                     {action === ACTION_ADD_CARD && cardId && (
                         <CardCollectionAdder collectedCardId={cardId} />
                     )}
@@ -79,7 +79,7 @@ export default function MainHome() {
                     <CollectCardsSection />
                 </div>
             ) : (
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1">
                     <HeroSection onMintClick={handleMintRedirect} />
                     <CollectCardsSection />
                 </div>

@@ -3,8 +3,8 @@
 import { useFetchCards } from "@/hooks/card/useFetchCards";
 import { CollectionFilterTag } from "@/lib/collection";
 import { filterCollections } from "@/lib/utils";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { useDeferredValue, useMemo, useRef, useState } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useDeferredValue, useMemo, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { CollectionFilter } from "../collection/CollectionFilter";
 import CardItem from "./collections/CardItem";
@@ -21,16 +21,13 @@ export default function CollectCardsSection() {
         error
     } = useFetchCards();
 
-    const scrollParentRef = useRef<HTMLDivElement | null>(null);
-
     const { filteredCards, tags } = useMemo(
         () => filterCollections(cards, selectedTag, deferredSearchTerm),
         [cards, selectedTag, deferredSearchTerm]
     );
 
-    const rowVirtualizer = useVirtualizer({
+    const rowVirtualizer = useWindowVirtualizer({
         count: filteredCards.length,
-        getScrollElement: () => scrollParentRef.current,
         estimateSize: () => 360,
         overscan: 8,
     });
@@ -42,9 +39,9 @@ export default function CollectCardsSection() {
             return null;
         }
 
-        const parent = scrollParentRef.current;
-        const viewportCenter =
-            (parent?.clientHeight ?? 0) / 2 + (parent?.scrollTop ?? 0);
+        const viewportHeight =
+            typeof window !== "undefined" ? window.innerHeight : 0;
+        const viewportCenter = rowVirtualizer.scrollOffset + viewportHeight / 2;
 
         const centeredItem =
             virtualItems.find(
@@ -59,7 +56,7 @@ export default function CollectCardsSection() {
     }, [filteredCards, virtualItems]);
 
     return (
-        <div className="bg-white px-4 sm:px-6 py-6 sm:py-8">
+        <div className="bg-white px-4 sm:px-6 pt-6">
             {/* Header */}
             <div className="text-left mb-6">
                 <h2 className="text-3xl sm:text-4xl font-k2d-bold text-black mb-2 tracking-tight">
@@ -121,11 +118,7 @@ export default function CollectCardsSection() {
                         </p>
                     </div>
                 ) : (
-                    <div
-                        ref={scrollParentRef}
-                        className="relative flex-1 overflow-y-auto px-5"
-                        style={{ maxHeight: "70vh" }}
-                    >
+                    <div className="relative flex-1 px-5">
                         <div
                             style={{
                                 height: `${rowVirtualizer.getTotalSize()}px`,
