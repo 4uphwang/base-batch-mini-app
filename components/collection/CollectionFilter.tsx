@@ -1,4 +1,4 @@
-import { type CollectionFilterTag } from "@/hooks/collection/useCollectionFilter";
+import { CollectionFilterTag } from "@/lib/collection";
 import clsx from "clsx";
 import { useMemo } from "react";
 

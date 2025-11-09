@@ -14,6 +14,7 @@ const transformCollectionData = (collections: CollectionResponse[]): Card[] => {
         address: collection.collectedCard.address,
         basename: collection.collectedCard.basename || "default.base.name",
         skills: collection.collectedCard.skills ?? [],
+        tokenId: collection.collectedCard.tokenId,
     }));
 };
 

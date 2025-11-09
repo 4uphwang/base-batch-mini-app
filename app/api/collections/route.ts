@@ -1,6 +1,6 @@
 import { cards, collections } from "@/db/schema";
 import { db } from "@/lib/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, lte, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 // GET /api/collections?id=card_id - Get collections for a specific card
@@ -37,7 +37,24 @@ export async function GET(req: Request) {
             .innerJoin(cards, eq(collections.collectedCardId, cards.id))
             .where(eq(collections.cardId, parseInt(cardId)));
 
-        return NextResponse.json(userCollections);
+        const collectionsWithTokenId = await Promise.all(
+            userCollections.map(async (collection) => {
+                const [{ count }] = await db
+                    .select({ count: sql<number>`count(*)` })
+                    .from(cards)
+                    .where(lte(cards.id, collection.collectedCard.id));
+
+                return {
+                    ...collection,
+                    collectedCard: {
+                        ...collection.collectedCard,
+                        tokenId: count,
+                    },
+                };
+            })
+        );
+
+        return NextResponse.json(collectionsWithTokenId);
     } catch (error) {
         console.error("Error fetching collections:", error);
         return NextResponse.json(
