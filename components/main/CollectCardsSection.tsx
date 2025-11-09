@@ -15,7 +15,6 @@ export default function CollectCardsSection() {
     const [selectedTag, setSelectedTag] = useState<CollectionFilterTag>("All");
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const [listOffsetTop, setListOffsetTop] = useState(0);
-    const [viewportHeight, setViewportHeight] = useState(0);
 
     const {
         data: cards = [],
@@ -31,17 +30,16 @@ export default function CollectCardsSection() {
 
     const rowVirtualizer = useWindowVirtualizer({
         count: filteredCards.length,
-        estimateSize: () => 360,
-        overscan: 8,
-        paddingEnd: Math.max(viewportHeight / 2, 0),
+        estimateSize: () => 200,
+        overscan: 6,
+        paddingEnd: typeof window !== "undefined" ? window.innerHeight / 3 : 0,
     });
 
     useLayoutEffect(() => {
-        const updateMeasurements = () => {
+        const updateOffset = () => {
             const element = listContainerRef.current;
             if (!element) {
                 setListOffsetTop(0);
-                setViewportHeight(typeof window !== "undefined" ? window.innerHeight : 0);
                 return;
             }
 
@@ -54,14 +52,13 @@ export default function CollectCardsSection() {
             }
 
             setListOffsetTop(offset);
-            setViewportHeight(typeof window !== "undefined" ? window.innerHeight : 0);
         };
 
-        updateMeasurements();
-        window.addEventListener("resize", updateMeasurements);
+        updateOffset();
+        window.addEventListener("resize", updateOffset);
 
         return () => {
-            window.removeEventListener("resize", updateMeasurements);
+            window.removeEventListener("resize", updateOffset);
         };
     }, [filteredCards.length]);
 
@@ -72,47 +69,45 @@ export default function CollectCardsSection() {
             return null;
         }
 
+        const viewportHeight =
+            typeof window !== "undefined" ? window.innerHeight : 0;
         const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
         const viewportCenter = scrollOffset + viewportHeight / 2;
 
-        let closestItem = null;
-        let smallestDistance = Number.POSITIVE_INFINITY;
+        let left = 0;
+        let right = virtualItems.length - 1;
+        let bestIndex = 0;
+        let bestDistance = Number.POSITIVE_INFINITY;
 
-        for (const item of virtualItems) {
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            const item = virtualItems[mid];
             const itemMiddle =
                 listOffsetTop + item.start + item.size / 2;
-            const distance = Math.abs(itemMiddle - viewportCenter);
+            const distance = itemMiddle - viewportCenter;
+            const absDistance = Math.abs(distance);
 
-            if (distance < smallestDistance) {
-                smallestDistance = distance;
-                closestItem = item;
+            if (absDistance < bestDistance) {
+                bestDistance = absDistance;
+                bestIndex = mid;
+            }
+
+            if (distance === 0) {
+                break;
+            } else if (distance < 0) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
             }
         }
 
-        if (closestItem) {
-            const clampedIndex = Math.min(
-                Math.max(closestItem.index, 0),
-                filteredCards.length - 1
-            );
-
-            return filteredCards[clampedIndex]?.id ?? null;
-        }
-
-        const totalHeight = rowVirtualizer.getTotalSize();
-        const averageItemSize =
-            totalHeight > 0 && filteredCards.length > 0
-                ? totalHeight / filteredCards.length
-                : 1;
-        const relativeCenter = viewportCenter - listOffsetTop;
-        const approximateIndex = Math.round(relativeCenter / averageItemSize);
-
         const clampedIndex = Math.min(
-            Math.max(approximateIndex, 0),
+            Math.max(bestIndex, 0),
             filteredCards.length - 1
         );
 
         return filteredCards[clampedIndex]?.id ?? null;
-    }, [filteredCards, virtualItems, listOffsetTop, viewportHeight]);
+    }, [filteredCards, virtualItems, listOffsetTop, rowVirtualizer.scrollOffset]);
 
     return (
         <div className="bg-white px-4 sm:px-6 pt-6">
