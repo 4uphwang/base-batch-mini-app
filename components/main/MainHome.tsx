@@ -6,7 +6,7 @@ import { useMyCard } from "@/hooks/useMyCard";
 import { walletAddressAtom } from "@/store/walletState";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import CardCollectionAdder from "./CardCollectionAdder";
 import CollectCardsSection from "./CollectCardsSection";
 import HeroSection from "./HeroSection";
@@ -49,28 +49,7 @@ export default function MainHome() {
     const [address] = useAtom(walletAddressAtom);
     const { data: card, status } = useMyCard(address);
     const [shouldRenderHero, setShouldRenderHero] = useState(false);
-    const heroTimerRef = useRef<number | null>(null);
 
-    useEffect(() => {
-        if (!address) {
-            heroTimerRef.current = window.requestAnimationFrame(() => {
-                setShouldRenderHero(true);
-                heroTimerRef.current = null;
-            });
-        } else {
-            if (heroTimerRef.current !== null) {
-                window.cancelAnimationFrame(heroTimerRef.current);
-                heroTimerRef.current = null;
-            }
-            setShouldRenderHero(false);
-        }
-        return () => {
-            if (heroTimerRef.current !== null) {
-                window.cancelAnimationFrame(heroTimerRef.current);
-                heroTimerRef.current = null;
-            }
-        };
-    }, [address]);
 
     // 딥링크 파라미터 추출
     const { action, cardId } = useMiniappParams();

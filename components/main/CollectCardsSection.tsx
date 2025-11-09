@@ -34,7 +34,7 @@ export default function CollectCardsSection() {
         count: filteredCards.length,
         estimateSize: () => 200,
         overscan: 6,
-        paddingEnd: Math.max(viewportHeight / 2, 0),
+        paddingEnd: Math.max(viewportHeight / 3, 0),
     });
 
     useLayoutEffect(() => {
@@ -140,7 +140,7 @@ export default function CollectCardsSection() {
             </div>
 
             {/* Search Bar */}
-            <div className="mb-8">
+            <div className="mb-3">
                 <div className="relative">
                     <input
                         type="text"
