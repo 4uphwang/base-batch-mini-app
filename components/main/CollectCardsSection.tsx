@@ -77,7 +77,7 @@ export default function CollectCardsSection() {
 
         let left = 0;
         let right = virtualItems.length - 1;
-        let bestIndex = 0;
+        let bestIndex = -1;
         let bestDistance = Number.POSITIVE_INFINITY;
 
         while (left <= right) {
@@ -104,8 +104,21 @@ export default function CollectCardsSection() {
             }
         }
 
+        if (bestIndex >= 0) {
+            const clampedIndex = Math.min(
+                Math.max(virtualItems[bestIndex].index, 0),
+                filteredCards.length - 1
+            );
+            return filteredCards[clampedIndex]?.id ?? null;
+        }
+
+        const estimateFn = rowVirtualizer.options.estimateSize;
+        const estimate =
+            typeof estimateFn === "function" ? estimateFn(0) : 200;
+        const relativeCenter = viewportCenter - listOffsetTop;
+        const approxIndex = Math.round(relativeCenter / estimate);
         const clampedIndex = Math.min(
-            Math.max(bestIndex, 0),
+            Math.max(approxIndex, 0),
             filteredCards.length - 1
         );
 
