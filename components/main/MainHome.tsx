@@ -55,11 +55,9 @@ export default function MainHome() {
         router.push("/mint");
     };
 
-    // 로딩 상태 처리
-    // - address가 없으면 로딩하지 않음 (즉시 HeroSection 표시)
-    // - address가 있고 쿼리가 아직 실행 중이면 로딩 표시
-    // - address가 있지만 아직 fetch가 완료되지 않았고 로딩 중이면 스켈레톤 표시
-    if (address && isLoading && !isFetched) {
+    // address가 존재하는데 아직 쿼리 최초 결과를 받지 못했다면
+    // 스켈레톤을 먼저 노출해 초기 깜빡임을 방지한다.
+    if (address && !isFetched) {
         return <MainSkeleton />
     }
 
