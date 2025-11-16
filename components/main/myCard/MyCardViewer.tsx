@@ -21,7 +21,7 @@ export default function MyCardViewer({ card: cardProp, address, title }: MyCardV
     const shouldFetch = !cardProp && !!address;
     const { data: fetchedCard, isLoading, error } = useMyCard(shouldFetch ? address : undefined);
 
-    const { socials, isLoading: isSocialLoading } = useBaseCardSocials(fetchedCard?.tokenId, {
+    const { socials, isLoading: isSocialLoading } = useBaseCardSocials(fetchedCard?.tokenId ?? null, {
         keys: ["x", "farcaster", "github", "linkedin", "website"],
         enabled: fetchedCard?.tokenId !== undefined,
     });
