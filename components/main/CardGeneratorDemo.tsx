@@ -2,7 +2,6 @@
 
 import { useCardGeneration } from "@/hooks/useCardGeneration";
 import { useMintBaseCard } from "@/hooks/useMintBaseCard";
-import { executeCardMintFlow } from "@/lib/cardMintingFlow";
 import { convertFileToBase64DataURL } from "@/lib/imageUtils";
 import { walletAddressAtom } from "@/store/walletState";
 import { useAtom } from "jotai";
@@ -60,7 +59,6 @@ export default function CardGeneratorDemo() {
         mintCard,
         isPending: isMintPending,
         isConfirming: isMintConfirming,
-        isSuccess: isMintSuccess,
         error: useMintError,
     } = useMintBaseCard();
 
@@ -164,39 +162,26 @@ export default function CardGeneratorDemo() {
         setMintHash(null);
 
         try {
-            const result = await executeCardMintFlow(
-                {
-                    name: nickname,
-                    role,
-                    bio,
-                    baseName: basename,
-                    address,
-                    profileImageFile,
-                    skills,
-                    socials: {
-                        twitter,
-                        github,
-                        farcaster,
-                    },
+            const result = await mintCard({
+                name: nickname,
+                role,
+                bio,
+                baseName: basename,
+                address,
+                profileImageFile,
+                skills,
+                socials: {
+                    twitter,
+                    github,
+                    farcaster,
                 },
-                generateCard,
-                mintCard
-            );
+            });
 
             if (result.success) {
-                console.log("✅ NFT minted successfully!", result.data);
+                console.log("✅ NFT minted successfully!", result);
                 setMintSuccess(true);
-                setMintHash(result.data?.mintHash || null);
-                setSavedCard({
-                    id: result.data?.cardId || 0,
-                    nickname,
-                    role,
-                    basename,
-                    address,
-                    bio,
-                    imageURI: `ipfs://${result.data?.ipfsCid}`,
-                    skills,
-                });
+                setMintHash(result.hash || null);
+                // Note: Card is already saved in DB by mintCard
             } else {
                 throw new Error(result.error || "Minting failed");
             }

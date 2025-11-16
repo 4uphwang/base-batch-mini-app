@@ -15,7 +15,7 @@ export const USE_MOCK_DATA =
  * 목업 지갑 주소
  */
 export const MOCK_WALLET_ADDRESS =
-    "0x50EA81351aE397bCC00D8E552698116677811B91" as `0x${string}`;
+    "0x8e522D685b0496E7c716705D22eA58120A358a2e" as `0x${string}`;
 
 /**
  * 목업 사용자 프로필 데이터

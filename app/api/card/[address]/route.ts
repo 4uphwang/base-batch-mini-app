@@ -1,7 +1,7 @@
 import { cards } from "@/db/schema";
 import { db } from "@/lib/db";
 import { MOCK_CARD, MOCK_WALLET_ADDRESS, USE_MOCK_DATA } from "@/lib/mockData";
-import { eq, lte, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 // GET /api/card/[address] - Get card by address
@@ -28,15 +28,9 @@ export async function GET(
             );
         }
 
-        const [{ count }] = await db
-            .select({ count: sql<number>`count(*)` })
-            .from(cards)
-            .where(lte(cards.id, card.id));
-
-        return NextResponse.json({
-            ...card,
-            tokenId: count, // 1부터 시작하는 순서
-        });
+        // card 객체를 그대로 반환 (tokenId 포함)
+        // 클라이언트에서 바로 사용할 수 있도록 구조화
+        return NextResponse.json(card);
     } catch (error) {
         console.error("Error fetching card:", error);
         return NextResponse.json(
@@ -62,6 +56,7 @@ export async function PUT(
             basename,
             role,
             skills,
+            tokenId,
         } = body;
 
         // Check if card exists
@@ -78,17 +73,29 @@ export async function PUT(
         }
 
         // Update card
+        const updateData: {
+            nickname?: string;
+            bio?: string;
+            imageURI?: string;
+            profileImage?: string;
+            basename?: string;
+            role?: string;
+            skills?: string[];
+            tokenId?: number;
+        } = {};
+
+        if (nickname !== undefined) updateData.nickname = nickname;
+        if (bio !== undefined) updateData.bio = bio;
+        if (imageURI !== undefined) updateData.imageURI = imageURI;
+        if (profileImage !== undefined) updateData.profileImage = profileImage;
+        if (basename !== undefined) updateData.basename = basename;
+        if (role !== undefined) updateData.role = role;
+        if (skills !== undefined) updateData.skills = skills;
+        if (tokenId !== undefined) updateData.tokenId = tokenId;
+
         const updatedCard = await db
             .update(cards)
-            .set({
-                nickname,
-                bio,
-                imageURI,
-                profileImage, // 원본 프로필 이미지도 업데이트 가능
-                basename,
-                role,
-                skills,
-            })
+            .set(updateData)
             .where(eq(cards.address, address))
             .returning();
 

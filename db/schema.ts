@@ -19,6 +19,7 @@ export const cards = pgTable("cards", {
     skills: text("skills").array(), // 스킬은 텍스트 배열로 저장
     address: varchar("address", { length: 42 }).unique(), // EVM 주소는 42자
     profileImage: text("profile_image"), // 카드 생성 시 사용한 원본 프로필 이미지 (SVG base64)
+    tokenId: integer("token_id"), // NFT 민팅 시 생성된 tokenId (nullable)
 });
 
 // collections 테이블 (Many-to-Many 관계)

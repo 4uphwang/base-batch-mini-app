@@ -1,8 +1,8 @@
 import { memo } from "react";
 
 interface MintErrorMessagesProps {
-    generationError: string | null;
-    mintError: string | null;
+    generationError?: string | null;
+    mintError?: string | null;
 }
 
 interface ResolvedErrorInfo {

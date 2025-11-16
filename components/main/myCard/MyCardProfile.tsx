@@ -26,9 +26,8 @@ export default function MyCardProfile({ title }: MyCardProfileProps) {
     const openUrl = useOpenUrl();
     const [walletAddress] = useAtom(walletAddressAtom);
 
-    const { data: cardData, isLoading, error } = useMyCard(walletAddress);
-
-    const { socials, isLoading: isSocialLoading } = useBaseCardSocials(27, {
+    const { data: cardData, isPending, error } = useMyCard(walletAddress);
+    const { socials, isLoading: isSocialLoading } = useBaseCardSocials(cardData?.tokenId ?? null, {
         keys: ["x", "farcaster", "github", "linkedin", "website"],
         enabled: cardData?.tokenId !== undefined,
     });
@@ -47,13 +46,13 @@ export default function MyCardProfile({ title }: MyCardProfileProps) {
 
     return (
         <div className="w-full flex flex-col overflow-hidden relative" style={rootHeight}>
-            {isLoading && <LoadingState />}
+            {isPending && <LoadingState />}
 
-            {!isLoading && (error || !cardData) && (
+            {!isPending && (error || !cardData) && (
                 <NoCardState onNavigateToMint={handleNavigateToMint} />
             )}
 
-            {!isLoading && cardData && (
+            {!isPending && cardData && (
                 <CardContent
                     card={cardData}
                     openUrl={openUrl}

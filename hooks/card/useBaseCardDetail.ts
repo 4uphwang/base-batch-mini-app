@@ -26,7 +26,7 @@ interface BaseCardSocialsResult {
 }
 
 export function useBaseCardSocials(
-    tokenId?: number,
+    tokenId: number | null,
     options: UseBaseCardSocialsOptions = {}
 ): BaseCardSocialsResult {
     const { keys = DEFAULT_SOCIAL_KEYS, enabled = true } = options;
@@ -90,6 +90,7 @@ export function useBaseCardSocials(
         ]);
 
         try {
+            console.log("normalizedTokenId", normalizedTokenId);
             const entries = await Promise.all(
                 normalizedKeys.map(async (key) => {
                     try {
@@ -99,7 +100,6 @@ export function useBaseCardSocials(
                             functionName: "getSocial",
                             args: [normalizedTokenId, key],
                         })) as string;
-                        console.log(key, "value", value);
                         return [key, value.trim()] as const;
                     } catch (readError) {
                         console.warn(`Failed to fetch social link for key "${key}"`, readError);
