@@ -6,7 +6,6 @@ import { useMyCard } from "@/hooks/useMyCard";
 import { walletAddressAtom } from "@/store/walletState";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 import CardCollectionAdder from "./CardCollectionAdder";
 import CollectCardsSection from "./CollectCardsSection";
 import HeroSection from "./HeroSection";
@@ -48,47 +47,11 @@ export default function MainHome() {
     const router = useRouter();
     const [address] = useAtom(walletAddressAtom);
     const { data: card, isPending } = useMyCard(address);
-    const [shouldRenderHero, setShouldRenderHero] = useState(false);
-    const heroTimerRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        if (!address) {
-            heroTimerRef.current = window.requestAnimationFrame(() => {
-                setShouldRenderHero(true);
-                heroTimerRef.current = null;
-            });
-        } else {
-            if (heroTimerRef.current !== null) {
-                window.cancelAnimationFrame(heroTimerRef.current);
-                heroTimerRef.current = null;
-            }
-            setShouldRenderHero(false);
-        }
-        return () => {
-            if (heroTimerRef.current !== null) {
-                window.cancelAnimationFrame(heroTimerRef.current);
-                heroTimerRef.current = null;
-            }
-        };
-    }, [address]);
-
-    // 딥링크 파라미터 추출
     const { action, cardId } = useMiniappParams();
 
     const handleMintRedirect = () => {
         router.push("/mint");
     };
-
-    const renderHero = () => (
-        <div className="flex flex-col flex-1">
-            <HeroSection onMintClick={handleMintRedirect} />
-            <CollectCardsSection />
-        </div>
-    );
-
-    if (shouldRenderHero) {
-        return <div className="bg-white">{renderHero()}</div>;
-    }
 
     if (isPending) {
         return <MainSkeleton />;
@@ -106,7 +69,10 @@ export default function MainHome() {
                     <CollectCardsSection />
                 </div>
             ) : (
-                renderHero()
+                <div className="flex flex-col flex-1">
+                    <HeroSection onMintClick={handleMintRedirect} />
+                    <CollectCardsSection />
+                </div>
             )}
         </div>
     );
