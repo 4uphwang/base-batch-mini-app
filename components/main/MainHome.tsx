@@ -47,7 +47,7 @@ const MainSkeleton = () => (<div className="flex flex-col w-full gap-4 px-5">
 export default function MainHome() {
     const router = useRouter();
     const [address] = useAtom(walletAddressAtom);
-    const { data: card, status } = useMyCard(address);
+    const { data: card, isPending } = useMyCard(address);
     const [shouldRenderHero, setShouldRenderHero] = useState(false);
     const heroTimerRef = useRef<number | null>(null);
 
@@ -90,7 +90,7 @@ export default function MainHome() {
         return <div className="bg-white">{renderHero()}</div>;
     }
 
-    if (status === "pending") {
+    if (isPending) {
         return <MainSkeleton />;
     }
 
