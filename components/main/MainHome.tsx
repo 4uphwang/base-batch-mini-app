@@ -102,6 +102,7 @@ export default function MainHome() {
                         <CardCollectionAdder collectedCardId={cardId} />
                     )}
                     <MyCardSection />
+                    <div className="h-4 bg-gray-200" />
                     <CollectCardsSection />
                 </div>
             ) : (

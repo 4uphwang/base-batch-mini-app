@@ -63,7 +63,7 @@ export default function MyCardSection() {
                     </div>
                 ) : card ? (
                     // Card found - Display image (clickable)
-                    <div className="h-60 drop-shadow-xl p-2">
+                    <div className=" drop-shadow-xl p-2">
                         <div onClick={handleMyCardClick} className="relative w-full h-52 transition-all duration-300 overflow-visible select-none">
                             {card?.imageURI && <Image
                                 src={getIPFSUrl(card.imageURI)}

@@ -48,7 +48,7 @@ export default function RootLayout({
 
     return (
         <html lang="en" className={`${inter.variable} ${k2d.variable}`}>
-            <body>
+            <body className="overscroll-none">
                 <RootProvider>
                     <SafeArea>{children}</SafeArea>
                 </RootProvider>

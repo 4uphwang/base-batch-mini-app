@@ -41,9 +41,9 @@ export default function MainLayoutClient({
     // 대신 특정 기능에서 앱 연결이 필요하다는 안내는 각 컴포넌트에서 처리
 
     return (
-        <div className="w-full flex flex-col min-h-screen">
+        <div className="w-full flex flex-col h-dvh overflow-hidden">
             <Header />
-            <main className="flex-1 pt-[var(--header-h,60px)] pb-[var(--bottom-nav-h,64px)]">
+            <main className="scroll-container pt-[var(--header-h,60px)] pb-[var(--bottom-nav-h,64px)]">
                 {children}
             </main>
             <FooterNav />

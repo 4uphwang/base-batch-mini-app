@@ -28,7 +28,7 @@ export default function MyCardProfile({ title }: MyCardProfileProps) {
 
     const { data: cardData, isLoading, error } = useMyCard(walletAddress);
 
-    const { socials, isLoading: isSocialLoading } = useBaseCardSocials(cardData?.tokenId, {
+    const { socials, isLoading: isSocialLoading } = useBaseCardSocials(27, {
         keys: ["x", "farcaster", "github", "linkedin", "website"],
         enabled: cardData?.tokenId !== undefined,
     });
