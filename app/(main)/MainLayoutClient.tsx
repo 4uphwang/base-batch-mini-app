@@ -43,7 +43,7 @@ export default function MainLayoutClient({
     return (
         <div className="w-full flex flex-col h-dvh overflow-hidden">
             <Header />
-            <main className="scroll-container pt-[var(--header-h,60px)] pb-[var(--bottom-nav-h,64px)]">
+            <main className="scroll-container scrollbar-hide pt-[var(--header-h,60px)] pb-[var(--bottom-nav-h,64px)]">
                 {children}
             </main>
             <FooterNav />
